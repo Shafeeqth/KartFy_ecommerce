@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>OTP Verification</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="assets/css/style.css"> <!-- Assuming you have a main CSS file -->
+    <style>
+        /* Style for OTP input boxes */
+        .otp-input {
+            width: 50px; /* Adjust width as needed */
+            height: 50px; /* Adjust height as needed */
+            font-size: 24px; /* Adjust font size as needed */
+            text-align: center;
+            margin: 0 5px;
+            padding: 0;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .otp-input:focus {
+            border-color: #007bff; /* Change border color on focus */
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <header class="header">
+            <!-- Your header content here -->
+        </header>
+
+        <main class="main">
+            <div class="login-page bg-image pt-8 pb-8 pt-md-12 pb-md-12 pt-lg-17 pb-lg-17" style="background-image: url('/images/backgrounds/login-bg.jpg')">
+                <div class="container">
+                    <div class="text-center">
+                        <h6>
+                          Please enter the one-time password <br />
+                          to verify your account
+                        </h6>
+                        <div>
+                          <span>A code has been sent to </span>
+                          <%= email %>
+                        </div>
+                      </div>
+                    <div class="form-box">
+                        <div class="form-tab">
+                            <div class="tab-content">
+                                <div class="tab-pane fade show active" id="otp-verification" role="tabpanel" aria-labelledby="otp-verification-tab">
+                                    <h3 class="mb-4">Enter OTP</h3>
+                                    <form id="otp-form" action="/otp-verification" method="post">
+                                        <div class="form-row justify-content-center">
+                                            <input type="text" class="form-control otp-input" maxlength="1" data-index="1" name="one">
+                                            <input type="text" class="form-control otp-input" maxlength="1" data-index="2" name="two">
+                                            <input type="text" class="form-control otp-input" maxlength="1" data-index="3" name="three">
+                                            <input type="text" class="form-control otp-input" maxlength="1" data-index="4" name="four">
+                                        </div>
+                                        <div class="form-group text-center mt-4">
+                                            <button type="submit" class="btn btn-primary" id="verify-btn">Verify OTP</button>
+                                            <button type="button" class="btn btn-link" id="resend-btn">Resend OTP</button>
+                                            <span id="countdown">3:00</span>
+                                        </div>
+                                    </form>
+                                </div><!-- End .tab-pane -->
+                            </div><!-- End .tab-content -->
+                        </div><!-- End .form-tab -->
+                    </div><!-- End .form-box -->
+                </div><!-- End .container -->
+            </div><!-- End .login-page section-bg -->
+        </main><!-- End .main -->
+
+        <footer class="footer">
+            <!-- Your footer content here -->
+        </footer><!-- End .footer -->
+    </div><!-- End .page-wrapper -->
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="js/otp.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Countdown timer for 3 minutes
+            var timer = 180;
+            var interval = setInterval(function() {
+                timer--;
+                var minutes = Math.floor(timer / 60);
+                var seconds = timer % 60;
+                $("#countdown").text(minutes + ":" + (seconds < 10 ? "0" + seconds : seconds));
+                if (timer === 0) {
+                    clearInterval(interval);
+                }
+            }, 1000);
+
+            // Focus on the next input when typing in an input box
+            $(".otp-input").on("input", function() {
+                var maxLength = parseInt($(this).attr("maxlength"));
+                var currentLength = $(this).val().length;
+                var currentIndex = parseInt($(this).data("index"));
+                if (currentLength >= maxLength) {
+                    if (currentIndex < 4) {
+                        var nextIndex = currentIndex + 1;
+                        $('[data-index="' + nextIndex + '"]').focus();
+                    }
+                } else {
+                    if (currentIndex > 1) {
+                        var prevIndex = currentIndex - 1;
+                        $('[data-index="' + prevIndex + '"]').focus();
+                    }
+                }
+            });
+
+            // Resend OTP button click handler
+            $("#resend-btn").on("click", function() {
+                // Restart the countdown timer
+                timer = 180;
+                $("#countdown").text("3:00");
+                clearInterval(interval);
+                interval = setInterval(function() {
+                    timer--;
+                    var minutes = Math.floor(timer / 60);
+                    var seconds = timer % 60;
+                    $("#countdown").text(minutes + ":" + (seconds < 10 ? "0" + seconds : seconds));
+                    if (timer === 0) {
+                        clearInterval(interval);
+                    }
+                }, 1000);
+            });
+
+            // Verify OTP button click handler
+            $("#verify-btn").on("click", function() {
+                // Add your OTP verification logic here
+                
+            });
+        });
+    </script>
+</body>
+</html>
