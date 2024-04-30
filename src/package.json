@@ -39,6 +39,7 @@
     "sharp": "^0.33.2",
     "sweetalert": "^2.1.2",
     "sweetalert2": "^11.6.13",
-    "twilio": "^5.0.3"
+    "twilio": "^5.0.3",
+    "uuid": "^9.0.1"
   }
 }

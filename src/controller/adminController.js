@@ -8,6 +8,7 @@ const Coupon = require('../models/couponModel');
 const User = require('../models/userModel');
 const Offer = require('../models/offerModel');
 const Address = require('../models/addressModel');
+const {v4: uuidv4, v5: uuidv5} = require('uuid');
 
 
 
@@ -112,9 +113,11 @@ const loadSingleOrderDetails = asyncHandler(async (req, res) => {
 
 
 const loadCoupons = asyncHandler(async (req, res) => {
-    let coupon =  null;
-    let couponLength = 0;
+
+    let coupon = await Coupon.find({});
+    let couponLength = Coupon.find().count();
     let page = 0;
+    console.log(coupon)
     res.render('admin/couponManagement', {coupon, couponLength, page});
 })
 
@@ -187,6 +190,49 @@ const changeOrderStatus = asyncHandler(async (req, res, next) => {
     
 })
 
+const createCoupon = asyncHandler( async (req, res) => {
+
+    let {name: title, description, discount,  minOrder: minCost , edate: expiryDate, limit} = req.body;
+    console.log('title', title, description, discount, minCost,expiryDate, limit )
+    let firstCode = title.split(' ')[0];
+    let middleCode = generateRandomString(4);
+    let lastCode = discount;
+    let couponCode = firstCode + middleCode + lastCode;
+    console.log(firstCode, middleCode, lastCode)
+    console.log('coupn', couponCode);
+
+    await Coupon.create({
+        title,
+        description, 
+        discount,
+        minCost,
+        expiryDate,
+        limit,
+        couponCode
+
+    })
+    return res.status(200)
+        .json({
+            success: true,
+            error: false,
+            message: 'Coupon created successfully'
+        })
+
+    // let uuid = uuidv4();
+    // console.log(uuid, firstTitle)
+
+    function generateRandomString(length) {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+        let result = '';
+        for (let i = 0; i < length; i++) {
+            const randomIndex = Math.floor(Math.random() * characters.length);
+            result += characters.charAt(randomIndex);
+        }
+        return result;
+    }
+    
+
+})
 
 
 
@@ -217,5 +263,6 @@ module.exports = {
     loadSingleOrderDetails,
     blockOrUnblockUser,
     changeOrderStatus,
+    createCoupon
 
 }

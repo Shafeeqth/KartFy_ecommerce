@@ -46,7 +46,7 @@
               ></button>
             </div>
             <div class="modal-body">
-              <form action="/api/v1/admin/create-coupon" method="post">
+              <form action="/api/v1/admin/coupons/create-coupon" method="post">
                 <label for="form-label">Name</label>
                 <input
                   type="text"
@@ -65,7 +65,7 @@
                 <label for="form-label">Dicount Percentage</label>
                 <input
                   type="text"
-                  name="description"
+                  name="discount"
                   placeholder="Enter in % "
                   class="form-control my-2"
                 />
@@ -74,7 +74,7 @@
                 <label for="form-label">MIn Order Amount</label>
                 <input
                   type="text"
-                  name="name"
+                  name="minOrder"
                   placeholder="Enter Min Amount"
                   class="form-control my-2"
                 />
@@ -138,53 +138,58 @@
               ></button>
             </div>
             <div class="modal-body">
-              <form action="/api/v1/admin/edit-coupon?_method=PUT" method="post">
+              <form action="/api/v1/admin/coupons/create-coupon" method="post">
                 <label for="form-label">Name</label>
                 <input
                   type="text"
-                  id="name"
                   name="name"
                   placeholder="Enter coupon name"
-                  class="form-control"
+                  class="form-control my-2"
                 />
-                <input type="text" id="couponId" name="id" hidden />
-
-                <label for="form-label">Activation date</label>
+                <label for="form-label">Description</label>
                 <input
-                  type="date"
-                  id="adate"
-                  name="adate"
-                 
-                  class="form-control"
+                  type="text"
+                  name="description"
+                  placeholder="Enter Description here"
+                  class="form-control my-2"
                 />
+
+                <label for="form-label">Dicount Percentage</label>
+                <input
+                  type="text"
+                  name="discount"
+                  placeholder="Enter in % "
+                  class="form-control my-2"
+                />
+
+
+                <label for="form-label">MIn Order Amount</label>
+                <input
+                  type="text"
+                  name="minOrder"
+                  placeholder="Enter Min Amount"
+                  class="form-control my-2"
+                />
+
+                
 
                 <label for="form-label">Expire date</label>
                 <input
-                  type="text"
-                  id="edate"
+                  type="date"
                   name="edate"
-                  placeholder="dd-mm-yyyy"
-                  class="form-control"
+                  placeholder="DD-MM-YYYY"
+                  class="form-control my-2"
                 />
 
                 <label for="form-label">Limit of use</label>
                 <input
                   type="text"
-                  id="limit"
                   name="limit"
-                  placeholder="enter how many user can use"
-                  class="form-control"
+                  placeholder="Enter how many user can use"
+                  class="form-control my-2"
                 />
 
-                <label for="form-label">Dicount amount</label>
-                <input
-                  type="text"
-                  id="damount"
-                  name="damount"
-                  placeholder="enter how many user can use"
-                  class="form-control"
-                />
-
+                
                 <div class="modal-footer">
                   <button
                     type="button"
@@ -194,7 +199,7 @@
                     Close
                   </button>
                   <button type="submit" class="btn btn-primary">
-                    Save changes
+                    Submit
                   </button>
                 </div>
               </form>
@@ -512,64 +517,66 @@
 
         // Perform validation
         const name = form.elements.name.value.trim();
-        const adate = form.elements.adate.value.trim();
-        const edate = form.elements.edate.value.trim();
+        const edate = form.elements.edate.value;
+        const description = form.elements.description.value.trim();
         const limit = form.elements.limit.value.trim();
-        const damount = form.elements.damount.value.trim();
+        const discount = form.elements.discount.value.trim();
+        const minOrder = form.elements.minOrder.value.trim();
 
-        if (name === "") {
-          displayErrorMessage(form, "name", "Please enter a coupon name.");
+        if (name.length <=2 ) {
+          displayErrorMessage(form, "name", "Please enter a valid coupon name.");
           return;
         }
 
-        if (adate === "") {
+       
+
+        if (description.length <= 10) {
           displayErrorMessage(
             form,
-            "adate",
-            "Please enter an activation date."
+            "description",
+            "Description must be 10 charectors."
           );
           return;
         }
+        
+        if (isNaN(Number(discount)) || discount > 100 || discount.length <= 0 || discount <= 0) {
+          displayErrorMessage(
+            form,
+            "discount",
+            "Please enter a valid discount percentage."
+          );
+          return;
+        }
+        
+        if (isNaN(Number(minOrder) ) || minOrder.length < 1 || minOrder < 1 ) {
+          displayErrorMessage(form, "minOrder", "Please enter a valid amount.");
+          return;
+        }
+        
+        const dateRegex =/^(?:19|20)\d\d-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])$/;
+        console.log(edate)
 
-        if (edate === "") {
+
+        if (edate.length < 1 || !dateRegex.test(edate)) {
           displayErrorMessage(
             form,
             "edate",
-            "Please enter an expiration date."
+            "Invalid date format. Please use dd-mm-yyyy."
           );
           return;
         }
 
-        if (limit === "") {
+        if (isNaN(Number(limit) ) || limit < 1 || limit > 1000) {
           displayErrorMessage(form, "limit", "Please enter a limit of use.");
           return;
         }
 
-        if (damount === "") {
-          displayErrorMessage(
-            form,
-            "damount",
-            "Please enter a discount amount."
-          );
-          return;
-        }
 
-        // Validate date format (dd-mm-yyyy)
-        const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
-        if (!dateRegex.test(adate) || !dateRegex.test(edate)) {
-          alert("Invalid date format. Please use dd-mm-yyyy.");
-          return;
-        }
+
+       
 
         // Validate discount amount is a number
-        if (isNaN(parseFloat(damount))) {
-          displayErrorMessage(
-            form,
-            "damount",
-            "Discount amount must be a valid number."
-          );
-          return;
-        }
+        
 
         // If all validations pass, you can submit the form
         form.submit();

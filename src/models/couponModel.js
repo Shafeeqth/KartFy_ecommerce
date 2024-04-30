@@ -11,7 +11,7 @@ const CouponSchema = mongoose.Schema({
         required: true,
     }
     ,
-    couponName: {
+    title: {
         type: String,
         required: true,
 
@@ -20,19 +20,24 @@ const CouponSchema = mongoose.Schema({
         required: true,
 
     },
-    couponExp: {
+    expiryDate: {
         type: Date,
         required: true,
 
     }, isListed: {
         type: Boolean,
+        default: true
 
-    }, minConst: {
+    }, minCost: {
         type: Number,
 
     }, appliedUsers: {
         type: Array,
 
+    },
+    limit: {
+        type: Number,
+        required: true
     }
 
 },

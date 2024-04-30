@@ -172,6 +172,9 @@ router.put('/offers/unlist_offer/:id');
 //view coupons
 router.get('/coupons', adminController.loadCoupons);
 
+
+router.post('/coupons/create-coupon', adminController.createCoupon)
+
 //edit coupon
 router.put('/coupons/edit_coupon/:id');
 
