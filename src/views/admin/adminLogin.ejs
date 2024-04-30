@@ -1,0 +1,59 @@
+<%- include('../partials/header.ejs') -%>
+
+<div class="wrapper">
+  <div class="" style="margin-left: 1rem; margin-bottom: 1rem ;display: flex; align-items: center; justify-content: center;">
+    <img style="width: 50%; height: 30%;" src="/img/logo.png" alt="" />
+  </div>
+
+  <h2 style="margin-bottom: 2rem">Admin Login</h2>
+
+  <form action="/api/v1/admin/login" method="post">
+    <div class="input-box">
+      <%if(messages.emailError) {%>
+      <div
+        class="text-danger"
+        id="userError"
+        style="position: absolute; top: -22px; left: 6px"
+      >
+        <%= messages.emailError %>
+      </div>
+      <%}%>
+      <input
+        type="text"
+        name="email"
+        placeholder="Enter your email"
+        required
+        style="padding: 10px; margin: 1rem, 0"
+      />
+    </div>
+    <div class="input-box">
+      <%if(messages.passwordError) {%>
+      <div
+        class="text-danger"
+        id="passError"
+        style="position: absolute; top: -22px; left: 6px"
+      >
+        <%= messages.passwordError %>
+      </div>
+      <%}%>
+      <input
+        type="password"
+        name="password"
+        placeholder="Enter password"
+        required
+        style="padding: 10px; margin: 1rem, 0"
+      />
+    </div>
+
+    <div class="input-box">
+      <input
+        type="submit"
+        value="Submit"
+        class="btn btn-outline-dark btn-lg"
+        placeholder="Log in"
+      />
+    </div>
+  </form>
+</div>
+
+<%- include('../partials/footer.ejs') -%>

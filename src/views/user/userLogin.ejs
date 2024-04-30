@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Cartfy - Login</title>
+    <meta name="keywords" content="HTML5 Template">
+    <meta name="description" content="Molla - Bootstrap eCommerce Template">
+    <meta name="author" content="p-themes">
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/icons/favicon-16x16.png">
+    <link rel="manifest" href="/assets/images/icons/site.html">
+    <link rel="mask-icon" href="/assets/images/icons/safari-pinned-tab.svg" color="#666666">
+    <link rel="shortcut icon" href="/assets/images/icons/favicon.ico">
+    <meta name="apple-mobile-web-app-title" content="Molla">
+    <meta name="application-name" content="Molla">
+    <meta name="msapplication-TileColor" content="#cc9966">
+    <meta name="msapplication-config" content="/assets/images/icons/browserconfig.xml">
+    <meta name="theme-color" content="#ffffff">
+    <!-- Plugins CSS File -->
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+    <!-- Main CSS File -->
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+
+<body>
+    <%-include('../partials/loginHeader')%>
+        <div class="login-page bg-image pt-1 pb-1 pt-md-1 pb-md-1 pt-lg-17 pb-lg-17 "
+            style="background-image: url('/assets/images/backgrounds/login-bg.jpg')">
+            <div class="container ">
+
+                <div class="form-box  " style="border-radius: 10px;">
+
+                    <div class="form-tab ">
+                        <ul class="nav nav-pills nav-fill" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="signin-tab" data-toggle="tab" href="#signin" role="tab"
+                                    aria-controls="signin" aria-selected="true">Login</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="signin" role="tabpanel"
+                                aria-labelledby="signin-tab">
+                                <div class="row align-items-center justify-content-center" style="position: relative;"
+                                    id="mainDiv">
+                                    <div class="text-danger fw-bolder" id="mainError" style="font-weight: 500;">
+                                    </div>
+                                </div>
+                                <form onsubmit="event.preventDefault()">
+                                    <div class="form-group row align-items-center justify-content-center"
+                                        style="position: relative;" id="emailDiv">
+                                        <label for="name">Email *</label>
+                                        <div class="text-danger" id="emailError" style="position: absolute; top: 20% ;">
+                                        </div>
+                                        <input type="text" onkeyup="enterSubmit(event)" class="form-control" id="singin-email" name="email" required>
+                                    </div><!-- End .form-group -->
+
+                                    <div class="form-group row align-items-center justify-content-center"
+                                        style="position: relative;" id="passwordDiv">
+                                        <label for="password">Password *</label>
+                                        <input type="checkbox" onclick="Pshow()"
+                                            style="position: absolute; top: 66%; left: 95%;">
+                                        <div class="text-danger" id="passwordError"
+                                            style="position: absolute;  top:20%;">
+                                        </div>
+                                        <input type="password" onkeyup="enterSubmit(event)" class="form-control" id="singin-password" name="password"
+                                            required>
+                                    </div><!-- End .form-group -->
+
+                                    <div class="form-footer row">
+                                        <button type="button" class="btn btn-outline-primary-2 col-5 rounded"
+                                            onclick="CheckUser()">
+                                            <span>LOG IN</span>
+                                            <i class="icon-long-arrow-right"></i>
+                                        </button>
+
+
+                                        <a href="/api/v1/forgot-password" class="forgot-link col-6 rounded">Forgot Your
+                                            Password?</a>
+                                    </div><!-- End .form-footer -->
+                                </form>
+                                <div class="form-choice">
+                                    <p class="text-center">or sign in with</p>
+                                    <div class="row">
+                                        <div class="col-sm-6 rounded">
+                                            <a href="/google" class="btn btn-login btn-g">
+                                                <i class="icon-google"></i>
+                                                Login With Google
+                                            </a>
+                                        </div><!-- End .col-6 -->
+                                        <div class="col-sm-6">
+                                            <a href="/api/v1/signup" class="btn btn-login btn-f">
+
+                                                Don't have an Account
+                                            </a>
+                                        </div><!-- End .col-6 -->
+                                    </div><!-- End .row -->
+                                </div><!-- End .form-choice -->
+                            </div><!-- .End .tab-pane -->
+                        </div><!-- End .tab-content -->
+                    </div><!-- End .form-tab -->
+                </div><!-- End .form-box -->
+            </div><!-- End .container -->
+        </div><!-- End .login-page bg-image pt-8 pb-8 pt-md-12 pb-md-12 pt-lg-17 pb-lg-17 -->
+        <!-- Plugins JS File -->
+        <script>
+            function Pshow() {
+                let x = document.getElementById("singin-password");
+                if (x.type === "password") {
+                    x.type = "text";
+                } else {
+                    x.type = "password";
+                }
+                i
+            }
+            function enterSubmit(event) {
+                if(event.keyCode == 13) {
+                    CheckUser();
+                }
+            }
+
+            function CheckUser() {
+                let email = document.getElementById('singin-email');
+                let password = document.getElementById('singin-password');
+
+                let emailError = document.getElementById('emailError');
+                let passwordError = document.getElementById('passwordError');
+
+                let emailDiv = document.getElementById('emailDiv');
+                let passwordDiv = document.getElementById('passwordDiv');
+
+                let mainDiv = document.getElementById('mainDiv');
+                let mainError = document.getElementById('mainError');
+
+                if (email.value.trim().length <= 1) {
+
+                    emailError.innerText = 'Email is required'
+                    email.style.border = '1px red solid';
+                    email.scrollIntoView({
+                        behavior: "smooth",
+                        block: 'center',
+                        inline: "center"
+                    });
+
+
+                    setTimeout(() => {
+                        emailError.innerText = ""
+                        email.style.border = ''
+                    }, 3000);
+                    return false
+                }
+                if (password.value.trim().length <= 1) {
+
+                    passwordError.innerText = 'Password is required'
+                    password.style.border = '1px red solid';
+                    password.scrollIntoView({
+                        behavior: "smooth",
+                        block: 'center',
+                        inline: "center"
+                    });
+
+
+                    setTimeout(() => {
+                        passwordError.innerText = ""
+                        password.style.border = ''
+                    }, 3000);
+                    return false
+
+                }
+
+                fetch('/api/v1/signin', {
+                    method: "POST",
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json'
+
+                    },
+                    body: JSON.stringify({
+                        email: email.value,
+                        password: password.value,
+
+                    })
+
+                })
+                    .then((response) => response.json())
+                    .then(response => {
+                        if (response.error == true) {
+                            mainError.style.display = 'block';
+                            mainError.innerText = response.message;
+                            mainError.scrollIntoView({
+                                behavior: "smooth",
+                                block: 'center',
+                                inline: "center"
+                            });
+
+                            setTimeout(() => {
+                                mainError.innerText = ""
+                                mainError.style.display = 'none'
+                            }, 4500);
+
+                        } else if(response.success) {
+                            window.location.href = '/api/v1/'
+
+                        }
+                    })
+
+            }
+
+
+
+        </script>
+        <script src="/assets/js/jquery.min.js"></script>
+        <script src="/assets/js/bootstrap.bundle.min.js"></script>
+        <script src="/assets/js/jquery.hoverIntent.min.js"></script>
+        <script src="/assets/js/jquery.waypoints.min.js"></script>
+        <script src="/assets/js/superfish.min.js"></script>
+        <script src="/assets/js/owl.carousel.min.js"></script>
+        <!-- Main JS File -->
+        <script src="/assets/js/main.js"></script>
+        <script>
+            // setTimeout(() => {
+            //     document.getElementById("error-div").remove();
+
+            // },3500)
+        </script>
+        <%-include( '../partials/userFooter' )%>
+</body>
+
+</html>

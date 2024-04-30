@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Nest Dashboard</title>
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta property="og:title" content="" />
+    <meta property="og:type" content="" />
+    <meta property="og:url" content="" />
+    <meta property="og:image" content="" />
+    <!-- Favicon -->
+    <link
+      rel="shortcut icon"
+      type="image/x-icon"
+      href="/assets/imgs/theme/favicon.svg"
+    />
+    <!-- Template CSS -->
+    <link href="/assets/css/main.css?v=1.1" rel="stylesheet" type="text/css" />
+  </head>
+
+  <body>
+    <%- include('../partials/sidenav.ejs') -%>
+    <main class="main-wrap">
+      <section class="content-main">
+        <div class="content-header">
+          <div>
+            <h2 class="content-title card-title">Order List</h2>
+            <p>Your orders are.</p>
+          </div>
+        </div>
+        <div class="card mb-4">
+          <!-- card-header end// -->
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Order Id</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Total</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <%if(order) {%> <%order.forEach((item, i) => {%>
+                  <a href="/api/v1/admin/single-orderDetails?orderId=<%= item._id%>">
+                  <tr>
+                   
+                    <td><%=  item.orderId%></td>
+                    <td><b><%= item.user.name%></b></td>
+                    <td><%= item.user.email%></td>
+                    <td>₹<%= item.orderAmout%>.00</td>
+                    <td>
+                      <span class="badge rounded-pill alert-warning"
+                        ><%= item.orderStatus%></span
+                      >
+                    </td>
+                    <% const formattedDate = item.createdAt.toLocaleString('en-US', {
+                    weekday: 'short', month: 'short', day: 'numeric', year:
+                    'numeric', hour: 'numeric', minute: 'numeric', second:
+                    'numeric', hour12: true }); %>
+                    <td><%= formattedDate%></td>
+                    <td class="">
+                      <a
+                        href="/api/v1/admin/orders/single-order-details?id=<%= item._id%>"
+                        >More details</a
+                      >
+                      <!-- dropdown //end -->
+                    </td>
+                  
+                  </tr>
+                </a>
+
+                  <%})%> <%} else {%> <%}%>
+                </tbody>
+              </table>
+            </div>
+            <!-- table-responsive //end -->
+          </div>
+      <!-- card-body end// -->
+        </div>
+        <!-- card end// -->
+        
+      </section>
+      <!-- content-main end// -->
+      <footer class="main-footer font-xs">
+        <div class="row pb-30 pt-15">
+          <div class="col-sm-6">
+            <script>
+              document.write(new Date().getFullYear());
+            </script>
+            &copy; Nest - HTML Ecommerce Template .
+          </div>
+          <div class="col-sm-6">
+            <div class="text-sm-end">All rights reserved</div>
+          </div>
+        </div>
+      </footer>
+    </main>
+    <script src="/assets/js/vendors/jquery-3.6.0.min.js"></script>
+    <script src="/assets/js/vendors/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/vendors/select2.min.js"></script>
+    <script src="/assets/js/vendors/perfect-scrollbar.js"></script>
+    <script src="/assets/js/vendors/jquery.fullscreen.min.js"></script>
+    <!-- Main Script -->
+    <script src="/assets/js/main.js?v=1.1" type="text/javascript"></script>
+  </body>
+</html>

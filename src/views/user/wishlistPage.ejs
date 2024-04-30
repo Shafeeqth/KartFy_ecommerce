@@ -1,0 +1,170 @@
+        <%-include('../partials/userHeader')%>
+		<style>
+			.swal2-show {
+				animation: slideInRight 0.5s ease forwards;
+			}
+			@keyframes slideInRight {
+				0% {
+					opacity: 0;
+					transform: translateX(100%)
+				}
+				100% {
+					opacity: 1;
+					transform: translateX(0);
+				}
+				
+			}
+			.swal2-hide {
+				animation: slideOutRight 0.5s ease forwards;
+
+			}
+
+			@keyframes slideOutRight {
+				0% {
+					opacity: 1;
+					transform: translateX(0%);
+				}
+				100% {
+					opacity: 0;
+					transform: translateX(100%);
+				}
+			}
+		</style>
+        <main class="main">
+        	<div class="page-header text-center" style="background-image: url('assets/images/page-header-bg.jpg')">
+        		<div class="container">
+        			<h1 class="page-title">Wishlist</h1>
+        		</div><!-- End .container -->
+        	</div><!-- End .page-header -->
+            <nav aria-label="breadcrumb" class="breadcrumb-nav">
+                <div class="container">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/api/v1">Home</a></li>
+                        <li class="breadcrumb-item"><a href="/api/v1/shop">Shop</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Wishlist</li>
+                    </ol>
+                </div><!-- End .container -->
+            </nav><!-- End .breadcrumb-nav -->
+
+
+            <div class="page-content">
+				<audio id="remove-audio" src="/audio/movement-swipe-whoosh-4-186578.mp3"></audio>
+            	<div class="container" id="Reload">
+					<% if(Array.isArray(wishlist) && wishlist.length > 0) {%>
+					<table class="table table-wishlist table-mobile">
+						<thead>
+							<tr>
+								<th>Product</th>
+								<th>Price</th>
+								<th>Stock Status</th>
+								<th></th>
+								<th></th>
+							</tr>
+						</thead>
+
+						<tbody>
+							
+							
+								<%wishlist.forEach((wishlist) => {%>
+							<tr>
+								<td class="product-col">
+									<div class="product">
+										<figure class="product-media">
+											<a href="/api/v1/product-detail?id=<%=wishlist.product._id%>">
+												<img src="/Data/uploads/<%=wishlist?.product?.images[0]%>" alt="Product image">
+											</a>
+										</figure>
+
+										<h3 class="product-title">
+											<a href="/api/v1/product-detail?id=<%=wishlist.product._id%>"><%=wishlist?.product?.title%></a>
+										</h3><!-- End .product-title -->
+									</div><!-- End .product -->
+								</td>
+								
+								<td class="price-col">₹<%=wishlist.product?.price%>.00</td>
+								<td>
+									<label for="size">Size:</label>
+									<div class="select-custom mx-4">
+										<select id="sizeVariant" id="size" class="form-control">
+											
+											<option selected value="Small">Small</option>
+											<option value="Medium">Medium</option>
+											<option value="Large">Large</option>
+											<option value="XLarge">X-Large</option>
+											<option value="XXLarge">XX-Large</option>
+											<option value="XXXLarge">XXX-Large</option>
+										</select>
+									</div><!-- End .select-custom -->
+								</td>
+								<td class="action-col">
+									<button onclick="addToCartFromWishlist('<%= wishlist?.product?._id%>')" class="btn btn-block btn-outline-primary-2"><i class="icon-cart-plus"></i>Add to Cart</button>
+								</td>
+								<td class="remove-col"><button onclick="removeFromWishlist('<%= wishlist?._id%>')" class="btn-remove"><i class="icon-close"></i></button></td>
+							</tr>
+							<%})%>
+							<%}else{%>
+								<tr class="h-100">
+									<td colspan="5">
+										<p class="text-center ">Your cart is empty please add items to the cart.</p>
+									</td>
+								</tr>
+								
+							
+						
+						<%}%>
+					</tbody>
+					</table><!-- End .table table-wishlist -->
+	            	
+            	</div><!-- End .container -->
+            </div><!-- End .page-content -->
+        </main><!-- End .main -->
+		<script>
+			function removeFromWishlist (id) {
+				try {
+					$.ajax({
+					url: '/api/v1/remove-wishlist',
+					type: 'DELETE',
+					contentType: 'application/json',
+					data: JSON.stringify({id:id}),
+					success: (response) => {
+                       if (response.success === true) {
+						
+                           $('#Reload').load('/api/v1/wishlist #Reload' ,'/wishlist #header-right',()=> {
+							Swal.fire({
+                                   titleText: 'Removed form wishlist',
+                                   width:'300px',
+                                  
+                                   icon: 'success',
+								   background: '#f0e7e6',
+                                //    toast:true,
+								   showConfirmButton:false,
+								   timer:1500,
+								   
+
+								});
+								setTimeout(() => window.location.reload(true),1400 )
+								
+
+						   })
+					   }else{
+							console.log('something went wrong');
+						}
+					}
+				})
+				} catch (error) {
+					console.log(error)
+					
+				}
+				
+				
+			}
+			
+		</script>
+
+        <%-include('../partials/userFooter')%>
+    
+</body>
+
+
+<!-- molla/wishlist.html  22 Nov 2019 09:55:06 GMT -->
+</html>

@@ -1,0 +1,492 @@
+<link href="/assets/css/main.css?v=1.1" rel="stylesheet" type="text/css" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+	integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
+</head>
+<%- include('../partials/userHeader') -%>
+
+
+	<main class="">
+		<!-- ... Your existing code ... -->
+
+		<!-- ... Your existing code ... -->
+
+		<section class="content-main bg-body-tertiary">
+
+			<div class="card mb-4">
+				<div class="card-body" id="Reload">
+					<div class="row mb-4">
+
+
+						<div class="col-md-6">
+							<!-- Add user details here, you can customize this section -->
+
+							<div class="card card-dashboard text-center">
+								<div class="card-body">
+									<h3>Delivery Address</h3>
+									<h3 class="card-title">
+										<%=order.address.name%>
+									</h3><!-- End .card-title -->
+
+
+									<p>
+										<%=order.address.phone%><br>
+											<%=order.address.state%><br>
+												<%=order.address.district%><br>
+													<%=order.address.locality%><br>
+														<%=order.address.pincode%><br>
+															<%=order.address.street%><br>
+
+
+
+									</p>
+								</div><!-- End .card-body -->
+							</div><!-- End .card-dashboard -->
+						</div>
+						<div class="table-responsive">
+							<div id="reload">
+								<table class="table " id="ReloadTable">
+									<thead>
+										<tr>
+											<th></th>
+											<th scope="col">Image</th>
+											<th scope="col">Name</th>
+											<th scope="col">Total</th>
+											<th scope="col">Status</th>
+											<th scope="col">Ordered Date</th>
+											<th scope="col" class="text-end">Action</th>
+										</tr>
+									</thead>
+
+									<tbody>
+										<% order.orderedItems.forEach((item, i)=> {%>
+											<tr class="m-0">
+
+												<td>
+													<div class="mx-5 text-center ">
+														<a style="all: unset; cursor: pointer;"
+															href="/api/v1/product-detail?id=<%=item.product._id%>">
+															<img src="/Data/uploads/<%=item.product.images[0]%>"
+																alt=" Product image" class="img-md shadow mb-1 "
+																style="margin: auto;" />
+
+															<%= item.product.title%>
+														</a>
+													</div>
+												</td>
+												<td class=" ">
+													Size : <input class="text-center bg-light m-2 p-3" disabled
+														style="width: 29%; padding: 10px; font-weight: bold; border: none; "
+														value=" <%= item.size%>" type="text"> <br>
+													Quantity : <input class="text-center bg-light" disabled
+														style="width: 20%; padding: 10px; font-weight: bold; border: none;"
+														value=" <%= item.quantity%>" type="text">
+												</td>
+												<td>
+													<input class="text-center text-success m-2" disabled
+														style="width: 50%;  padding: 10px 5px; font-weight: bold; border: none; "
+														value=" Price : ₹ <%= item.product.mrpPrice%>.00" type="text">
+													<br>
+													<input class="text-center text-success  m-2 " disabled
+														style="width: 50%; padding: 10px 5px; font-weight: bold; border: none; "
+														value=" Total : ₹ <%= item.product.mrpPrice * item.quantity%>.00"
+														type="text">
+												</td>
+												<td>
+													<%if(order.orderStatus== 'Delivered' ){%>
+														<span class=" px-4 py-2 rounded-pill"
+															style="font-weight: 400; background-color: rgb(46, 168, 56); color: #e1d8d8;">
+
+															<%}else if(order.orderStatus=='Canceled' ){%>
+																<span class=" px-4 py-2 rounded-pill"
+																	style="font-weight: 400; background-color: rgb(177, 16, 16); color: #e1d8d8;">
+
+																	<%}else if(order.orderStatus=='Out For Delivery'
+																		){%>
+																		<span class=" px-4 py-2 rounded-pill"
+																			style="font-weight: 400; background-color: rgb(18, 163, 163); color: #e1d8d8;">
+
+																			<%}else if(order.orderStatus=='Pending' ){%>
+																				<span class=" px-4 py-2 rounded-pill"
+																					style="font-weight: 400; background-color: rgb(12, 95, 120); color: #e1d8d8;">
+
+																					<%}else
+																						if(order.orderStatus=='Shipped'
+																						){%>
+																						<span
+																							class=" px-4 py-2 rounded-pill"
+																							style="font-weight: 400; background-color: rgb(101, 15, 32); color: #e1d8d8;">
+																							<%}%>
+																								<%= order.orderStatus%>
+																						</span>
+												</td>
+												<% const formattedDate=order.createdAt.toLocaleString('en-US', {
+													weekday: 'short' , month: 'short' , day: 'numeric' , year: 'numeric'
+													}); %>
+													<td>
+														<%= formattedDate%>
+													</td>
+													<td class="text-center col-2 ">
+														<%if(order.orderStatus== 'Delivered' ){%>
+															<button onclick="returnProduct('<%=order._id%>','<%=item.product._id%>')" data-orderId="" 
+																data-productId="" 
+																class="returnOrderTrigger btn btn-warning rounded">Return
+																Product</button>
+															<%if(!item.isReviewed){ %>
+																<button
+																	onclick="reviewModalLogic('<%=order._id%>','<%=item.product._id%>', '<%=item.size%>')"
+																	type="button" data-productId="" data-orderId=" "
+																	class="btn btn-primary">
+																	Add Review
+																</button>
+																<%}else{%>
+																	<button disabled type="button"
+																		class="btn btn-primary">
+																		Already Reviewed
+																	</button>
+																	<%}%>
+
+
+																		<%}else if(order.orderStatus=='Cancelled' ){%>
+
+																			<button disabled
+																				class="btn btn-danger rounded">Order
+																				Cancelled</button>
+																			<!-- <a href="/api/v1/shop">Continue shopping</a> -->
+
+																			<%}else{%>
+																				<button data-orderId="<%=order._id%>"
+																					id="cancelOrderTrigger"
+																					class="btn btn-danger rounded">Track
+																					Order</button>
+																				<%}%>
+													</td>
+											</tr>
+
+											<%})%>
+									</tbody>
+
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+		</section>
+		<!-- Return Order Modal -->
+		<div class="modal fade" id="returnOrderModal" tabindex="-1" aria-labelledby="returnOrderModalLabel"
+			aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+					<div class="modal-header bg-dark text-light my-3">
+						<h5 class="modal-title text-white" id="returnOrderModalLabel">Return Order</h5>
+						<button type="button" class="close btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body m-3">
+						<div class="mb-3">
+							<label for="returnReason" class="form-label">Reason for return</label>
+							<select class="form-select" id="returnReason" required>
+								<option value="Wrong product shipped">Wrong product shipped</option>
+								<option value="Damaged goods">Damaged goods</option>
+								<option value="Item does not match the description">Item does not match the description
+								</option>
+								<option value="Product no longer required">Product no longer required</option>
+							</select>
+						</div>
+						<div class="mb-3">
+							<label for="returnComments" class="form-label">Additional Comments (Optional)</label>
+							<textarea class="form-control" id="returnComments" rows="3"></textarea>
+						</div>
+					</div>
+					<div class="modal-footer " style="display: flex; justify-content: space-around;">
+						<button type="button" class="close btn btn-primary" > cancel</button>
+						<button type="button" class="btn btn-warning" id="confirmReturnOrder">Confirm</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Review Modal -->
+		<div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+					<div class="modal-header bg-dark text-light">
+						<h5 class="text-light modal-title" id="reviewModalLabel">Add Review</h5>
+						<button type="button" class="btn-close " data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<form id="reviewForm" onsubmit="event.preventDefault()">
+							<div class="mb-3 ">
+								<label for="rating" class="form-label  text-center fs-3">Rating</label>
+								<div id="starRating" class="mb-3 text-center">
+									<span class="star" style="font-size: 6rem;" data-rating="1">&#9733;</span>
+									<span class="star" style="font-size: 6rem;" data-rating="2">&#9733;</span>
+									<span class="star" style="font-size: 6rem;" data-rating="3">&#9733;</span>
+									<span class="star" style="font-size: 6rem;" data-rating="4">&#9733;</span>
+									<span class="star" style="font-size: 6rem;" data-rating="5">&#9733;</span>
+								</div>
+								<input type="hidden" name="rating" id="rating">
+							</div>
+							<div class="mb-3">
+								<label for="comment" class="form-label">Comment (Optional)</label>
+								<textarea class="form-control" id="comment" name="comment" rows="3"></textarea>
+							</div>
+							<div class="row align-items-end">
+								<button id="submitButton" type="submit" class="btn btn-primary">Submit</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- CSS -->
+		<style>
+			.modal-content {
+				border-radius: 10px;
+			}
+
+			.modal-header {
+				border-bottom: none;
+				border-radius: 10px 10px 0 0;
+			}
+
+			.modal-body {
+				padding: 20px;
+			}
+
+			.modal-footer {
+				border-top: none;
+				border-radius: 0 0 10px 10px;
+			}
+
+			#starRating {
+				font-size: 32px;
+			}
+
+			.star {
+				cursor: pointer;
+				color: #FFD700;
+				/* Golden color */
+			}
+
+			.star:hover,
+			.star.filled {
+				color: #FFB600;
+				/* Darker golden color on hover or when filled */
+			}
+		</style>
+
+		<!-- JavaScript remains the same as provided in the previous response -->
+
+
+		<!-- ... Your existing code ... -->
+
+		<!-- ... Your existing code ... -->
+
+		<!-- content-main end// -->
+
+		
+	</main>
+	<script>
+
+
+		function reviewModalLogic(orderId, productId, size) {
+
+			let reviewModal = document.getElementById('reviewModal');
+			reviewModal.classList.add('show');
+			reviewModal.style.display = 'block';
+			document.body.classList.add('modal-open');
+
+
+			const stars = document.querySelectorAll('.star');
+			const ratingInput = document.getElementById('rating');
+
+			stars.forEach(star => {
+				star.addEventListener('click', function () {
+					const rating = parseInt(this.getAttribute('data-rating'));
+					ratingInput.value = rating;
+					highlightStars(rating);
+				});
+			});
+
+			function highlightStars(rating) {
+				stars.forEach(star => {
+					const starRating = parseInt(star.getAttribute('data-rating'));
+					if (starRating <= rating) {
+						star.classList.add('filled');
+					} else {
+						star.style.background = 'white' ;
+						star.style.color = 'lightgoldenrodyellow' ;
+					}
+				});
+			}
+			
+			// //hide the unfilled stars
+			// const maxRating = 5; // Maximum rating
+			// stars.forEach(star => {
+			// 	const starRating = parseInt(star.getAttribute('data-rating'));
+			// 	if (starRating > maxRating) {
+				
+			// 	}
+			// });
+
+			const reviewForm = document.getElementById('reviewForm');
+			reviewForm.addEventListener('submit', function (event) {
+				event.preventDefault();
+				const formData = new FormData(reviewForm);
+				formData.append('orderId', orderId);
+				formData.append('productId', productId);
+				formData.append('size', size)
+				const data = Object.fromEntries(formData.entries());
+
+
+				fetch('/api/v1/product-review', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(data)
+				})
+					.then(response => response.json())
+					.then(data => {
+						console.log('Review submitted successfully:', data);
+						setTimeout(() => {
+							window.location.reload();
+
+						}, 1600);
+						Swal.fire({
+							title: 'Success',
+							icon: 'success',
+							text: data.message,
+							//  toast:true,
+
+							showConfirmButton: false,
+							timer: 1500,
+
+						});
+
+
+
+					})
+					.catch(error => {
+						console.error('Error submitting review:', error);
+					});
+			});
+
+
+		};
+
+		function returnProduct(orderId, productId) {
+			returnOrderButton.addEventListener('click', function () {
+				var reason = document.getElementById('returnReason').value;
+				var comments = document.getElementById('returnComments').value;
+				
+
+				fetch('/api/v1/orders/order-return', {
+					method: "POST",
+					body: JSON.stringify({
+						reason,
+						comments,
+						id,
+						productId
+					}),
+					headers: {
+						'Content-Type': 'application/json',
+
+					}
+
+				}).then(response => response.json())
+					.then(response => {
+						console.log(response);
+						if (response.success == true) {
+							window.location.reload(true)
+						}
+					})
+
+
+
+
+
+
+
+
+					
+				document.body.classList.remove('modal-open');
+			});
+		}
+
+
+
+		document.addEventListener('DOMContentLoaded', function () {
+			// Get modal elements
+			let returnOrderModal = document.getElementById('returnOrderModal');
+
+			// Get buttons to trigger modals
+			let returnOrderButton = document.getElementById('confirmReturnOrder');
+
+			// Example trigger events
+			// Replace these with your own trigger logic
+			let returnOrderTrigger = document.querySelectorAll('.returnOrderTrigger');
+
+			// Function to open cancel order modal
+
+			 document.querySelectorAll('.close').forEach(btn => {
+				btn.addEventListener('click', (event) => {
+					returnOrderModal.classList.remove('show');
+				document.body.classList.remove('modal-open');
+
+				})
+			 })
+			
+
+			// Function to open return order modal
+			function openReturnOrderModal() {
+				returnOrderModal.classList.add('show');
+				returnOrderModal.style.display = 'block';
+				document.body.classList.add('modal-open');
+			}
+			console.log(returnOrderTrigger)
+
+			// Add event listener to cancel order button
+			
+
+			// Add event listener to return order button
+			
+
+			// Example trigger events
+			// Replace these with your own trigger logic
+			
+			
+			returnOrderTrigger.forEach(item => item.addEventListener('click', openReturnOrderModal));
+		});
+
+	</script>
+	<script src="/assets/js/vendors/jquery-3.6.0.min.js"></script>
+	<script src="/assets/js/vendors/bootstrap.bundle.min.js"></script>
+	<script src="/assets/js/vendors/select2.min.js"></script>
+	<script src="/assets/js/vendors/perfect-scrollbar.js"></script>
+	<script src="/assets/js/vendors/jquery.fullscreen.min.js"></script>
+	<!-- // sweat alert -->
+	<script src="/node_modules/sweetalert2/dist/sweetalert2.all.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<script src="/https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+		crossorigin="anonymous"></script>
+
+	<!-- Main Script -->
+	<script src="assets/js/main.js?v=1.1" type="text/javascript"></script>
+	<%- include('../partials/userFooter') -%>
+		<!-- Plugins JS File -->
+		<script src="assets/js/jquery.min.js"></script>
+		<script src="assets/js/bootstrap.bundle.min.js"></script>
+		<script src="assets/js/jquery.hoverIntent.min.js"></script>
+		<script src="assets/js/jquery.waypoints.min.js"></script>
+		<script src="assets/js/superfish.min.js"></script>
+		<script src="assets/js/owl.carousel.min.js"></script>
+		<!-- Main JS File -->
+		<script src="assets/js/main.js"></script>
+		</body>
+
+
+		<!-- molla/dashboard.html  22 Nov 2019 10:03:13 GMT -->
+
+		</html>

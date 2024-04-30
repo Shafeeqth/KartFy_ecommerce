@@ -38,7 +38,7 @@ $(document).ready(function () {
 		var sticky = new Waypoint.Sticky({
 			element: $('.sticky-header')[0],
 			stuckClass: 'fixed',
-			offset: -300,
+			offset: -170,
             handler: function ( direction ) {
                 // Show category dropdown
                 if ( catInitVal &&  direction == 'up') {
