@@ -247,8 +247,9 @@ const loadCheckout = asyncHandler(async (req, res) => {
     if (user) {
         let cartData = await Cart.findOne({ user }).populate('products.product')
         let address = await Address.find({ user });
-        console.log(cartData, address)
-        res.render('user/checkoutPage', { user, cartData, address });
+        let coupons = await Coupon.find({isListed: true})
+        console.log(cartData, address, coupons)
+        res.render('user/checkoutPage', { user, cartData, address, coupons });
 
     }
 

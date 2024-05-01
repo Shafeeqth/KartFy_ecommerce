@@ -176,16 +176,13 @@ router.get('/coupons', adminController.loadCoupons);
 router.post('/coupons/create-coupon', adminController.createCoupon)
 
 //edit coupon
-router.put('/coupons/edit_coupon/:id');
+router.post('/coupons/edit-coupon', adminController.editCoupon);
 
 //delete coupon
 router.delete('/coupons/delete_coupon/:id');
 
 //List coupon
-router.put('/coupons/list_coupon/:id');
-
-//Unlist coupon
-router.put('/coupons/unlist_coupon/:id');
+router.put('/coupons/list-unlist-coupon', adminController.listAndUnlistCoupon);
 
 
 

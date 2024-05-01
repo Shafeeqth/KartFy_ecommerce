@@ -138,10 +138,12 @@
               ></button>
             </div>
             <div class="modal-body">
-              <form action="/api/v1/admin/coupons/create-coupon" method="post">
+              <form action="/api/v1/admin/coupons/edit-coupon" method="post">
                 <label for="form-label">Name</label>
+                <input style="visibility: hidden;" type="text" name="id" id="couponId">
                 <input
                   type="text"
+                  id="name"
                   name="name"
                   placeholder="Enter coupon name"
                   class="form-control my-2"
@@ -149,6 +151,7 @@
                 <label for="form-label">Description</label>
                 <input
                   type="text"
+                  id="description"
                   name="description"
                   placeholder="Enter Description here"
                   class="form-control my-2"
@@ -157,6 +160,7 @@
                 <label for="form-label">Dicount Percentage</label>
                 <input
                   type="text"
+                  id="discount"
                   name="discount"
                   placeholder="Enter in % "
                   class="form-control my-2"
@@ -167,6 +171,7 @@
                 <input
                   type="text"
                   name="minOrder"
+                  id="minCost"
                   placeholder="Enter Min Amount"
                   class="form-control my-2"
                 />
@@ -177,6 +182,7 @@
                 <input
                   type="date"
                   name="edate"
+                  id="edate"
                   placeholder="DD-MM-YYYY"
                   class="form-control my-2"
                 />
@@ -184,6 +190,7 @@
                 <label for="form-label">Limit of use</label>
                 <input
                   type="text"
+                  id="limit"
                   name="limit"
                   placeholder="Enter how many user can use"
                   class="form-control my-2"
@@ -237,11 +244,11 @@
                     <th class="text-end">Action</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody >
                   <% if(Array.isArray(coupon) && coupon.length> 0) {%> <%
                   coupon.map((c)=> {%>
                   <tr>
-                    <td width="40%">
+                    <td width="20%">
                       <a href="#" class="itemside">
                         <div class="left">
                           <img
@@ -255,16 +262,22 @@
                             class="mb-0 title"
                             style="text-transform: capitalize"
                           >
-                            <%= c.name %>
+                            <%= c.title %>
                           </h6>
                           <small class="text-muted">Seller ID: #439</small>
                         </div>
                       </a>
                     </td>
                     <td><%= c.couponCode%></td>
-                    <td><%= c.activationDate%></td>
-                    <td><%= c.expiresDate%></td>
-                    <td><%= c.discountAmount%></td>
+                    <% const formattedDate =
+                    c.createdAt?.toLocaleString('en-US', { weekday: 'short',
+                    month: 'short', day: 'numeric', year: 'numeric',  }); %>
+                    <td><%= formattedDate%></td>
+                    <% const fDate =
+                    c.expiryDate?.toLocaleString('en-US', { weekday: 'short',
+                    month: 'short', day: 'numeric', year: 'numeric', }); %>
+                    <td><%= fDate%></td>
+                    <td><%= c.discount%>%</td>
 
                     <td class="text-end">
                       <button
@@ -272,15 +285,15 @@
                         class="btn btn-sm btn-dark rounded font-sm mt-15"
                         data-user-id=""
                         data-status=""
-                        onclick="block('<%= c._id%>')"
+                        onclick="listOrUnlist('<%= c._id%>')"
                       >
-                        <%= c.active ? "List" : "Unlist" %>
+                        <%= c.isListed ? "List" : "Unlist" %>
                       </button>
                       <button
                         id="button"
                         class="btn btn-sm btn-dark rounded font-sm mt-15"
                         data-user-id=""
-                        onclick="return editCoupon('<%= c._id%>', '<%= c.name%>', '<%= c.activationDate%>', '<%= c.expiresDate%>', '<%= c.discountAmount%>','<%= c.limit%>')"
+                        onclick="return editCoupon('<%= c._id%>', '<%= c.title%>', '<%= c.description%>', '<%= c.expiryDate%>', '<%= c.discount%>','<%= c.limit%>', '<%=c.minCost%>')"
                         data-status=""
                         data-bs-toggle="modal"
                         data-bs-target="#exampleModal2"
@@ -346,28 +359,13 @@
 </html>
 
 <script>
-  function block(id) {
+  function listOrUnlist(id) {
     const data = { id: id };
-    const btn = document.getElementById("button");
-    let stat;
-    btn.addEventListener("click", () => {
-      const status = btn.getAttribute("data-status");
-      console.log(status, "hii");
-
-      if (status) {
-        console.log("unbock");
-        stat = "Unblock";
-        console.log(stat + "111");
-      } else {
-        console.log("block");
-        stat = "block";
-        console.log(stat + " 00000");
-      }
-    });
+    
+    
 
     Swal.fire({
-      title: "Are you sure",
-      text: `do you want to ${stat} this user!`,
+      text: "Are you sure",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
@@ -376,16 +374,19 @@
     }).then((decision) => {
       if (decision.isConfirmed) {
         $.ajax({
-          method: "POST",
-          url: "/admin/blockUser",
+          method: "put",
+          url: "/api/v1/admin/coupons/list-unlist-coupon",
           data: JSON.stringify(data),
           contentType: "application/json",
           success: (response) => {
-            if (response.block === true) {
-              $("#Reload").load("/admin/user #Reload", null, () => {
+            if (response.success === true) {
+              $("#Reload").load("/api/v1/admin/coupons #Reload", null, () => {
                 Swal.fire({
-                  title: `${stat}`,
+                  title: `success`,
                   icon: "success",
+                  width: '300px',
+                  showConfirmButton: false,
+                  timer: 1500
                 });
               });
             }
@@ -396,13 +397,23 @@
   }
 </script>
 <script>
-  function editCoupon(id, name, adate, edate, damount, limit) {
+  function editCoupon(id, name, description, edate, discount, limit, minCost) {
     console.log("function is called");
+    console.log(edate);
+
+    let date = new Date(edate)
+    let year = date.getFullYear();
+    let month = String(date.getMonth() + 1).padStart(2, '0');
+    let day = String(date.getDate()).padStart(2, '0');
+    edate = `${year}-${month}-${day}`
+    console.log(`${year}-${month}-${day}`)
+
     document.getElementById("couponId").value = id;
     document.getElementById("name").value = name;
-    document.getElementById("adate").value = adate;
+    document.getElementById("minCost").value = minCost;
     document.getElementById("edate").value = edate;
-    document.getElementById("damount").value = damount;
+    document.getElementById("description").value = description;
+    document.getElementById("discount").value = discount;
     document.getElementById("limit").value = limit;
     return;
   }

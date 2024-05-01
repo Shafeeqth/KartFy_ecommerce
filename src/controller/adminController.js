@@ -3,12 +3,12 @@ const mongoose = require('mongoose');
 const ApiError = require('../utilities/apiError');
 const ApiResponse = require('../utilities/apiResponse');
 const asyncHandler = require('../utilities/asyncHandler');
-const {Order, OrderReturn, Review} = require('../models/orderModels');
+const { Order, OrderReturn, Review } = require('../models/orderModels');
 const Coupon = require('../models/couponModel');
 const User = require('../models/userModel');
 const Offer = require('../models/offerModel');
 const Address = require('../models/addressModel');
-const {v4: uuidv4, v5: uuidv5} = require('uuid');
+const { v4: uuidv4, v5: uuidv5 } = require('uuid');
 
 
 
@@ -63,7 +63,7 @@ const checkAuthentic = asyncHandler(async (req, res) => {
 
 const loadCustomers = asyncHandler(async (req, res) => {
 
-    const customers = await User.find({}).sort({createdAt:-1});
+    const customers = await User.find({}).sort({ createdAt: -1 });
     console.log('fetched the customers');
     res
         .render('admin/userManagement', { customers })
@@ -78,7 +78,7 @@ const loadOrders = asyncHandler(async (req, res) => {
         .populate('user')
         .populate('address')
         .populate('orderedItems.product')
-        .sort({createdAt:-1});
+        .sort({ createdAt: -1 });
     console.log(order)
     res
         .render('admin/order-details', {
@@ -118,7 +118,7 @@ const loadCoupons = asyncHandler(async (req, res) => {
     let couponLength = Coupon.find().count();
     let page = 0;
     console.log(coupon)
-    res.render('admin/couponManagement', {coupon, couponLength, page});
+    res.render('admin/couponManagement', { coupon, couponLength, page });
 })
 
 
@@ -174,26 +174,26 @@ const blockOrUnblockUser = asyncHandler(async (req, res, next) => {
 
 
 const changeOrderStatus = asyncHandler(async (req, res, next) => {
-   
-
-        let { orderId, productId, index, status, userId } = req.body
-        let order = await Order.findOneAndUpdate({ _id: orderId }, { $set: { orderStatus: status } }, { new: true });
-        console.log(order);
-        return res.json({
-            success: true,
-            result: order,
-            error: null,
-            message: 'Order status changed Successfully.'
-        })
 
 
-    
+    let { orderId, productId, index, status, userId } = req.body
+    let order = await Order.findOneAndUpdate({ _id: orderId }, { $set: { orderStatus: status } }, { new: true });
+    console.log(order);
+    return res.json({
+        success: true,
+        result: order,
+        error: null,
+        message: 'Order status changed Successfully.'
+    })
+
+
+
 })
 
-const createCoupon = asyncHandler( async (req, res) => {
+const createCoupon = asyncHandler(async (req, res) => {
 
-    let {name: title, description, discount,  minOrder: minCost , edate: expiryDate, limit} = req.body;
-    console.log('title', title, description, discount, minCost,expiryDate, limit )
+    let { name: title, description, discount, minOrder: minCost, edate: expiryDate, limit } = req.body;
+    console.log('title', title, description, discount, minCost, expiryDate, limit)
     let firstCode = title.split(' ')[0];
     let middleCode = generateRandomString(4);
     let lastCode = discount;
@@ -203,7 +203,7 @@ const createCoupon = asyncHandler( async (req, res) => {
 
     await Coupon.create({
         title,
-        description, 
+        description,
         discount,
         minCost,
         expiryDate,
@@ -211,12 +211,13 @@ const createCoupon = asyncHandler( async (req, res) => {
         couponCode
 
     })
-    return res.status(200)
-        .json({
-            success: true,
-            error: false,
-            message: 'Coupon created successfully'
-        })
+    return res.redirect('/api/v1/admin/coupons')
+    // return res.status(200)
+    //     .json({
+    //         success: true,
+    //         error: false,
+    //         message: 'Coupon created successfully'
+    //     })
 
     // let uuid = uuidv4();
     // console.log(uuid, firstTitle)
@@ -230,11 +231,84 @@ const createCoupon = asyncHandler( async (req, res) => {
         }
         return result;
     }
-    
 
+
+});
+
+const editCoupon = asyncHandler(async (req, res) => {
+    console.log(req.body)
+    const { name, id, description, discount, minOrder, edate, limit } = req.body;
+
+    const coupon = await Coupon.findOneAndUpdate({
+        _id: id,
+    },
+        {
+            $set: {
+                title: name,
+                description,
+                discount,
+                expiryDate: edate,
+                limit,
+                minCost: minOrder
+
+            }
+        },
+        {
+            new: true
+        }
+    )
+    res.redirect('/api/v1/admin/coupons')
+    // return res.status(200)
+    //     .json({
+    //         success: true,
+    //         error: false,
+    //         data: coupon,
+    //         message: 'Coupon edited successfully'
+    //     })
 })
 
 
+const listAndUnlistCoupon = asyncHandler(async (req, res) => {
+    let { id } = req.body
+    let coupon = await Coupon.findOne({ _id: id })
+
+    if (coupon.isListed == true) {
+        coupon = await Coupon.findOneAndUpdate({
+            _id: id,
+        },
+            {
+                $set: {
+                    isListed: false
+                }
+            },
+            {
+                new: true
+            }
+
+        )
+    }else{
+        coupon = await Coupon.findOneAndUpdate({
+            _id: id
+        },
+        {
+            $set: {
+                isListed: true
+            }
+        },
+        {
+            new: true
+        }
+    
+    )
+    }
+    return res.status(200)
+        .json({
+            success: true,
+            error: false,
+            data: coupon,
+            message: 'Coupn updated successfully'
+        })
+})
 
 
 
@@ -263,6 +337,10 @@ module.exports = {
     loadSingleOrderDetails,
     blockOrUnblockUser,
     changeOrderStatus,
-    createCoupon
+    createCoupon,
+    editCoupon,
+    listAndUnlistCoupon,
+
+
 
 }
