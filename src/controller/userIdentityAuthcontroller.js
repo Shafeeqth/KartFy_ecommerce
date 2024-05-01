@@ -112,7 +112,7 @@ const varifyOtp = asyncHandler(async (req, res, next) => {
    
 
 
-    const user = await Otp.findOne({ email: req.session.value.email, otp });
+    const user = await Otp.find({ email: req.session.value.email, otp });
         if (!user) {
             req.flash('otpError', 'Incorrect OTP! please check again.')
             return  res.redirect('/otp-verification?errorOtp=' + encodeURIComponent('Incorrect OTP'))
@@ -195,7 +195,11 @@ const resetPassword = asyncHandler(async (req, res, next) => {
 
 const resendOtp = asyncHandler(async (req, res, next) => {
 
-    let email = req.session.user.email;
+    let email = req.session.user?.email;
+    if(!email){
+       return res.status(301)
+        .redirect('api/v1/signup')
+    }
     let otp = generateOtp.generate(4, {
         digits: true,
         lowerCaseAlphabets: false,

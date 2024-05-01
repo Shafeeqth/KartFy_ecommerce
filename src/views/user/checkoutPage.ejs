@@ -192,11 +192,122 @@
 										  </div>
 										</div>
 									</div>
+
+									<style>
+
+									.custom-modal-content {
+										border: 2px solid #ccc;
+										border-radius: 10px;
+									  }
+									  
+									  .custom-modal-header {
+										background-color: #f8f9fa; 
+										border-bottom: 2px solid #ccc;
+									  }
+									  
+									  .custom-modal-body {
+										padding: 20px; 
+									  }
+									  
 									
+									  .modal.fade .modal-dialog {
+										transition: transform 0.3s ease-out;
+									  }
+									  
+									 
+									  .btn-primary:hover {
+										background-color: #4a90e2; 
+									  }
+
+									  .coupon-container {
+										position: relative;
+									  }
+
+									  .copy-message {
+										display: none;
+										position: absolute;
+										top: 100%;
+										left: 0;
+										background-color: #f9f9f9;
+										padding: 5px 10px;
+										border: 1px solid #ccc;
+										border-radius: 5px;
+									  }
+
+									</style>
+<!-- Button to trigger modal -->
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#couponModal">
+	View Coupon Details
+  </button>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="couponModal" tabindex="-1" role="dialog" aria-labelledby="couponModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-scrollable modal-xl" role="document">
+	  <div class="modal-content custom-modal-content">
+		<div class="modal-header custom-modal-header">
+		  <h5 class="modal-title" id="couponModalLabel">Coupon Details</h5>
+		  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		  </button>
+		</div>
+		<div class="modal-body custom-modal-body">
+			
+
+		  <table class="table">
+			<!-- <thead>
+			  <tr>
+				<th></th>
+				<th>Column 2</th>
+				<th>Column 3</th>
+				<th>Column 4</th>
+			  </tr>
+			</thead> -->
+			
+			<tbody>
+				<%if(Array.isArray(coupons) && coupons.length > 0){%>
+					<%coupons.forEach( coupon => { %>
+			  <tr>
+				<td class="text-center"><%=coupon.title%></td>
+				<td class="text-center"><span class="text-success"> Offer :  <%=coupon.discount%> %</span></td>
+				<% const formattedDate=coupon.expiryDate.toLocaleString('en-US',
+				  {  month: 'short' , day: 'numeric' ,
+				  year: 'numeric' }); %>
+				  
+				<td class="text-center">Valid upto: <br> <%=formattedDate%></td>
+				<td class="text-center">Min : ₹<%=coupon.minCost%></td>
+				<td class="text-center">
+					<div class="coupon-container">
+						<div class="coupon-code" onclick="copyCouponCode()"><%=coupon.couponCode%></div>
+						<div class="copy-message" id="copyMessage">Coupon code copied!</div>
+					</div>
+					  
+					</td>
+			  </tr>
+			  
+			<%})%>
+			  <%}else{%>
+				<tr>
+					<td colspan="5">
+						<p>No coupns available</p>
+
+					</td>
+				</tr>
+				<%}%>
+			  <!-- Add more rows as needed -->
+			</tbody>
+		  </table>
+		</div>
+	  </div>
+	</div>
+  </div>
+  
+
+
+							
 									
 									<div class="cart-discount my-4">
 										<form action="#">
-											<a style="margin-left: 60% ;" href=""> check coupons</a>
+											<a style="margin-left: 0% ;" href=""> check coupons</a>
 											<div class="input-group">
 												<input type="text" class="form-control m-0"  placeholder="coupon code">
 												<div class="input-group-append">
@@ -307,6 +418,37 @@
             </div><!-- End .page-content -->
         </main><!-- End .main -->
 		<script>
+			function copyCouponCode() {
+				
+				let couponCode = document.querySelector('.coupon-code');
+				let couponValue = couponCode.value
+
+				let tempInput = document.createElement('input');
+				tempInput.value = couponValue;
+			
+			document.body.appendChild(tempInput);
+
+			tempInput.select();
+			tempInput.setSelectionRange(0, 99999);
+			let range = document.createRange();
+             range.selectNode(couponCode);
+            window.getSelection().removeAllRanges(); // Clear previous selections
+             window.getSelection().addRange(range);
+
+
+			document.execCommand('copy');
+
+			document.body.removeChild(tempInput);
+
+			let copyMessage = document.getElementById('copyMessage');
+			copyMessage.style.display = 'block';
+
+			setTimeout( () => {
+				copyMessage.style.display = 'none';
+			}, 2000)
+
+
+		}
 			function sendPayPal() { 
 			fetch('/paypal/pay',{
 				method: "POST"
