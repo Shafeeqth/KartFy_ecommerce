@@ -1,129 +1,157 @@
 <%- include('../partials/userHeader')%>
 
-        <main class="main">
-        	<div class="page-header text-center" style="background-image: url('/assets/images/page-header-bg.jpg')">
-        		<div class="container">
-        			<h1 class="page-title">Checkout</h1>
-        		</div><!-- End .container -->
-        	</div><!-- End .page-header -->
-            <nav aria-label="breadcrumb" class="breadcrumb-nav">
-                <div class="container">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
-                        <li class="breadcrumb-item"><a href="/api/v1/shop">Shop</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Checkout</li>
-                    </ol>
-                </div><!-- End .container -->
-            </nav><!-- End .breadcrumb-nav -->
+	<main class="main">
+		<div class="page-header text-center" style="background-image: url('/assets/images/page-header-bg.jpg')">
+			<div class="container">
+				<h1 class="page-title">Checkout</h1>
+			</div><!-- End .container -->
+		</div><!-- End .page-header -->
+		<nav aria-label="breadcrumb" class="breadcrumb-nav">
+			<div class="container">
+				<ol class="breadcrumb">
+					<li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
+					<li class="breadcrumb-item"><a href="/api/v1/shop">Shop</a></li>
+					<li class="breadcrumb-item active" aria-current="page">Checkout</li>
+				</ol>
+			</div><!-- End .container -->
+		</nav><!-- End .breadcrumb-nav -->
 
-            <div class="page-content">
-            	<div class="checkout">
-	                <div class="container">
-            			
+		<div class="page-content">
+			<div class="checkout">
+				<div class="container">
 
-            			<form action="/api/v1/confirm-order" method="POST" >
-		                	<div class="row m-0">
-		                		<div class="col-lg-9 ">
-									<div class="accordion " id="accordionExample">
-										<div class="accordion-item ">
-										 
-											
-												<h4 class="accordion-header  border row justify-content-center bg-light" id="headingOne" style="height: 4rem;">
-													<button style="all: unset;" class="accordion-button btn-secondary " type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne"><span>Delivery Addresses</span></button>
-												
-												</h4>
-											
-										  
-										  <div id="collapseOne" class="accordion-collapse collapse  " aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+
+					<form onsubmit="event.preventDefault()">
+						<div class="row m-0">
+							<div class="col-lg-9 ">
+								<div class="accordion " id="accordionExample">
+									<div class="accordion-item ">
+
+
+										<h4 class="accordion-header  border row justify-content-center bg-light"
+											id="headingOne" style="height: 4rem;">
+											<button style="all: unset;" class="accordion-button btn-secondary "
+												type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
+												aria-expanded="true" aria-controls="collapseOne"><span>Delivery
+													Addresses</span></button>
+
+										</h4>
+
+
+										<div id="collapseOne" class="accordion-collapse collapse  "
+											aria-labelledby="headingOne" data-bs-parent="#accordionExample">
 											<div class="accordion-body">
 												<div class="row justify-content-center">
-										
-													<%if(address && address.length > 0) {%>
+
+													<%if(address && address.length> 0) {%>
 														<div class="col-lg-5 ">
-															
+
 															<div class="card card-dashboard ">
 																<div class="row justify-content-start">
-																<input style="margin-left: 3rem; margin-top: 3rem" class="text-start" type="radio" name="address" checked value="<%=address[0]._id%>" >
+																	<input style="margin-left: 3rem; margin-top: 3rem"
+																		class="text-start" type="radio" name="address"
+																		checked value="<%=address[0]._id%>">
 																</div>
-															
+
 																<div class="card-body pt-2">
 																	<h3 class="card-title">
 																		<%=address[0]?.name%>
 																	</h3><!-- End .card-title -->
-			
-			
+
+
 																	<p>
 																		Phone: <%=address[0]?.phone%><br>
 																			State: <%=address[0]?.state%><br>
 																				District: <%=address[0]?.district%><br>
-																					Locality: <%=address[0]?.locality%><br>
-																						Pincode: <%=address[0]?.pincode%><br>
-																							Street: <%=address[0]?.street%><br>
+																					Locality: <%=address[0]?.locality%>
+																						<br>
+																						Pincode:
+																						<%=address[0]?.pincode%><br>
+																							Street:
+																							<%=address[0]?.street%><br>
 																								<a
 																									href="/api/v1/profile/edit-address?id=<%=address[0]._id%>">Edit
-																									<i class="icon-edit"></i></a>
-																									
+																									<i
+																										class="icon-edit"></i></a>
+
 																	</p>
 																</div><!-- End .card-body -->
 															</div><!-- End .card-dashboard -->
 														</div><!-- End .col-lg-6 -->
-													
-														<%for(let i = 1; i < address.length; i++) {%>
-														
-														<div class="col-lg-5 ">
-															
-															<div class="card card-dashboard ">
-																<div class="row justify-content-start">
-																<input style="margin-left: 3rem; margin-top: 3rem" class="text-start" type="radio" name="address"  value="<%=address[i]._id%>" >
-																</div>
-															
-																<div class="card-body pt-2">
-																	<h3 class="card-title">
-																		<%=address[i]?.name%>
-																	</h3><!-- End .card-title -->
-			
-			
-																	<p>
-																		Phone: <%=address[i]?.phone%><br>
-																			State: <%=address[i]?.state%><br>
-																				District: <%=address[i]?.district%><br>
-																					Locality: <%=address[i]?.locality%><br>
-																						Pincode: <%=address[i]?.pincode%><br>
-																							Street: <%=address[i]?.street%><br>
-																								<a
-																									href="/api/v1/profile/edit-address?id=<%=address[i]._id%>">Edit
-																									<i class="icon-edit"></i></a>
-																									
-																	</p>
-																</div><!-- End .card-body -->
-															</div><!-- End .card-dashboard -->
-														</div><!-- End .col-lg-6 -->
-												
-											
-													
-														<%}%>
-														
-														<%}%>
-														<div class="container">
-														<div class=" row mb-2  justify-content-center text-center;">
-									
-															<a class="btn btn-primary" href="/api/v1/profile/add-address">Add new Address <i class="icon-edit"></i></a>
-														</div>
-													</div>
-														
-			
-			
+
+														<%for(let i=1; i < address.length; i++) {%>
+
+															<div class="col-lg-5 ">
+
+																<div class="card card-dashboard ">
+																	<div class="row justify-content-start">
+																		<input
+																			style="margin-left: 3rem; margin-top: 3rem"
+																			class="text-start" type="radio"
+																			name="address" value="<%=address[i]._id%>">
+																	</div>
+
+																	<div class="card-body pt-2">
+																		<h3 class="card-title">
+																			<%=address[i]?.name%>
+																		</h3><!-- End .card-title -->
+
+
+																		<p>
+																			Phone: <%=address[i]?.phone%><br>
+																				State: <%=address[i]?.state%><br>
+																					District: <%=address[i]?.district%>
+																						<br>
+																						Locality:
+																						<%=address[i]?.locality%><br>
+																							Pincode:
+																							<%=address[i]?.pincode%><br>
+																								Street:
+																								<%=address[i]?.street%>
+																									<br>
+																									<a
+																										href="/api/v1/profile/edit-address?id=<%=address[i]._id%>">Edit
+																										<i
+																											class="icon-edit"></i></a>
+
+																		</p>
+																	</div><!-- End .card-body -->
+																</div><!-- End .card-dashboard -->
+															</div><!-- End .col-lg-6 -->
+
+
+
+															<%}%>
+
+																<%}%>
+																	<div class="container">
+																		<div
+																			class=" row mb-2  justify-content-center text-center;">
+
+																			<a class="btn btn-primary"
+																				href="/api/v1/profile/add-address">Add
+																				new Address <i
+																					class="icon-edit"></i></a>
+																		</div>
+																	</div>
+
+
+
 												</div><!-- End .row -->
 											</div>
-										  </div>
 										</div>
-										<div class="accordion-item ">
-										  <h4 class="accordion-header d-flex justify-content-center border bg-light" id="headingTwo"  style="height: 4rem;">
-											<button class="accordion-button collapsed" style="all: unset;" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-											  <span>Products</span>
+									</div>
+									<div class="accordion-item ">
+										<h4 class="accordion-header d-flex justify-content-center border bg-light"
+											id="headingTwo" style="height: 4rem;">
+											<button class="accordion-button collapsed" style="all: unset;" type="button"
+												data-bs-toggle="collapse" data-bs-target="#collapseTwo"
+												aria-expanded="false" aria-controls="collapseTwo">
+												<span>Products</span>
 											</button>
-										  </h4>
-										  <div id="collapseTwo" class="accordion-collapse collapse show" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+										</h4>
+										<div id="collapseTwo" class="accordion-collapse collapse show"
+											aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
 											<div class="accordion-body">
 												<table class="table table-cart table-mobile">
 													<thead>
@@ -135,340 +163,509 @@
 															<th></th>
 														</tr>
 													</thead>
-				
+
 													<tbody>
-														<%let grandTotal = 0;%>
-														<%if(Array.isArray(cartData.products) && cartData.products.length > 0) {%>
-															
-															<%cartData.products.forEach(cart => {%>
-																<%total = 0%>
-																
-																
-				
-															
-														<tr>
-															<td class="product-col">
-																<div class="product">
-																	<figure class="product-media">
-																		<a href="/api/v1/product-detail?id=<%=cart.product._id%>">
-																			<img src="/Data//uploads/<%=cart.product.images[0]%>" alt="Product image">
-																		</a>
-																	</figure>
-				
-																	<h3 class="product-title">
-																		<a href="/api/v1/product-detail?id=<%=cart.product._id%>"><%= cart.product.title%></a>
-																	</h3><!-- End .product-title -->
-																</div><!-- End .product -->
-															</td>
-															<td class="price-col">₹<%=cart.product.price%>.00</td>
-															<%total = +cart.product.price * cart.quantity%>%>
-															<td class="quantity-col">
-																<div class="cart-product-quantity row">
-																	<input disabled type="text" class="form-control" value="<%=cart.size%>" >
-																	<input disabled type="text" class="form-control" value="<%=cart.quantity%>" >
-																</div><!-- End .cart-product-quantity -->
-															</td>
-															
-															
-															<td class="total-col">₹<%= total%>.00</td>
-															<td class="remove-col"><button onclick="removeFromCart('<%=cart.id%>','<%=cart.product.title%>')" class="btn-remove"><i class="icon-close"></i></button></td>
-														</tr>
-														<% grandTotal += +total %>
-														<%})%>
-				
-														<%}else{%>
-															<tr class="h-100">
-																<td colspan="5">
-																	<p class="text-center ">Your cart is empty please add items to the cart.</p>
-																</td>
-															</tr>
-															
-				
-															<%}%>
-														
-														
+														<%let grandTotal=0;%>
+															<%if(Array.isArray(cartData.products) &&
+																cartData.products.length> 0) {%>
+
+																<%cartData.products.forEach(cart=> {%>
+																	<%total=0%>
+
+
+
+
+																		<tr>
+																			<td class="product-col">
+																				<div class="product">
+																					<figure class="product-media">
+																						<a
+																							href="/api/v1/product-detail?id=<%=cart.product._id%>">
+																							<img src="/Data//uploads/<%=cart.product.images[0]%>"
+																								alt="Product image">
+																						</a>
+																					</figure>
+
+																					<h3 class="product-title">
+																						<a
+																							href="/api/v1/product-detail?id=<%=cart.product._id%>">
+																							<%= cart.product.title%>
+																						</a>
+																					</h3><!-- End .product-title -->
+																				</div><!-- End .product -->
+																			</td>
+																			<td class="price-col">₹
+																				<%=cart.product.price%>.00</td>
+																			<%total=+cart.product.price *
+																				cart.quantity%>%>
+																				<td class="quantity-col">
+																					<div
+																						class="cart-product-quantity row">
+																						<input disabled type="text"
+																							class="form-control"
+																							value="<%=cart.size%>">
+																						<input disabled type="text"
+																							class="form-control"
+																							value="<%=cart.quantity%>">
+																					</div>
+																					<!-- End .cart-product-quantity -->
+																				</td>
+
+
+																				<td class="total-col">₹<%= total%>.00
+																				</td>
+																				<td class="remove-col"><button
+																						onclick="removeFromCart('<%=cart.id%>','<%=cart.product.title%>')"
+																						class="btn-remove"><i
+																							class="icon-close"></i></button>
+																				</td>
+																		</tr>
+																		<% grandTotal +=+total %>
+																			<%})%>
+
+																				<%}else{%>
+																					<tr class="h-100">
+																						<td colspan="5">
+																							<p class="text-center ">Your
+																								cart is empty please add
+																								items to the cart.</p>
+																						</td>
+																					</tr>
+
+
+																					<%}%>
+
+
 													</tbody>
-												</table><!-- End .table table-wishlist -->											</div>
-										  </div>
+												</table><!-- End .table table-wishlist -->
+											</div>
 										</div>
 									</div>
+								</div>
 
-									<style>
-
+								<style>
 									.custom-modal-content {
 										border: 2px solid #ccc;
 										border-radius: 10px;
-									  }
-									  
-									  .custom-modal-header {
-										background-color: #f8f9fa; 
+									}
+
+									.custom-modal-header {
+										background-color: #f8f9fa;
 										border-bottom: 2px solid #ccc;
-									  }
-									  
-									  .custom-modal-body {
-										padding: 20px; 
-									  }
-									  
-									
-									  .modal.fade .modal-dialog {
+									}
+
+									.custom-modal-body {
+										padding: 20px;
+									}
+
+
+									.modal.fade .modal-dialog {
 										transition: transform 0.3s ease-out;
-									  }
-									  
-									 
-									  .btn-primary:hover {
-										background-color: #4a90e2; 
-									  }
+									}
 
-									  .coupon-container {
+
+									.btn-primary:hover {
+										background-color: #4a90e2;
+									}
+
+									.coupon-container {
 										position: relative;
-									  }
+									}
 
-									  .copy-message {
+									.copy-message {
 										display: none;
 										position: absolute;
 										top: 100%;
-										left: 0;
+										left: -220%;
 										background-color: #f9f9f9;
-										padding: 5px 10px;
+										padding: 10px 15px;
 										border: 1px solid #ccc;
 										border-radius: 5px;
-									  }
 
-									</style>
-<!-- Button to trigger modal -->
-<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#couponModal">
-	View Coupon Details
-  </button>
-  
-  <!-- Modal -->
-  <div class="modal fade" id="couponModal" tabindex="-1" role="dialog" aria-labelledby="couponModalLabel" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-scrollable modal-xl" role="document">
-	  <div class="modal-content custom-modal-content">
-		<div class="modal-header custom-modal-header">
-		  <h5 class="modal-title" id="couponModalLabel">Coupon Details</h5>
-		  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-			<span aria-hidden="true">&times;</span>
-		  </button>
-		</div>
-		<div class="modal-body custom-modal-body">
-			
-
-		  <table class="table">
-			<!-- <thead>
-			  <tr>
-				<th></th>
-				<th>Column 2</th>
-				<th>Column 3</th>
-				<th>Column 4</th>
-			  </tr>
-			</thead> -->
-			
-			<tbody>
-				<%if(Array.isArray(coupons) && coupons.length > 0){%>
-					<%coupons.forEach( coupon => { %>
-			  <tr>
-				<td class="text-center"><%=coupon.title%></td>
-				<td class="text-center"><span class="text-success"> Offer :  <%=coupon.discount%> %</span></td>
-				<% const formattedDate=coupon.expiryDate.toLocaleString('en-US',
-				  {  month: 'short' , day: 'numeric' ,
-				  year: 'numeric' }); %>
-				  
-				<td class="text-center">Valid upto: <br> <%=formattedDate%></td>
-				<td class="text-center">Min : ₹<%=coupon.minCost%></td>
-				<td class="text-center">
-					<div class="coupon-container">
-						<div class="coupon-code" onclick="copyCouponCode()"><%=coupon.couponCode%></div>
-						<div class="copy-message" id="copyMessage">Coupon code copied!</div>
-					</div>
-					  
-					</td>
-			  </tr>
-			  
-			<%})%>
-			  <%}else{%>
-				<tr>
-					<td colspan="5">
-						<p>No coupns available</p>
-
-					</td>
-				</tr>
-				<%}%>
-			  <!-- Add more rows as needed -->
-			</tbody>
-		  </table>
-		</div>
-	  </div>
-	</div>
-  </div>
-  
+									}
+								</style>
 
 
-							
-									
-									<div class="cart-discount my-4">
-										<form action="#">
-											<a style="margin-left: 0% ;" href=""> check coupons</a>
-											<div class="input-group">
-												<input type="text" class="form-control m-0"  placeholder="coupon code">
-												<div class="input-group-append">
-													<button class="btn btn-outline-primary-2" type=""><i class="icon-long-arrow-right"></i></button>
-												</div><!-- .End .input-group-append -->
-											</div><!-- End .input-group -->
-										</form>
-									</div><!-- End .cart-discount -->
-		                		</div><!-- End .col-lg-9 -->
-								
-		                		<aside class="col-lg-3">
-		                			<div class="summary">
-										<table class="table table-summary">
-		                					<thead>
-		                						
-		                					</thead>
+								<!-- Modal -->
+								<div class="modal fade" id="couponModal" tabindex="-1" role="dialog"
+									aria-labelledby="couponModalLabel" aria-hidden="true">
+									<div class="modal-dialog modal-dialog-scrollable modal-xl" role="document">
+										<div class="modal-content custom-modal-content">
+											<div class="modal-header custom-modal-header">
+												<h5 class="modal-title" id="couponModalLabel">Coupon Details</h5>
+												<button type="button" class="close" data-dismiss="modal"
+													aria-label="Close">
+													<span aria-hidden="true">&times;</span>
+												</button>
+											</div>
+											<div class="modal-body custom-modal-body">
 
-		                					<tbody>
-											
-		                						
-		                						<tr class="summary-subtotal">
-		                							<td>Subtotal:</td>
-		                							<td>₹<%=grandTotal%>.00</td>
-		                						</tr><!-- End .summary-subtotal -->
-		                						<tr>
-		                							<td>Shipping:</td>
-		                							<td>Free shipping</td>
-		                						</tr>
-		                						<tr class="summary-total">
-		                							<td>Total:</td>
-		                							<td>₹<%=grandTotal%>.00</td>
-		                						</tr><!-- End .summary-total -->
-												
-		                					</tbody>
-		                				</table><!-- End .table table-summary -->
-		                				
 
-		                				<%if(Array.isArray(cartData.products) && cartData.products.length > 0 && address && address.length > 0) {%>
+												<table class="table">
+													<thead>
+														<tr>
+															<th class="mx-2 text-dark font-weight-bold fs-5">Name</th>
+															<th class="mx-2 text-dark font-weight-bold fs-5">Offer</th>
+															<th class="mx-2 text-dark font-weight-bold fs-5">Valid upto
+															</th>
+															<th class="mx-2 text-dark font-weight-bold fs-5">Min Order
+															</th>
+															<th class="mx-2 text-dark font-weight-bold fs-5">Coupon code
+															</th>
+														</tr>
+													</thead>
 
-		                				<div class="accordion-summary" id="accordion-payment">
-										    <div class="card">
-										        <div class="card-header" id="heading-1">
-										            <h2 class="card-title">
-													<input style="text-decoration: none;" role="button"   data-bs-toggle="collapse" data-bs-target="#collapse-1" aria-expanded="true" aria-controls="collapse-1" class="text-start" type="radio" name="paymentMethod" checked value="wallet" >
-										                
-										                   Pay Using Wallet
-										               
-										            </h2>
-										        </div><!-- End .card-header -->
-										        <div id="collapse-1" class="collapse " aria-labelledby="heading-1" data-parent="#accordion-payment" value="paypal" >
-										            <div class="card-body"> 
+													<tbody>
+														<%if(Array.isArray(coupons) && coupons.length> 0){%>
+															<%coupons.forEach( coupon=> { %>
+																<tr>
+																	<td class="text-center m-2""><%=coupon.title%></td>
+																<td class=" text-center m-2""><span class="text-success"> Offer : <%=coupon.discount%> %</span></td>
+																	<% const
+																		formattedDate=coupon.expiryDate.toLocaleString('en-US',
+																		{ month: 'short' , day: 'numeric' ,
+																		year: 'numeric' }); %>
 
-														Digital wallets allow you to pay when you're shopping using your device so that you don't need to carry your cards around.
-										            </div><!-- End .card-body -->
-										        </div><!-- End .collapse -->
-										    </div><!-- End .card -->
+																		<td class="text-center m-2">
+																			<%=formattedDate%>
+																		</td>
+																		<td class="text-center m-2"> ₹
+																			<%=coupon.minCost%>
+																		</td>
+																		<td class="text-center  m-2">
+																			<div class="coupon-container">
+																				<span style="font-size: 12px;">click to
+																					copy</span>
+																				<div class="p-1 rounded-pill "
+																					style="background-color: rgb(87, 60, 6);">
+																					<div class="coupon-code  fs-5"
+																						style="color: rgb(255, 255, 255); font-weight: 400;">
+																						<%=coupon.couponCode%>
+																					</div>
+																				</div>
+																				<div class="copy-message text-primary "
+																					id="copyMessage">Coupon code copied!
+																				</div>
+																			</div>
 
-										   
+																		</td>
+																</tr>
 
-										    <div class="card">
-										        <div class="card-header" id="heading-3">
-										            <h2 class="card-title">
-														<input  class="collapsed"  role="button"   data-bs-toggle="collapse" data-bs-target="#collapse-3" aria-expanded="false" aria-controls="collapse-3" class="text-start" type="radio" name="paymentMethod"  value="cashOnDelivery" >
-										              
-										                    Cash on delivery
-										             
-										            </h2>
-										        </div><!-- End .card-header -->
-										        <div id="collapse-3" class="collapse" aria-labelledby="heading-3" data-parent="#accordion-payment">
-										            <div class="card-body">A cash transaction refers to exchanging goods or services where payment is made in physical currency. 
-										            </div><!-- End .card-body -->
-										        </div><!-- End .collapse -->
-										    </div><!-- End .card -->
+																<%})%>
+																	<%}else{%>
+																		<tr>
+																			<td colspan="5">
+																				<p>No coupns available</p>
 
-										    <div class="card">
-										        <div class="card-header" id="heading-4">
-										            <h2 class="card-title">
-														
-														<input class="collapsed"  role="button" onclick="sendPayPal()"  data-bs-toggle="collapse" data-bs-target="#collapse-4" aria-expanded="false" aria-controls="collapse-4" class="text-start" type="radio" name="paymentMethod"  value="paypal" >
-										               
-										                    PayPal <small class="float-right paypal-link">What is PayPal?</small>
-										                </a>
-										            </h2>
-										        </div><!-- End .card-header -->
-										        <div id="collapse-4" class="collapse" aria-labelledby="heading-4" data-parent="#accordion-payment">
-										            <div class="card-body">
-														PayPal is an online payment system that allows you to send and receive money around the world.
-										            </div><!-- End .card-body -->
-										        </div><!-- End .collapse -->
-										    </div><!-- End .card -->
+																			</td>
+																		</tr>
+																		<%}%>
+																			<!-- Add more rows as needed -->
+													</tbody>
+												</table>
+											</div>
+										</div>
+									</div>
+								</div>
 
-										    
+
+
+
+
+								<div class="cart-discount my-4">
+
+									<a onclick="event.preventDefault()" style="margin-left: 40% ;" href=""> <button
+											style="all: unset;" type="button" class="btn btn-primary"
+											data-toggle="modal" data-target="#couponModal">
+											click here to view coupons
+										</button></a>
+									<div class="input-group">
+										<input type="tedxt" class="form-control m-0" id="coupon-input"
+											placeholder="coupon code">
+										<div class="input-group-append">
+											<button onclick="checkCoupon(event)" class="btn btn-outline-primary-2"><i
+													class="icon-long-arrow-right"></i></button>
+										</div><!-- .End .input-group-append -->
+									</div><!-- End .input-group -->
+
+								</div><!-- End .cart-discount -->
+							</div><!-- End .col-lg-9 -->
+
+							<aside class="col-lg-3">
+								<div class="summary">
+									<table class="table table-summary">
+										<thead>
+
+										</thead>
+
+										<tbody>
+
+
+											<tr class="summary-subtotal">
+												<td>Subtotal:</td>
+												<td>₹<%=grandTotal%>.00</td>
+											</tr><!-- End .summary-subtotal -->
+											<tr>
+												<td>Shipping:</td>
+												<td>Free shipping</td>
+											</tr>
+											<tr class="summary-total">
+												<td>Total:</td>
+												<td>₹<%=grandTotal%>.00</td>
+											</tr><!-- End .summary-total -->
+
+										</tbody>
+									</table><!-- End .table table-summary -->
+
+
+									<%if(Array.isArray(cartData.products) && cartData.products.length> 0 && address &&
+										address.length > 0) {%>
+
+										<div class="accordion-summary" id="accordion-payment">
+											<div class="card my-3">
+												<div class="card-header" id="heading-1">
+													<h2 class="card-title">
+														<input style="text-decoration: none;" role="button"
+															data-bs-toggle="collapse" data-bs-target="#collapse-1"
+															aria-expanded="true" aria-controls="collapse-1"
+															class="text-start" type="radio" name="paymentMethod" checked
+															value="Wallet">
+
+														Pay Using Wallet
+
+													</h2>
+												</div><!-- End .card-header -->
+												<div id="collapse-1" class="collapse " aria-labelledby="heading-1"
+													data-parent="#accordion-payment" value="paypal">
+													<div class="card-body">
+
+														Digital wallets allow you to pay when you're shopping using your
+														device so that you don't need to carry your cards around.
+													</div><!-- End .card-body -->
+												</div><!-- End .collapse -->
+											</div><!-- End .card -->
+
+
+
+											<div class="card my-3">
+												<div class="card-header" id="heading-3">
+													<h2 class="card-title">
+														<input class="collapsed" role="button" data-bs-toggle="collapse"
+															data-bs-target="#collapse-3" aria-expanded="false"
+															aria-controls="collapse-3" class="text-start" type="radio"
+															name="paymentMethod" value="COD">
+
+														Cash on delivery
+
+													</h2>
+												</div><!-- End .card-header -->
+												<div id="collapse-3" class="collapse" aria-labelledby="heading-3"
+													data-parent="#accordion-payment">
+													<div class="card-body">A cash transaction refers to exchanging goods
+														or services where payment is made in physical currency.
+													</div><!-- End .card-body -->
+												</div><!-- End .collapse -->
+											</div><!-- End .card -->
+
+											<div class="card my-3">
+												<div class="card-header" id="heading-4">
+													<h2 class="card-title">
+
+														<input class="collapsed" role="button"
+															data-bs-toggle="collapse" data-bs-target="#collapse-4"
+															aria-expanded="false" aria-controls="collapse-4"
+															class="text-start" type="radio" name="paymentMethod"
+															value="RazorPay">
+
+														RazorPay <small class="float-right paypal-link">What is
+															RazorPay?</small>
+														</a>
+													</h2>
+												</div><!-- End .card-header -->
+												<div id="collapse-4" class="collapse" aria-labelledby="heading-4"
+													data-parent="#accordion-payment">
+													<div class="card-body">
+														RazorPay is an online payment system that allows you to send and
+														receive money around the world.
+													</div><!-- End .card-body -->
+												</div><!-- End .collapse -->
+											</div><!-- End .card -->
+
+
+											<div class="card my-3">
+												<div class="card-header" id="heading-4">
+													<h2 class="card-title">
+
+														<input class="collapsed" role="button"
+															data-bs-toggle="collapse" data-bs-target="#collapse-5"
+															aria-expanded="false" aria-controls="collapse-5"
+															class="text-start" type="radio" name="paymentMethod"
+															value="paypal">
+
+														PayPal <small class="float-right paypal-link">What is
+															PayPal?</small>
+														</a>
+													</h2>
+												</div><!-- End .card-header -->
+												<div id="collapse-5" class="collapse" aria-labelledby="heading-5"
+													data-parent="#accordion-payment">
+													<div class="card-body">
+														PayPal is an online payment system that allows you to send and
+														receive money around the world.
+													</div><!-- End .card-body -->
+												</div><!-- End .collapse -->
+											</div><!-- End .card -->
+
+
 										</div><!-- End .accordion -->
-									
-										
-		                				<button type="submit" class="btn btn-outline-primary-2 btn-order btn-block">
-		                					<span class="btn-text">Place Order</span>
-		                					<span class="btn-hover-text">Confirm Order</span>
-		                				</button>
+
+
+										<button type="button" onclick="placeOrder(event)" class="btn btn-outline-primary-2 btn-order btn-block">
+											<span class="btn-text">Place Order</span>
+											<span class="btn-hover-text">Confirm Order</span>
+										</button>
 										<%}%>
-										
-		                			</div><!-- End .summary -->
-		                		</aside><!-- End .col-lg-3 -->
-		                	</div><!-- End .row -->
-            			</form>
-	                </div><!-- End .container -->
-                </div><!-- End .checkout -->
-            </div><!-- End .page-content -->
-        </main><!-- End .main -->
-		<script>
-			function copyCouponCode() {
-				
-				let couponCode = document.querySelector('.coupon-code');
-				let couponValue = couponCode.value
 
-				let tempInput = document.createElement('input');
-				tempInput.value = couponValue;
+								</div><!-- End .summary -->
+							</aside><!-- End .col-lg-3 -->
+						</div><!-- End .row -->
+					</form>
+				</div><!-- End .container -->
+			</div><!-- End .checkout -->
+		</div><!-- End .page-content -->
+	</main><!-- End .main -->
+	<script>
+
+		function placeOrder(event) {
+			event.preventDefault()
+
+			let payment = document.getElementsByName('paymentMethod');
+			let address = document.getElementsByName('address');
 			
-			document.body.appendChild(tempInput);
+			let addressId = Array.from(address).filter(item => item.checked)[0].value
+			let paymentMethod = Array.from(payment).filter(item => item.checked)[0].value
+			console.log(paymentMethod, addressId)
 
-			tempInput.select();
-			tempInput.setSelectionRange(0, 99999);
-			let range = document.createRange();
-             range.selectNode(couponCode);
-            window.getSelection().removeAllRanges(); // Clear previous selections
-             window.getSelection().addRange(range);
+			fetch('/api/v1/order-place', {
+				method: 'POST',
+				body: JSON.stringify( {addressId, paymentMethod}),
+				headers: {
+					'Content-Type': 'application/json',
+
+				}
+
+			}).then(response => response.json())
+				.then(data => {
+					console.log(data)
+					console.log(data.data._id)
+					if(data.success && data.orderType == 'COD') {
+						return location.href = `/api/v1/order-success?orderId=${data.data._id}`
+					}
+				})
 
 
-			document.execCommand('copy');
-
-			document.body.removeChild(tempInput);
-
-			let copyMessage = document.getElementById('copyMessage');
-			copyMessage.style.display = 'block';
-
-			setTimeout( () => {
-				copyMessage.style.display = 'none';
-			}, 2000)
 
 
+			
 		}
-			function sendPayPal() { 
-			fetch('/paypal/pay',{
+
+
+
+
+
+
+		function checkCoupon(event) {
+			event.preventDefault();
+
+			let codeInput = document.getElementById('coupon-input');
+			let code = codeInput.value.trim();
+			if (code.length < 2) {
+				codeInput.style.border = '1px solid red';
+				setTimeout(() => {
+					codeInput.style.border = ''
+
+				}, 2000);
+
+				return false
+			}
+
+			fetch('/api/v1/apply-coupon', {
+				method: "POST",
+				body: JSON.stringify({ code }),
+				headers: {
+					'Content-Type': 'application/json',
+
+				}
+
+			}).then(response => response.json())
+				.then(data => {
+					console.log(data)
+				})
+		}
+
+		document.addEventListener('DOMContentLoaded', () => {
+
+
+			let coupons = document.querySelectorAll('.coupon-code');
+
+			coupons.forEach(coupon => {
+				coupon.addEventListener('click', (event) => {
+
+					let couponValue = event.target.innerText;
+
+					let tempInput = document.createElement('input');
+					tempInput.value = couponValue;
+
+					document.body.appendChild(tempInput);
+
+					tempInput.select();
+					tempInput.setSelectionRange(0, 99999);
+					let range = document.createRange();
+					range.selectNode(coupon);
+					window.getSelection().removeAllRanges(); // Clear previous selections
+					window.getSelection().addRange(range);
+
+
+					document.execCommand('copy');
+
+					document.body.removeChild(tempInput);
+
+					let copyMessage = document.getElementById('copyMessage');
+					copyMessage.style.display = 'block';
+
+					setTimeout(() => {
+						copyMessage.style.display = 'none';
+					}, 2000)
+
+				})
+
+			})
+
+
+		})
+
+
+		function sendPayPal() {
+			fetch('/paypal/pay', {
 				method: "POST"
 			}).then(response => response.json())
-			.then(response => console.log(response));
+				.then(response => console.log(response));
 		}
-		</script>
+	</script>
 
-        <%- include('../partials/userFooter')%>
-    <!-- Plugins JS File -->
-    <script src="/assets/js/jquery.min.js"></script>
-    <script src="/assets/js/bootstrap.bundle.min.js"></script>
-    <script src="/assets/js/jquery.hoverIntent.min.js"></script>
-    <script src="/assets/js/jquery.waypoints.min.js"></script>
-    <script src="/assets/js/superfish.min.js"></script>
-    <script src="/assets/js/owl.carousel.min.js"></script>
-    <!-- Main JS File -->
-    <script src="/assets/js/main.js"></script>
-</body>
+	<%- include('../partials/userFooter')%>
+		<!-- Plugins JS File -->
+		<script src="/assets/js/jquery.min.js"></script>
+		<script src="/assets/js/bootstrap.bundle.min.js"></script>
+		<script src="/assets/js/jquery.hoverIntent.min.js"></script>
+		<script src="/assets/js/jquery.waypoints.min.js"></script>
+		<script src="/assets/js/superfish.min.js"></script>
+		<script src="/assets/js/owl.carousel.min.js"></script>
+		<!-- Main JS File -->
+		<script src="/assets/js/main.js"></script>
+		</body>
 
 
-<!-- molla/checkout.html  22 Nov 2019 09:55:06 GMT -->
-</html>
+		<!-- molla/checkout.html  22 Nov 2019 09:55:06 GMT -->
+
+		</html>

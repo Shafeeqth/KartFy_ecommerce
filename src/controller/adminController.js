@@ -9,6 +9,7 @@ const User = require('../models/userModel');
 const Offer = require('../models/offerModel');
 const Address = require('../models/addressModel');
 const { v4: uuidv4, v5: uuidv5 } = require('uuid');
+const Category = require('../models/categoryModel');
 
 
 
@@ -311,6 +312,14 @@ const listAndUnlistCoupon = asyncHandler(async (req, res) => {
 })
 
 
+const loadOffers = asyncHandler( async (req, res) => {
+    let offers = Offer.find({});
+    let categories = await Category.find({isListed: true});
+    res.render('admin/offerManagement',{categories, offers, page: 0, couponLength: 0})
+    
+})
+
+
 
 
 
@@ -340,6 +349,7 @@ module.exports = {
     createCoupon,
     editCoupon,
     listAndUnlistCoupon,
+    loadOffers
 
 
 

@@ -151,7 +151,7 @@ router.put('/retuns/reject_return/:id');
 /*===============================Routes related to Offer Management ========================================*/
 
 //view offers
-router.get('/offers');
+router.get('/offers', adminController.loadOffers);
 
 //Edit offer
 router.put('/offers/edit_offer/:id');

@@ -27,8 +27,12 @@
 										aria-selected="true">Dashboard</a>
 								</li>
 								<li class="nav-item">
-									<a class="nav-link" id="tab-downloads-link" href="/api/v1/my-orders"
+									<a class="nav-link" id="tab-wallet-link" href="/api/v1/profile/my-orders"
 										aria-selected="false">My Orders</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link" id="tab-wallet-link" data-toggle="tab" href="#tab-wallet"
+										role="tab" aria-controls="tab-address" aria-selected="false">My Wallet</a>
 								</li>
 								<li class="nav-item">
 									<a class="nav-link" id="tab-downloads-link" href="/api/v1/wishlist"
@@ -39,6 +43,7 @@
 										aria-selected="false">My
 										Cart</a>
 								</li>
+								
 								<li class="nav-item">
 									<a class="nav-link" id="tab-address-link" data-toggle="tab" href="#tab-address"
 										role="tab" aria-controls="tab-address" aria-selected="false">Adresses</a>
@@ -202,77 +207,187 @@
 
 									</div><!-- End .row -->
 								</div><!-- .End .tab-pane -->
+								<style>
+ 
+
+									.containerrr {
+									  display: flex;
+									  flex-wrap: wrap;
+									}
+								
+									.sidebarrr {
+									  flex: 1;
+									  min-width: 20%;
+									  max-width: 25%;
+									  padding: 20px;
+									 
+									  color: #fff;
+									  min-height: 100vh;
+									}
+								
+									.main-contenttt {
+									  flex: 3;
+									  padding: 20px;
+									}hr{
+										color:black;
+									}
+								
+									.user-headerrr {
+									  display: flex;
+									  align-items: center;
+									  margin-bottom: 20px;
+									}
+								
+									.user-photooo {
+									  border-radius: 50%;
+									  width: 40px;
+									  height: 40px;
+									  margin-right: 10px;
+									  /* Placeholder background color for the user photo */
+									  background-color: #ddd;
+									}
+								
+									.user-nameee {
+									  font-size: .6rem;
+									  font-weight: bold;
+									}
+								
+									.menu-headinggg {
+									  font-size: .7rem;
+									  font-weight: bold;
+									  margin-bottom: 10px;
+									  color: rgba(127,127,127,1);
+									}
+								
+									.menu-itemmm {
+									  margin-bottom: 10px;
+								
+									}
+								
+									.menu-itemmm a {
+									 color: black;
+									  text-decoration: none;
+									  font-size: .9rem;
+									  font-family: 'Quicksand';
+									}
+									.menu-itemmm.selected {
+								  background-color: #f0f0f0;
+								  border-radius: 5px;
+								}
+								
+									@media screen and (max-width: 600px) {
+										.menu-itemmm a {
+									 color: black;
+									  text-decoration: none;
+									  font-size: .5rem;
+									}   
+								
+								}
+								
+								
+								
+								
+								/* wallet  */
+								.card{
+									border: none;
+									border-radius: 10px;
+									width: 50%;
+								  
+									
+								}
+								.fa-ellipsis-v{
+									font-size: 10px;
+									color: #C2C2C4;
+									margin-top: 6px;
+									cursor: pointer;
+								}
+								.text-dark{
+									font-weight: bold;
+									margin-top: 8px;
+									font-size: 13px;
+									letter-spacing: 0.5px;
+								}
+								.card-bottom{
+									background: #3E454D;
+									border-radius: 6px;
+								}
+								
+								.flex-column p{
+									letter-spacing: 1px;
+									font-size: 18px;
+								}
+								.btn-secondary{
+									height: 40px!important;
+									margin-top: 3px;
+								}
+								.btn-secondary:focus{
+									box-shadow: none;
+								}
+							 </style>
 
 
-								<div class="tab-pane fade" id="tab-orders" role="tabpanel"
-									aria-labelledby="tab-orders-link">
+								<div class="tab-pane fade" id="tab-wallet" role="tabpanel"
+									aria-labelledby="tab-wallet-link">
 									<div class="card-body">
-										<div class="table-responsive" id="Reload">
-											<table class="table table-hover">
-												<thead>
-													<tr>
-														<th>ID</th>
-														<th>Product name</th>
-														<th>Image</th>
-														<th>Category</th>
-
-
-														<th class="text-end">Actions</th>
-													</tr>
-												</thead>
-												<tbody>
-
-
-
-													<tr>
-														<td width="40%">
-															<a href="#" class="itemside">
-																<div class="left">
-
-																	<img src="/img/productImage/" class="img-sm"
-																		alt="Userpic" />
-
-																</div>
-																<!-- <div class="info pl-3">
-																			<h6 class="mb-0 title" style="text-transform: capitalize;"></h6>
-																			<small class="text-muted">Seller ID: #439</small>
-																		</div> -->
-															</a>
-														</td>
-														<td></td>
-														<td></td>
-
-														<td></td>
-
-
-
-														<td class="text-end">
-															<button id="button"
-																class="btn btn-sm btn-dark rounded font-sm mt-15"
-																data-user-id="" data-status="" onclick="listProduct()">
-
-															</button>
-
-															<a href="/admin/loadVariant/"
-																class="btn btn-sm btn-dark rounded font-sm mt-15"
-																data-user-id="" data-status="">
-																variant
-															</a>
-														</td>
-													</tr>
-
-													<tr>
-														<td colspan="5">No user found</td>
-													</tr>
-
-
-
-
-
-												</tbody>
-											</table>
-											<!-- table-responsive.// -->
-										</div>
+										<div id="edit-profile-section"   style="display: block;"  >
+											<h1>Wallet</h1>
+											
+											<div class="mt-5">
+											 
+											 
+											 <div class="table-responsive">
+											   <div class=" d-flex ">
+												 <div class="card p-3">
+												   <div class="d-flex flex-row justify-content-between text-align-center">
+											  
+													 <i class="fas fa-ellipsis-v"></i>
+												   </div>
+												   <p class="text-dark"><%= wallet?.user?.name  %> Account</p>
+												   <div class="card-bottom pt-3 px-3 mb-2">
+													 <div class="d-flex flex-row justify-content-between text-align-center">
+													   <div class="d-flex flex-column" style="	color: #adb5bd;
+													   font-size: 13px;" ><span>Balance amount</span><p>₹ <span class="text-white"><%= wallet?.balance  %></span></p></div>
+											   
+													 </div>
+												   </div>
+												   <div class="new-div">
+													 <div class="car"  >
+													  <div class="card-body">
+													   <h4 class="card-title text-center">Transaction History</h4>
+													   <hr>
+													   <%if(wallet?.transactions?.length > 0){%>
+														 <% walletHistory.forEach((walletHistory)=>{ %>
+														   <div class="d-flex justify-content-between transction- " >
+															 <p ><%= walletHistory.date.toLocaleDateString('en-US',
+															   { year: 'numeric', month: 'short', day: '2-digit'
+															   }) %></p>
+															 <p>
+															   ₹<%=  walletHistory.amount %>
+															 </p>
+															 <p>
+															   <%= walletHistory.mode %>
+															 </p>
+														   </div>
+														 
+														   <%})%>
+													   
+													   <% } %>
+													  
+													   <button class="btn text-white w-100" style="background-color: #3E454D">Add Money</button>
+									   
+													  </div>
+													 </div>
+													 
+													 <!-- Add your content here -->
+												   </div>
+												 </div>
+											   </div>
+											
+											 </div>
+										 </div>
+									   
+										 </div>
+									   
 									</div>
 								</div><!-- .End .tab-pane -->
 

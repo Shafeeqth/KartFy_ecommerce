@@ -33,10 +33,12 @@
 									</thead>
 
 									<tbody>
-										<%let grandTotal = 0%>
-										<%if(Array.isArray(cart.products) && cart.products.length >0 ) {%>
+										<%let total = 0%>
+										
+										
+										<%if(cart && Array.isArray(cart.products) && cart.products.length >0 ) {%>
 											<%cart.products.forEach(cart => {%>
-												<%let total = cart.product.price * cart.quantity ;%>
+												<% total = cart.product.price * cart.quantity ;%>
 												
 												
 
@@ -65,14 +67,14 @@
 											<td class="price-col">₹<%=cart.product.price%>.00</td>
 											<td class="quantity-col">
                                                 <div class="cart-product-quantity">
-                                                    <input onchange="changeCount('<%=cart._id%>','<%=cart.product._id%>','<%=cart.size%>')" id="<%=cart._id%>" type="number" class="countControl form-control" value="<%=cart.quantity%>" min="1"  max="6" step="1" data-decimals="0" required>
+                                                    <input onchange="changeCount('<%=cart._id%>','<%=cart.product._id%>','<%=cart.size%>','<%=cart.product.price%>')" id="<%=cart._id%>" type="number" class="countControl form-control" value="<%=cart.quantity%>" min="1"  max="6" step="1" data-decimals="0" required>
                                                 </div><!-- End .cart-product-quantity -->
                                             </td>
 											
-											<td class="total-col">₹<%= total%>.00</td>
-											<td class="remove-col"><button onclick="removeFromCart('<%=cart._id%>','<%=cart.size%>')" class="btn-remove"><i class="icon-close"></i></button></td>
+											<td class="total-col">₹<%= cart?.totalPrice %>.00</td>
+											<td class="remove-col"><button onclick="removeFromCart('<%=cart._id%>','<%=cart.size%>','<%=total%>')" class="btn-remove"><i class="icon-close"></i></button></td>
 										</tr>
-										<% grandTotal += total %>
+										
 										<%})%>
 
 										<%}else{%>
@@ -154,7 +156,7 @@
 
   </style>
   
-<button type="button" onclick="findDeliveryCharge(event)" data-id="good" style="position: absolute; top: 56%; right: -41%; width: 5px; height: 30px; z-index: 10;" class="btn btn-lg btn-primary">Check</button>
+
 	                			<div class="cart-bottom">
 			            			
 			            			<a href="/api/v1/shop" class="btn btn-outline-dark-2"><span>ADD ITEMS TO CART</span><i class="icon-refresh"></i></a>
@@ -168,13 +170,18 @@
 	                					<tbody>
 	                						<tr class="summary-subtotal">
 	                							<td>Subtotal:</td>
-	                							<td>₹<%= grandTotal %>.00</td>
+												
+												<%if(cart?.cartTotal ){%>
+	                							<td>₹<%= cart?.cartTotal  %>.00</td>
+												<%}else{%>
+												<td>₹0.00</td>
+												<%}%>
 	                						</tr><!-- End .summary-subtotal -->
 	                						<tr class="summary-shipping">
 	                							<td>Shipping:</td>
 	                							<td>&nbsp;</td>
 	                						</tr>
-											<%if((grandTotal > 4999) ) {%>
+											<%if(( cart?.cartTotal  > 4999) ) {%>
 
 	                						<tr class="summary-shipping-row">
 	                							<td>
@@ -185,7 +192,7 @@
 	                							</td>
 	                							<td>₹0.00</td>
 	                						</tr><!-- End .summary-shipping-row -->
-											<%}else{%>
+											<%}else if( cart?.cartTotal > 0){%>
 
 	                						<tr id="output-div" class="summary-shipping-row text-primary" style="display: none;">
 	                							<td>
@@ -208,7 +215,7 @@
 													 <a> Estimate delivery cost<br><input id="deliveryCharge" onkeypress="findDeliveryCharge(event)" class="" style="all: unset; margin-left: 2%;" type="text"></a>
 													</td> <br>
 													
-	                							<td></td>
+													<button type="button" onclick="findDeliveryCharge(event)" data-id="good" style="position: absolute; top: 52%; right: 16%; width: 5px; height: 30px; z-index: 10;" class="btn btn-lg btn-primary">Check</button>
 	                						</tr>
 											<div class="row d-none">
 												<div>
@@ -220,12 +227,12 @@
 
 	                						<tr class="summary-total">
 	                							<td>Total:</td>
-	                							<td>₹<%= grandTotal %>.00</td>
+	                							<td>₹<%= cart.cartTotal %>.00</td>
 	                						</tr><!-- End .summary-total -->
 											<%}%>
 	                					</tbody>
 	                				</table><!-- End .table table-summary -->
-									<%if(grandTotal > 0) {%>
+									<%if(cart?.cartTotal > 0) {%>
 
 	                				<a href="/api/v1/checkout" class="btn btn-outline-primary-2 btn-order btn-block">PROCEED TO CHECKOUT</a>
 									<%}%>

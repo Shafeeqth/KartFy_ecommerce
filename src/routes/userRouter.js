@@ -6,7 +6,7 @@ const userController = require('../controller/userController.js');
 const userMiddleware = require('../middleware/userMiddleware.js');
 const UserIdentityAndAuth = require('../controller/userIdentityAuthcontroller.js');
 const { userAndemailValid } = require('../helpers/validations.js');
-
+const userOrderController = require('../controller/userOrderController.js')
 
 
 // Load the Home Page
@@ -111,7 +111,7 @@ router.get('/product-detail', userController.loadProductDetail );
 router.get('/checkout',  userMiddleware.isUserAutharized, userController.loadCheckout);
 
 //add address of users
-router.post('/add_address');
+router.post('/apply-coupon', userMiddleware.addCoupon);
 
 
 
@@ -122,33 +122,28 @@ router.post('/add_address');
 
 // Get orders
 
-router.get('/my-orders',userMiddleware.isUserAutharized, userController.loadMyOrders);
+router.get('/my-orders',userMiddleware.isUserAutharized, userOrderController.loadMyOrders);
 
 //Load order details
-router.get('/my-orders/single-orderDetails', userMiddleware.isUserAutharized, userController.loadSingleOrderDetails);
+router.get('/my-orders/single-orderDetails', userMiddleware.isUserAutharized, userOrderController.loadSingleOrderDetails);
 
 
-
-
-
-// Place order 
-router.put('/order-place', );
 
 
 // confirm order
-router.post('/confirm-order', userMiddleware.isUserAutharized, userMiddleware.orderConfirm);
+router.post('/order-place', userMiddleware.isUserAutharized, userOrderController.orderConfirm);
 
 //laod order success page
 router.get('/order-success', userMiddleware.isUserAutharized, userController.loadOrderSuccess)
 
 //Cancel order 
-router.put('/order-cancel', userMiddleware.isUserAutharized, userMiddleware.orderCancel);
+router.put('/order-cancel', userMiddleware.isUserAutharized, userOrderController.orderCancel);
 
 // load review of product
-router.post('/product-review', userMiddleware.orderProductReview  );
+router.post('/product-review', userOrderController.orderProductReview  );
 
 //sumbit return page
-router.post('/api/v1/orders/order-return', userMiddleware.orderReturn  );
+router.post('orders/order-return', userOrderController.orderReturn  );
 
 
 
@@ -181,7 +176,7 @@ router.put('/profile/change-password', userMiddleware.isUserAutharized, userMidd
 
 router.put('/profile/change-user-details', userMiddleware.isUserAutharized, userMiddleware.changeUserDetails)
 
-
+router.get('/profile/wallet', userController.loadWallet)
 
 
 module.exports = router;

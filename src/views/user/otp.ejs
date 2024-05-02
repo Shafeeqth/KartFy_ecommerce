@@ -111,7 +111,7 @@
                         <h3 class="mb-2 text-center"> Verify your account</h3>
                         <div id="error-div" class="alert text-danger f bg-light rounded text-center d-none  " role="alert"></div>
                         <% if(messages.otpError){%>
-                            <div id="error-div" class="alert text-danger f bg-light rounded text-center  " role="alert"><%= messages.otpError %></div>
+                            <div id="error" class="alert text-danger f bg-light rounded text-center  " role="alert"><%= messages.otpError %></div>
             
                         <%}%>
                        
@@ -159,10 +159,7 @@
     <!-- Bootstrap JS -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-        setTimeout(() => {
-            document.getElementById('error-div').remove();
-
-        },3500)
+        
 
         function validate() {
             let one = document.getElementById('one');
@@ -216,12 +213,23 @@
                 method: 'PUT',
 
 
-            })
+            }).then(response => response.json())
             .then((respose) => {
+
                 let errorDiv = document.getElementById('error-div')
+                if(!respose.success) {
+                    errorDiv.style.display = 'block'
+                errorDiv.className = "alert text-danger f bg-light rounded text-center  "
+                errorDiv.innerText = respose.message
+                window.location.href = '/api/v1/signup'
+
+                }else{
+               
                 errorDiv.style.display = 'block'
                 errorDiv.className = "alert text-danger f bg-light rounded text-center  "
                 errorDiv.innerText = "An OTP has been send again!"
+
+                }
 
 
 

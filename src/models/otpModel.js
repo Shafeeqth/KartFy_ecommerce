@@ -59,8 +59,7 @@ const Otp = mongoose.model('OTP', otpSchema);
 
 
 
-module.exports = {
-    Otp,
+module.exports = Otp
+    
 
 
-}

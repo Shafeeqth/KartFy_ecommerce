@@ -1,4 +1,4 @@
-const Otp = require('../models/otpModel');
+const OTP = require('../models/otpModel');
 const bcrypt = require('bcrypt');
 const userHelper = require('../helpers/validations');
 const sendMail = require('../helpers/nodeMailer');
@@ -8,6 +8,7 @@ const ApiError = require('../utilities/apiError');
 const ApiResponse = require('../utilities/apiResponse');
 const asyncHandler = require('../utilities/asyncHandler');
 const User = require('../models/userModel');
+const Wallet = require('../models/walletModel');
 
 
 
@@ -85,9 +86,9 @@ const createUser = asyncHandler(async (req, res, next) => {
         console.log(value)
 
 
-        const OTP = Math.floor(6000 + Math.random() * 4000);
+        const Otp = Math.floor(6000 + Math.random() * 4000);
 
-        sendMail(req.body.email, OTP);
+        sendMail(req.body.email, Otp);
         req.session.value = value;
 
         return res.status(200)
@@ -112,17 +113,18 @@ const varifyOtp = asyncHandler(async (req, res, next) => {
    
 
 
-    const user = await Otp.find({ email: req.session.value.email, otp });
+    let user = await OTP.findOne({ email: req.session.value.email, otp });
         if (!user) {
             req.flash('otpError', 'Incorrect OTP! please check again.')
-            return  res.redirect('/otp-verification?errorOtp=' + encodeURIComponent('Incorrect OTP'))
+            return  res.redirect('/api/v1/otp-verification?errorOtp=' + encodeURIComponent('Incorrect OTP'))
         }
 
              user = await User.create(req.session.value);
+             await Wallet.create({user: user._id})
 
             req.session.value = null;
             req.session.user = user;
-            res.redirect('/?success=' + encodeURIComponent('User account saved successfully'));
+            res.redirect('/api/v1/?success=' + encodeURIComponent('User account saved successfully'));
 
 
 })
@@ -197,8 +199,12 @@ const resendOtp = asyncHandler(async (req, res, next) => {
 
     let email = req.session.user?.email;
     if(!email){
-       return res.status(301)
-        .redirect('api/v1/signup')
+       return res.status(400)
+       .json({
+        success: false,
+        error: true,
+        message: 'Something went wrong'
+       })
     }
     let otp = generateOtp.generate(4, {
         digits: true,

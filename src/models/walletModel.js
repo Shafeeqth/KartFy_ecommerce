@@ -5,7 +5,7 @@ const walletSchema  = new mongoose.Schema({
 
     user: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'users',
+        ref: 'User',
         required: true,
     },
     balance: {
@@ -31,7 +31,5 @@ const walletSchema  = new mongoose.Schema({
 });
 const Wallet = mongoose.model('Wallet', walletSchema);
 
-module.exports = {
-    Wallet,
+module.exports = Wallet
     
-}

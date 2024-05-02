@@ -39,7 +39,7 @@ const orderSchema = mongoose.Schema({
     }, paymentMethod: {
         type: String,
         required: true,
-        enum: ['COD', 'Online', 'Wallet']
+        enum: ['COD', 'PayPal', 'RazorPay', 'Wallet']
 
     },
     paymentId: {
@@ -54,8 +54,8 @@ const orderSchema = mongoose.Schema({
     orderStatus: {
         type: String,
         required: true,
-        enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled', 'Returned'],
-        default: 'Pending'
+        enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled', 'Returned', 'Placed'],
+        default: 'Placed'
     },
     orderId: {
         type: Number,

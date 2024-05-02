@@ -12,6 +12,7 @@ const Category = require('../models/categoryModel');
 const { Product, Inventory } = require('../models/productModels');
 const { Cart, Wishlist } = require('../models/CartAndWishlistModel');
 const { pipeline } = require('nodemailer/lib/xoauth2');
+const Wallet = require('../models/walletModel');
 const {calculateDistance} = require('../helpers/calculateDeliveryCharge');
 
 
@@ -30,6 +31,7 @@ const loadShop = asyncHandler(async (req, res) => {
 
 
     let user = req.session.user ? req.session.user : null;
+    
 
     let page = parseInt(req.query.page) -1 || 0;
     let limit = parseInt(req.query.limit) || 7;
@@ -230,6 +232,7 @@ const loadWishlist = asyncHandler(async (req, res) => {
 })
 
 const loadCart = asyncHandler(async (req, res) => {
+    
 
     let user = req.session.user ? req.session.user : null;
     let cart = await Cart.findOne({ user }).populate('products.product');
@@ -245,9 +248,12 @@ const loadCheckout = asyncHandler(async (req, res) => {
     let user = req.session.user ? req.session.user : null;
 
     if (user) {
-        let cartData = await Cart.findOne({ user }).populate('products.product')
+        let cartData = await Cart.findOne({ user }).populate('products.product') 
+        cartData = cartData ?? []
         let address = await Address.find({ user });
+        address = address ?? []
         let coupons = await Coupon.find({isListed: true})
+        coupons = coupons ?? []
         console.log(cartData, address, coupons)
         res.render('user/checkoutPage', { user, cartData, address, coupons });
 
@@ -276,8 +282,8 @@ const loadProfile = asyncHandler(async (req, res, next) => {
 
     let user = req.session.user ? req.session.user : null;
     if (user) {
-
-
+        let wallet = await Wallet.findOne({user: user._id }).populate('user');
+        console.log('wallet', wallet)
         let userProfile = await User.aggregate([
             {
                 $match: {
@@ -304,7 +310,7 @@ const loadProfile = asyncHandler(async (req, res, next) => {
 
         console.log('user1', userProfile)
 
-        res.render("user/userProfile", { user, userProfile })
+        res.render("user/userProfile", { user, userProfile, wallet })
     } else {
 
     }
@@ -338,10 +344,11 @@ const editAddress = asyncHandler(async (req, res) => {
 })
 
 const loadOrderSuccess = asyncHandler(async (req, res) => {
-
+    
+    let orderId = req.query['orderId'];
     let user = req.session?.user ?? null
     let currentOrder = await Order.findById({
-        _id: req.session.user.currentOrderId
+        _id: orderId
     })
         .populate('user')
         .populate('address')
@@ -352,38 +359,14 @@ const loadOrderSuccess = asyncHandler(async (req, res) => {
 
 })
 
-const loadMyOrders = asyncHandler(async (req, res) => {
-
-    let user = req.session?.user;
-    if (!user) return res.redirect('/api/v1/')
-
-    let order = await Order.find({
-        user: user._id
-    })
-        .populate('address')
-        .populate('orderedItems.product')
-        .sort({createdAt: -1})
-    console.log('my order ==========================================',JSON.stringify(order))
-
-    res
-        .render('user/myOrders',
-            {
-                order,
-                user,
-            })
 
 
-})
 
-const loadSingleOrderDetails = asyncHandler(async (req, res, next) => {
-    let user = req.session.user
-    let id = req.query.id;
-    let order = await Order.findById({ _id: id })
-        .populate('user')
-        .populate('orderedItems.product')
-        .sort({ createdAt: -1 });
-    console.log(order)
-    res.render('user/singleOrderDetails',{user, order})
+const loadWallet = asyncHandler( async (req, res) => {
+    let user = req.session.user ?? null;
+    
+    
+    res.render('user/userWallet', {user, wallet} )
 })
 
 
@@ -411,8 +394,10 @@ module.exports = {
     loadAddAddress,
     editAddress,
     loadOrderSuccess,
-    loadMyOrders,
-    loadSingleOrderDetails,
+   
+    loadWallet
+    
+
 
 
 }

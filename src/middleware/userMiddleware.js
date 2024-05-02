@@ -1,10 +1,10 @@
-const Otp = require('../models/otpModel');
+
 const bcrypt = require('bcrypt');
 const userHelper = require('../helpers/validations');
 const nodemailer = require('nodemailer');
 const generateOtp = require('otp-generator');
 const mongoose = require('mongoose');
-const { Order, OrderReturn, Review } = require('../models/orderModels');
+
 const Coupon = require('../models/couponModel');
 const User = require('../models/userModel');
 const Offer = require('../models/offerModel');
@@ -13,7 +13,7 @@ const Category = require('../models/categoryModel');
 const { Product, Inventory } = require('../models/productModels');
 const { Cart, Wishlist } = require('../models/CartAndWishlistModel');
 const asyncHandler = require('../utilities/asyncHandler');
-const {calculateDeliveryCharge, getCordinates, getDistance} = require('../helpers/calculateDeliveryCharge');
+const { calculateDeliveryCharge, getCordinates, getDistance } = require('../helpers/calculateDeliveryCharge');
 
 
 
@@ -45,7 +45,7 @@ const isUserAutharized = asyncHandler(async (req, res, next) => {
 
     }
     let id = req.session.user._id
-    let user = await User.findById({ _id: id })
+    let user = await User.findById({ _id: id, })
     if (user.isBlocked == true) {
         req.session.user = null
         res.redirect('/api/v1/')
@@ -80,8 +80,12 @@ const addToCart = asyncHandler(async (req, res, next) => {
 
         })
     }
-    let inventory = await Inventory.findOne({ product: id });
-    let product = inventory.sizeVariant.find(item => item.size)
+    let inventory = await Inventory.findOne({ product: id }).populate('product')
+    console.log('Inventory', inventory)
+    let totalPrice = inventory.product.price;
+
+    let product = inventory.sizeVariant.find(item => item.size);
+
     if (!product) {
         return res.json({
             success: false,
@@ -109,11 +113,13 @@ const addToCart = asyncHandler(async (req, res, next) => {
         if (!userCart) {
             let cartCreate = await Cart.create({
                 user,
-                product: [{
+                products: [{
                     product: id,
                     size,
                     quantity: 1,
-                }]
+                    totalPrice
+                }],
+                cartTotal: totalPrice
             })
 
             return res.json({
@@ -140,36 +146,25 @@ const addToCart = asyncHandler(async (req, res, next) => {
                 productAlreadyExist: true
             })
 
-
-
         }
 
-
-        let cartData = await Cart.findOneAndUpdate({
-            user
-        },
-            {
-                $push: {
-                    products: {
-                        product: id,
-                        quantity: 1,
-                        size
-                    }
-
-                }
-            },
-            {
-
-                new: true
-            }
-        );
+        userCart.products.push({
+            product: id,
+            quantity: 1,
+            size,
+            totalPrice
+        })
+        userCart.cartTotal += totalPrice;
         await Wishlist.deleteOne({ product: id })
+        userCart = await userCart.save()
+
+
         return res.status(200)
             .json({
                 success: true,
                 error: false,
                 addToCartFromWishlist: true,
-                data: cartData,
+                data: userCart,
                 message: 'Product moved to the cart successfully'
             })
 
@@ -181,11 +176,13 @@ const addToCart = asyncHandler(async (req, res, next) => {
 
         let cartCreate = await Cart.create({
             user,
-            product: [{
+            products: [{
                 product: id,
                 size,
                 quantity: 1,
-            }]
+                totalPrice,
+            }],
+            cartTotal: totalPrice
         })
 
         return res.json({
@@ -215,29 +212,20 @@ const addToCart = asyncHandler(async (req, res, next) => {
     }
 
 
-    let cart = await Cart.findOneAndUpdate({
-        user
-    },
-        {
-            $push: {
-                products: {
-                    product: id,
-                    quantity: 1,
-                    size
-                }
+    userCart.products.push({
+        product: id,
+        quantity: 1,
+        size,
+        totalPrice
+    })
+    userCart.cartTotal += totalPrice;
 
-            }
-        },
-        {
-
-            new: true
-        }
-    );
+    userCart = await userCart.save()
 
     res.json({
         success: true,
         error: false,
-        data: cart,
+        data: userCart,
         message: 'Product added to cart successfully',
         addedToCart: true
     })
@@ -256,7 +244,9 @@ const addToCart = asyncHandler(async (req, res, next) => {
 const removeFromCart = asyncHandler(async (req, res, next) => {
 
     let user = req.session.user
-    let { id, size } = req.body
+    let { id, size, total } = req.body;
+    let product = await Product.findOne({ _id: id })
+
 
     await Cart.updateOne({
         user: user._id
@@ -264,7 +254,12 @@ const removeFromCart = asyncHandler(async (req, res, next) => {
         {
             $pull: {
                 products: { _id: id }
+            },
+            $inc: {
+                cartTotal: -1 * total
+
             }
+
         }
     );
     return res
@@ -297,39 +292,39 @@ const addToWishlist = asyncHandler(async (req, res, next) => {
             userNotFound: true
         });
     }
-        let exist = await Wishlist.findOne({ user, product })
-        console.log(exist);
+    let exist = await Wishlist.findOne({ user, product })
+    console.log(exist);
 
-        if (exist) {
-            return res
-                .status(401)
-                .json({
-                    success: false,
-                    error: true,
-                    message: 'Product already Exist in Wishlist!',
-                    productAlreadyExist: true
-                })
-
-
-        } else {
-            let wishlist = await Wishlist.create({ product, user });
-
-            //  
-            return res
-                .status(201)
-                .json({
-                    success: true,
-                    error: false,
-                    message: 'Product added to wishlist successfully!',
-                    addedToWishlist: true
-                })
-
-        }
+    if (exist) {
+        return res
+            .status(401)
+            .json({
+                success: false,
+                error: true,
+                message: 'Product already Exist in Wishlist!',
+                productAlreadyExist: true
+            })
 
 
+    } else {
+        let wishlist = await Wishlist.create({ product, user });
+
+        //  
+        return res
+            .status(201)
+            .json({
+                success: true,
+                error: false,
+                message: 'Product added to wishlist successfully!',
+                addedToWishlist: true
+            })
+
+    }
 
 
-   
+
+
+
 
 
 
@@ -357,9 +352,10 @@ const removeFromWishlist = asyncHandler(async (req, res, next) => {
 const updateCartCount = asyncHandler(async (req, res, next) => {
 
     let user = req.session.user._id
-    let userCart = await Cart.findOne({ user })
+    let { controlValue: count, cartId, productId, size, price } = req.body;
 
-    let { controlValue: count, cartId, productId, size } = req.body;
+
+
     console.log('count', count, 'productId', productId, 'cartId', cartId, 'size', size)
     let productItem = await Inventory.findOne({ product: productId });
     console.log(productItem, 'productItem')
@@ -399,6 +395,15 @@ const updateCartCount = asyncHandler(async (req, res, next) => {
     }
 
     console.log(count, product)
+    let userCart = await Cart.findOne({
+        user,
+        'products._id': new mongoose.Types.ObjectId(cartId),
+        "products.size": size
+    });
+    userCart.cartTotal -= userCart.products.find(item => item.size == size).totalPrice;
+
+
+    console.log('userCart', userCart)
     await Cart.updateOne({
         user,
         'products._id': new mongoose.Types.ObjectId(cartId),
@@ -406,9 +411,13 @@ const updateCartCount = asyncHandler(async (req, res, next) => {
     },
         {
             $set: {
-                'products.$.quantity': count
+                'products.$.quantity': count,
+                'products.$.totalPrice': count * price
             }
         })
+    userCart.cartTotal += count * price
+    await userCart.save()
+
     return res.json({
         success: true,
         error: false,
@@ -423,12 +432,12 @@ const updateCartCount = asyncHandler(async (req, res, next) => {
 
 
 const findDeliveryCharge = asyncHandler(async (req, res, next) => {
-    let {pincode} = req.body;
+    let { pincode } = req.body;
     console.log(req.body)
     let companyPincode = `676525`;
     let [sourceCordinate, targetCordinates] = await getCordinates(companyPincode, pincode); // find the cordinates of the company and users pincode
 
-    if(targetCordinates.length == 0) {
+    if (targetCordinates.length == 0) {
         return res.status(404)
             .json({
                 success: false,
@@ -437,25 +446,25 @@ const findDeliveryCharge = asyncHandler(async (req, res, next) => {
             })
     }
     let distance = getDistance(sourceCordinate, targetCordinates);
-    if(distance === 0) {
+    if (distance === 0) {
         return res.status(200)
-        .json({
-            success: true,
-            error: false,
-            data: distance,
-            message: 'Delivery charge found successfully'
-        })
+            .json({
+                success: true,
+                error: false,
+                data: distance,
+                message: 'Delivery charge found successfully'
+            })
 
-    }else if(!distance){
+    } else if (!distance) {
         return res.status(500)
-        .json({
-            success: false,
-            error: true,
-            message: 'something went wrong'
-        })
+            .json({
+                success: false,
+                error: true,
+                message: 'something went wrong'
+            })
     }
     console.log('distance', distance)
-    let delivaryCharge = calculateDeliveryCharge(distance) 
+    let delivaryCharge = calculateDeliveryCharge(distance)
     return res.status(200)
         .json({
             success: true,
@@ -463,8 +472,8 @@ const findDeliveryCharge = asyncHandler(async (req, res, next) => {
             data: delivaryCharge + 20,
             message: 'Delivery charge found successfully'
         })
-    
-    
+
+
 })
 
 /* ==========================================User Profile ============================================================ */
@@ -634,243 +643,6 @@ const changeUserDetails = asyncHandler(async (req, res, next) => {
 
 /* =======================================Order======================================== */
 
-const orderConfirm = asyncHandler(async (req, res, next) => {
-
-    let orderId = Math.round(Math.random() * 10000) + 1
-    let user = req.session.user
-    console.log(req.body)
-    let { address, paymentMethod } = req.body;
-    address = await Address.findById({ _id: address });
-    if (paymentMethod == 'cashOnDelivery') {
-
-        let products = await Cart.findOne({
-            user: new mongoose.Types.ObjectId(user._id)
-        }, {
-            products: 1,
-            _id: 0
-
-        }).populate('products.product')
-
-        let orderedItems = await Cart.findOne({
-            user: new mongoose.Types.ObjectId(user._id)
-        }, {
-            products: 1,
-            _id: 0,
-
-
-        })
-
-
-        console.log('products,', JSON.stringify(products))
-        console.log('orderedItems,', JSON.stringify(orderedItems))
-
-
-        products.products.forEach(async (item) => {
-            
-            let newProduct = await Inventory.findOneAndUpdate({
-                product: item.product,
-                'sizeVariant.size': item.size
-            }, {
-                $inc: {
-                    'sizeVariant.$.stock': -parseInt(item.quantity)
-                }
-            },
-                { new: true }
-            );
-                console.log('newProduct', newProduct)
-
-
-        })
-
-        let orderAmout = products.products.map(item => item.product.price * item.quantity).reduce((acc, item) => acc + item);
-
-        orderedItems = orderedItems.products.map(item => {
-
-            return {
-                product: item.product,
-                quantity: item.quantity,
-                size: item.size,
-            }
-        })
-
-        // updating product's soldCount 
-        orderedItems.forEach(async item => {
-            await Product.findOneAndUpdate({
-                _id: item.product
-            },
-                {
-                    $inc: {
-                        soldCount: 1
-                    }
-                }
-            )
-        })
-
-
-
-        let order = await Order.create({
-            user: user._id,
-            address,
-            paymentMethod: 'COD',
-            orderId,
-            orderedItems,
-            orderAmout
-        });
-
-
-        await Cart.findOneAndUpdate({
-             user: user._id 
-            },
-        {
-            $set: {
-                products: []
-            }
-        })
-
-        req.session.user.currentOrderId = order._id;
-        res.redirect('/api/v1/order-success');
-
-    } else {
-        res.send('Not configured')
-    }
-
-
-
-
-})
-
-const orderCancel = asyncHandler(async (req, res, next) => {
-    let user = req.session.user;
-    if (!user) return res.redirect('/api/v1/')
-    console.log(req.body)
-    let { reason, comments, id } = req.body;
-    let cancelDetails = { reason, comment: comments }
-
-    let order = await Order.findOneAndUpdate({
-        _id: id
-    },
-        {
-            $set: {
-                isCancelled: true,
-                cancelDetails,
-                orderStatus: 'Cancelled'
-
-            }
-        }, {
-
-        new: true
-    });
-    console.log(order, 'order')
-    let product;
-    order.orderedItems.forEach(async item => {
-
-        product = await Inventory.findOneAndUpdate({
-            product: item.product
-
-        },
-            {
-                $inc: {
-                    quantity: item.quantity
-                }
-            }
-        )
-        console.log('product :', product, 'item :', item)
-    })
-
-
-    return res.json({
-        success: true,
-        error: false,
-
-        result: order,
-        message: 'Order cancelled successfully'
-    });
-
-
-});
-
-
-const orderProductReview = asyncHandler(async (req, res) => {
-    let user = req.session.user
-    if(!user) return res.redirect('/api/v1')
-    let { rating, comment, orderId, productId, size } = req.body;
-
-    let updatedReviewOrder = await Order.findOneAndUpdate({
-        _id: orderId,
-        'orderedItems.product': productId,
-        'orderedItems.size': size
-
-    },
-        {
-            $set: {
-                'orderedItems.$.isReviewed': true
-            }
-
-        },
-        {
-            new: true
-        }
-    )
-    console.log(updatedReviewOrder, 'updatedReview')
-    let product = await Product.findOne({_id: productId});
-    let ratingCount = +product.productReviews.length;
-    let currentRatingAvg = +product.avgRating;
-    let newRatingAvg ;
-
-    if(ratingCount != 0) {
-        newRatingAvg = ((+ratingCount * +currentRatingAvg) + +rating) / (+ratingCount +1) 
-    }else{
-        newRatingAvg = +rating
-    }
-
-
-    let reviewProduct = await Product.findOneAndUpdate({
-        _id: productId
-    },
-    {
-        $set: {
-            avgRating : +newRatingAvg,
-            
-
-        },
-        $push: {
-            productReviews: {
-                rating,
-                user: user._id,
-                comment
-            }
-        }
-    },
-    {
-        new: true
-    }
-    )
-
-    return res.status(201)
-        .json({
-            
-            success: true,
-            error: false,
-            data: reviewProduct,
-            message: 'Product review successfully submited'
-        })
-
-
-
-
-
-
-
-})
-
-const orderReturn = asyncHandler( async (req, res) => {
-    console.log(req.body)
-})
-
-
-
-
-
 
 
 
@@ -885,16 +657,17 @@ module.exports = {
     removeFromWishlist,
     removeFromCart,
     addAddress,
-    orderConfirm,
+    
     updateCartCount,
     deleteAddress,
     editAddress,
     changePassword,
     changeUserDetails,
-    orderCancel,
-    orderProductReview,
-    orderReturn,
+    
+  
     findDeliveryCharge,
+    
+
 
 
 }

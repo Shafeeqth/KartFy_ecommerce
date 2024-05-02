@@ -1,5 +1,5 @@
 
-const { required } = require('joi');
+
 const mongoose = require('mongoose');
 
 const cartSchema = mongoose.Schema({
@@ -23,7 +23,8 @@ const cartSchema = mongoose.Schema({
             required: true
         },
         totalPrice: {
-            type: Number
+            type: Number,
+
         }
 
     }],
@@ -45,6 +46,10 @@ const cartSchema = mongoose.Schema({
         }
 
 
+    },
+    cartTotal: {
+        type: Number,
+        required: true,
     }
 },
     {

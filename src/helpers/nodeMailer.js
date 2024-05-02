@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer');
-const {Otp} = require('../models/otpModel');
+const OTP = require('../models/otpModel');
 
-const sendMail = async (email, OTP, Token) => {
+const sendMail = async (email, Otp, Token) => {
     const Transport = nodemailer.createTransport({
         service: "Gmail",
         auth: {
@@ -12,8 +12,8 @@ const sendMail = async (email, OTP, Token) => {
     let html;
     let subject
 
-    if (OTP) {
-        html = `Your OTP is ${OTP}`
+    if (Otp) {
+        html = `Your OTP is ${Otp}`
         subject = 'CartFy OTP Verification'
 
     } else if (Token) {
@@ -37,14 +37,24 @@ const sendMail = async (email, OTP, Token) => {
     try {
 
         const mailSent = await Transport.sendMail(mailOptions);
-        console.log(`${OTP || Token} send`);
+        console.log(`${Otp || Token} send`);
 
         try {
 
-            if (OTP) {
+            if (Otp) {
 
-                const otp = await Otp.updateOne({ email },
-                    { $set: { email, otp: OTP } }, { upsert: true }
+                const otp = await OTP.updateOne({
+                     email 
+                    },
+                    {
+                         $set: { 
+                            email, 
+                            otp: Otp 
+                        } 
+                    }, 
+                    {
+                         upsert: true 
+                        }
                 );
 
 

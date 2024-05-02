@@ -1,6 +1,11 @@
 const paypal = require('paypal-rest-sdk');
 const asyncHandler = require('../utilities/asyncHandler');
-const { PAYPAL_MODE, PAYPAL_CLIENT_KEY, PAYPAL_SECRET_KEY, PORT } = process.env;
+const { PAYPAL_MODE, PAYPAL_CLIENT_KEY, PAYPAL_SECRET_KEY, PORT,
+    RAZORPAY_KEY_ID} = process.env;
+
+
+
+
 
 paypal.configure({
     mode: PAYPAL_MODE,

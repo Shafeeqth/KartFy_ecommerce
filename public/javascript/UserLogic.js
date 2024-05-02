@@ -43,7 +43,7 @@ function addToCartFromWishlist(id) {
                     titleText: response.message,
                     icon: 'info',
                     width: '300px',
-                    height: '300px',
+                    
                     toast: true,
                     showConfirmButton: false,
                     timer: 1500,
@@ -87,7 +87,7 @@ function addToCart(id) {
                 Swal.fire({
                     titleText: 'Product already exist in cart',
                     width: '300px',
-                    height: '300px',
+                   
                     icon: 'info',
                     toast: true,
 
@@ -101,7 +101,7 @@ function addToCart(id) {
                     Swal.fire({
                         titleText: 'Produce added to cart successfully',
                         width: '300px',
-                        height: '300px',
+                       
                         icon: 'success',
                         toast: true,
 
@@ -118,7 +118,7 @@ function addToCart(id) {
                 titleText: response.message,
                 icon: 'info',
                 width: '300px',
-                height: '300px',
+               
                 toast: true,
                 showConfirmButton: false,
                 timer: 1500,
@@ -178,7 +178,7 @@ function addToWishlist(id) {
                     titleText: "Product already exist in wishlist",
                     icon: 'info',
                     width: '300px',
-                    height: '300px',
+                  
                     toast: true,
                     showConfirmButton: false,
                     timer: 1500,
@@ -193,8 +193,8 @@ function addToWishlist(id) {
 
 // Remove from cart
 
-function removeFromCart(id, size) {
-    let data = { id ,size}
+function removeFromCart(id, size, total ) {
+    let data = { id ,size, total}
     console.log(data)
     Swal.fire({
         title: 'Are you sure',
@@ -236,7 +236,7 @@ function removeFromCart(id, size) {
 
 
 }
-function changeCount(cartId, productId, size) {
+function changeCount(cartId, productId, size, price) {
 
 
 
@@ -247,7 +247,7 @@ function changeCount(cartId, productId, size) {
     console.log(controlValue);
 
 
-    let data = { controlValue, cartId , productId, size};
+    let data = { controlValue, cartId , productId, size, price};
     console.log(data);
     $.ajax({
         method: 'put',

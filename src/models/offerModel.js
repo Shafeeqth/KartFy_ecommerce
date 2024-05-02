@@ -1,11 +1,16 @@
 const mongoose = require('mongoose');
 
 const offerSchema = mongoose.Schema({
-    offerName: {
+    title: {
         type: String,
         required: true,
 
-    }, offerExpire: {
+    },description: {
+        type: String,
+        required: true
+
+    },
+     expiryDate: {
         type: Date,
         required: true,
 
@@ -16,10 +21,9 @@ const offerSchema = mongoose.Schema({
     }, isListed: {
         type: Boolean,
 
-    }, minConst: {
-        type: Number,
-
-    },
+    },appliedCategory: {
+        type: Array,
+    }
 
 });
 
