@@ -128,8 +128,6 @@ router.get('/my-orders',userMiddleware.isUserAutharized, userOrderController.loa
 router.get('/my-orders/single-orderDetails', userMiddleware.isUserAutharized, userOrderController.loadSingleOrderDetails);
 
 
-
-
 // confirm order
 router.post('/order-place', userMiddleware.isUserAutharized, userOrderController.orderConfirm);
 
@@ -144,6 +142,17 @@ router.post('/product-review', userOrderController.orderProductReview  );
 
 //sumbit return page
 router.post('orders/order-return', userOrderController.orderReturn  );
+
+
+/*==================================E-payment================================================= */
+
+//RazorPay success
+router.put('orders/razorpay-success', userOrderController.razorpaySuccess)
+
+
+//RazorPay failure
+router.put('orders/razorpay-failure', userOrderController.razorpayFailure)
+
 
 
 

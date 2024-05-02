@@ -1,10 +1,57 @@
 const paypal = require('paypal-rest-sdk');
 const asyncHandler = require('../utilities/asyncHandler');
-const { PAYPAL_MODE, PAYPAL_CLIENT_KEY, PAYPAL_SECRET_KEY, PORT,
-    RAZORPAY_KEY_ID} = process.env;
+const { PAYPAL_MODE, PAYPAL_CLIENT_KEY, PAYPAL_SECRET_KEY, 
+    PORT,RAZORPAY_KEY_ID, RAZORPAY_SECRET_KEY } = process.env;
 
+const Razorpay = require('razorpay');
+const razorpayInstance = new Razorpay({
+    key_id: RAZORPAY_KEY_ID,
+    key_secret: RAZORPAY_SECRET_KEY,
+})
 
+const createRazorpayOrder = async (req, res, myOrder) => {
+    try {
+        const amount = myOrder.orderAmout * 100;
+        const options = {
+            amount,
+            currency: 'INR',
+            // reciept: ''+order.orderId
+        }
 
+        razorpayInstance.orders.create(options, 
+        (error, order) => {
+            if(error) {
+                console.log(error)
+                return res.status(400)
+                .json({
+                    success: false,
+                    error: true,
+                    message: error.message
+    
+                })
+            }
+            return res.status(200)
+                .json({
+                    orderId: myOrder._id,
+                    order,
+                    success: true,
+                    paymentType: 'RazorPay',
+                    message: 'Order Created',
+                    order_id: order._id,
+                    amount: amount,
+                    key_id:RAZORPAY_KEY_ID,
+                    contact: '9745191844',
+                    name: 'CartFy Online',
+                    email: 'cartfyOnline@gmail.com'
+                })
+        })
+        
+    } catch (error) {
+        console.log(error)
+        
+    }
+
+}
 
 
 paypal.configure({
@@ -14,7 +61,7 @@ paypal.configure({
 });
 
 const payPalPayment = asyncHandler((req, res, next) => {
-console.log('comes here');
+    console.log('comes here');
     const create_payment_json = {
         "intent": "sale",
         "payer": {
@@ -49,13 +96,13 @@ console.log('comes here');
             throw error;
         } else {
             for (let i = 0; i < payment.links.length; i++) {
-                if (payment.links[i].rel === 'approval_url'){ 
+                if (payment.links[i].rel === 'approval_url') {
                     res.redirect(payment.links[i].href);
                 }
             }
         }
     });
-    
+
 })
 
 const payPalSuccess = asyncHandler(async (req, res, next) => {
@@ -86,6 +133,7 @@ module.exports = {
     payPalCancel,
     payPalPayment,
     payPalSuccess,
+    createRazorpayOrder
 }
 
 

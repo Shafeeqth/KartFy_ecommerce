@@ -640,6 +640,82 @@ const changeUserDetails = asyncHandler(async (req, res, next) => {
     })
 
 })
+const addCoupon = asyncHandler(async (req, res) => {
+    let code = req.body.code;
+    let user = req.session.user;
+    let coupon = await Coupon.findOne({
+        couponCode: code
+    })
+    console.log('coupon', coupon)
+    let now = new Date;
+
+    if (!coupon) {
+        return res.status(400)
+            .json({
+                success: false,
+                error: true,
+                message: 'Coupon not found!'
+            })
+    }
+    let expiryDate = new Date(coupon.expiryDate)
+    if (now.getTime() > expiryDate.getTime()) {
+        return res.status(400)
+            .json({
+                success: false,
+                error: true,
+                message: 'Coupon is expired!'
+            })
+
+    }
+    if (now.getTime() > expiryDate.getTime()) {
+        return res.status(400)
+            .json({
+                success: false,
+                error: true,
+                message: 'Coupon is expired!'
+            })
+
+    }
+    if (coupon.appliedUsers.includes(user._id)) {
+        return res.status(400)
+            .json({
+                success: false,
+                error: true,
+                message: 'You have already rediemed this coupon!'
+            })
+
+    }
+    if (!coupon.limit) {
+        return res.status(400)
+            .json({
+                success: false,
+                error: true,
+                message: 'Coupon limit is over!'
+            })
+
+    }
+    coupon.limit -= 1;
+    coupon.appliedUsers.push(user._id)
+    await coupon.save()
+
+    let cart = await Cart.findOne({ user: user._id });
+    let discount = Math.trunc((coupon.discount * cart.cartTotal) / 100)
+    cart.isCouponApplied = true;
+    cart.coupon = {
+        name: coupon.title,
+        discount,
+    }
+    cart = await cart.save();
+    return res.status(200)
+        .json({
+            success: true,
+            error: false,
+            data: cart,
+            message: 'Coupon rediemed!'
+        })
+
+
+});
 
 /* =======================================Order======================================== */
 
@@ -657,6 +733,7 @@ module.exports = {
     removeFromWishlist,
     removeFromCart,
     addAddress,
+    addCoupon,
     
     updateCartCount,
     deleteAddress,

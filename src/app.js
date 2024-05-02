@@ -59,7 +59,7 @@ app.use(passport.session());
 app.use('/api/v1/admin', adminRouter);
 app.use('/api/v1', usersRouter);
 app.use('/google', googleRouter);
-app.use('/paypal', paymentRouter)
+// app.use('/paypal', paymentRouter)
 
 
 

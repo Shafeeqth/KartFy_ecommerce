@@ -10,11 +10,10 @@ const { Cart, Wishlist } = require('../models/CartAndWishlistModel');
 const asyncHandler = require('../utilities/asyncHandler');
 const { calculateDeliveryCharge, getCordinates, getDistance } = require('../helpers/calculateDeliveryCharge');
 const userHelper = require('../helpers/validations');
+const { createRazorpayOrder } = require('../controller/paymentControllers');
+const mongoose = require('mongoose')
 
-const Razorpay = require('razorpay');
-const razorpayInstance = new Razorpay({
-    key_id: 
-})
+
 
 const orderConfirm = asyncHandler(async (req, res, next) => {
 
@@ -23,70 +22,70 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
     let { addressId, paymentMethod } = req.body;
 
     let address = await Address.findById({ _id: addressId });
-   
 
-        let products = await Cart.findOne({
-            user: new mongoose.Types.ObjectId(user._id)
+
+    let products = await Cart.findOne({
+        user: new mongoose.Types.ObjectId(user._id)
+    }, {
+        products: 1,
+        _id: 0
+
+    }).populate('products.product')
+
+    let orderedItems = await Cart.findOne({
+        user: new mongoose.Types.ObjectId(user._id)
+    }, {
+        products: 1,
+        _id: 0,
+
+
+    })
+
+
+    console.log('products,', JSON.stringify(products))
+    console.log('orderedItems,', JSON.stringify(orderedItems))
+
+
+    products.products.forEach(async (item) => {
+
+        let newProduct = await Inventory.findOneAndUpdate({
+            product: item.product,
+            'sizeVariant.size': item.size
         }, {
-            products: 1,
-            _id: 0
-
-        }).populate('products.product')
-
-        let orderedItems = await Cart.findOne({
-            user: new mongoose.Types.ObjectId(user._id)
-        }, {
-            products: 1,
-            _id: 0,
-
-
-        })
-
-
-        console.log('products,', JSON.stringify(products))
-        console.log('orderedItems,', JSON.stringify(orderedItems))
-
-
-        products.products.forEach(async (item) => {
-
-            let newProduct = await Inventory.findOneAndUpdate({
-                product: item.product,
-                'sizeVariant.size': item.size
-            }, {
-                $inc: {
-                    'sizeVariant.$.stock': -parseInt(item.quantity)
-                }
-            },
-                { new: true }
-            );
-            console.log('newProduct', newProduct)
-
-
-        })
-
-        let orderAmout = products.products.map(item => item.product.price * item.quantity).reduce((acc, item) => acc + item);
-
-        orderedItems = orderedItems.products.map(item => {
-
-            return {
-                product: item.product,
-                quantity: item.quantity,
-                size: item.size,
+            $inc: {
+                'sizeVariant.$.stock': -parseInt(item.quantity)
             }
-        })
+        },
+            { new: true }
+        );
+        console.log('newProduct', newProduct)
 
-        // updating product's soldCount 
-        orderedItems.forEach(async item => {
-            await Product.findOneAndUpdate({
-                _id: item.product
-            },
-                {
-                    $inc: {
-                        soldCount: 1
-                    }
+
+    })
+
+    let orderAmout = products.products.map(item => item.product.price * item.quantity).reduce((acc, item) => acc + item);
+
+    orderedItems = orderedItems.products.map(item => {
+
+        return {
+            product: item.product,
+            quantity: item.quantity,
+            size: item.size,
+        }
+    })
+
+    // updating product's soldCount 
+    orderedItems.forEach(async item => {
+        await Product.findOneAndUpdate({
+            _id: item.product
+        },
+            {
+                $inc: {
+                    soldCount: 1
                 }
-            )
-        })
+            }
+        )
+    })
 
     if (paymentMethod == 'COD') {
 
@@ -103,15 +102,15 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
             user: user._id
         })
         return res.status(201)
-        .json({
-            success: true,
-            error: false,
-            data: order,
-            orderType: 'COD',
-            message: 'order placed'
-        })
+            .json({
+                success: true,
+                error: false,
+                data: order,
+                orderType: 'COD',
+                message: 'order placed'
+            })
 
-    } else {
+    } else if (paymentMethod == 'RazorPay') {
 
         let order = await Order.create({
             user: user._id,
@@ -120,31 +119,32 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
             orderId,
             orderedItems,
             orderAmout,
-            orderStatus: 'Pending'
+            orderStatus: 'Placed'
         });
 
 
         await Cart.deleteOne({
             user: user._id
         })
-        return res.status(200)
-            .json({
-                success: true,
-                error: false,
-                orderType: paymentMethod,
-                data: order,
-                message: 'order placed'
-            })
+        createRazorpayOrder(req, res, order);
+        // return res.status(200)
+        //     .json({
+        //         success: true,
+        //         error: false,
+        //         orderType: paymentMethod,
+        //         data: order,
+        //         message: 'order placed'
+        //     })
 
-        }
-      
-
-
+    }
 
 
 
 
-    })
+
+
+
+})
 
 const orderCancel = asyncHandler(async (req, res, next) => {
     let user = req.session.user;
@@ -274,82 +274,7 @@ const orderReturn = asyncHandler(async (req, res) => {
     console.log(req.body)
 })
 
-const addCoupon = asyncHandler(async (req, res) => {
-    let code = req.body.code;
-    let user = req.session.user;
-    let coupon = await Coupon.findOne({
-        couponCode: code
-    })
-    console.log('coupon', coupon)
-    let now = new Date;
 
-    if (!coupon) {
-        return res.status(400)
-            .json({
-                success: false,
-                error: true,
-                message: 'Coupon not found!'
-            })
-    }
-    let expiryDate = new Date(coupon.expiryDate)
-    if (now.getTime() > expiryDate.getTime()) {
-        return res.status(400)
-            .json({
-                success: false,
-                error: true,
-                message: 'Coupon is expired!'
-            })
-
-    }
-    if (now.getTime() > expiryDate.getTime()) {
-        return res.status(400)
-            .json({
-                success: false,
-                error: true,
-                message: 'Coupon is expired!'
-            })
-
-    }
-    if (coupon.appliedUsers.includes(user._id)) {
-        return res.status(400)
-            .json({
-                success: false,
-                error: true,
-                message: 'You have already rediemed this coupon!'
-            })
-
-    }
-    if (!coupon.limit) {
-        return res.status(400)
-            .json({
-                success: false,
-                error: true,
-                message: 'Coupon limit is over!'
-            })
-
-    }
-    coupon.limit -= 1;
-    coupon.appliedUsers.push(user._id)
-    await coupon.save()
-
-    let cart = await Cart.findOne({ user: user._id });
-    let discount = Math.trunc((coupon.discount * cart.cartTotal) / 100)
-    cart.isCouponApplied = true;
-    cart.coupon = {
-        name: coupon.title,
-        discount,
-    }
-    cart = await cart.save();
-    return res.status(200)
-        .json({
-            success: true,
-            error: false,
-            data: cart,
-            message: 'Coupon rediemed!'
-        })
-
-
-});
 
 const loadMyOrders = asyncHandler(async (req, res) => {
 
@@ -361,8 +286,8 @@ const loadMyOrders = asyncHandler(async (req, res) => {
     })
         .populate('address')
         .populate('orderedItems.product')
-        .sort({createdAt: -1})
-    console.log('my order ==========================================',JSON.stringify(order))
+        .sort({ createdAt: -1 })
+    console.log('my order ==========================================', JSON.stringify(order))
 
     res
         .render('user/myOrders',
@@ -377,20 +302,84 @@ const loadMyOrders = asyncHandler(async (req, res) => {
 const loadSingleOrderDetails = asyncHandler(async (req, res, next) => {
     let user = req.session.user
     let id = req.query.id;
-    let order = await Order.findOne({ _id: id , user:user._id})
+    let order = await Order.findOne({ _id: id, user: user._id })
         .populate('user')
         .populate('orderedItems.product')
         .sort({ createdAt: -1 });
-        console.log('order==============================',order)
+    console.log('order==============================', order)
     if (!order) {
-           return res.json({
-                success: false,
-                error: true,
-                message:" something went wrong"
-            })
-        }
+        return res.json({
+            success: false,
+            error: true,
+            message: " something went wrong"
+        })
+    }
     console.log(order)
-    res.render('user/singleOrderDetails',{user, order})
+    res.render('user/singleOrderDetails', { user, order })
+})
+
+
+const razorpaySuccess = asyncHandler(async (req, res) => {
+    console.log('req.body', req.body);
+    let { paymentId, orderId } = req.body;
+    let order = await Order.findOneAndUpdate({
+        _id: orderId
+    },
+        {
+            $set: {
+                orderStatus: 'Placed',
+                paymentStatus: "Paid",
+                paymentId
+
+            }
+
+        },
+        {
+            new: true
+        }
+    )
+
+    return res.status(200)
+        .json({
+            success: true,
+            error: false,
+            data: order,
+            message: "RazorPay payment successfull"
+        })
+
+})
+
+const razorpayFailure = asyncHandler(async (req, res) => {
+
+    console.log('req.body', req.body);
+    let { paymentId, orderId } = req.body;
+    let order = await Order.findOneAndUpdate({
+        _id: orderId
+    },
+        {
+            $set: {
+                orderStatus: 'Placed',
+                paymentStatus: "Paid",
+                paymentId
+
+            }
+
+        },
+        {
+            new: true
+        }
+    )
+    console.log('orderId',orderId)
+
+    return res.status(200)
+        .json({
+            orderId,
+            success: true,
+            error: false,
+            data: order,
+            message: "RazorPay payment successfull"
+        })
+
 })
 
 
@@ -400,8 +389,9 @@ module.exports = {
     orderCancel,
     orderProductReview,
     orderReturn,
-    addCoupon,
     loadMyOrders,
     loadSingleOrderDetails,
+    razorpaySuccess,
+    razorpayFailure
 
 }
