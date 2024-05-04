@@ -10,7 +10,7 @@ const { Cart, Wishlist } = require('../models/CartAndWishlistModel');
 const asyncHandler = require('../utilities/asyncHandler');
 const { calculateDeliveryCharge, getCordinates, getDistance } = require('../helpers/calculateDeliveryCharge');
 const userHelper = require('../helpers/validations');
-const { createRazorpayOrder } = require('../controller/paymentControllers');
+const { createRazorpayOrder, createPayPalPayment } = require('../controller/paymentControllers');
 const mongoose = require('mongoose')
 
 
@@ -19,9 +19,10 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
 
     let orderId = Math.round(Math.random() * 10000) + 1
     let user = req.session.user
-    let { addressId, paymentMethod } = req.body;
+    let { address, paymentMethod } = req.body;
+    console.log(req.body)
 
-    let address = await Address.findById({ _id: addressId });
+    let userAddress = await Address.findById({ _id: address});
 
 
     let products = await Cart.findOne({
@@ -91,7 +92,7 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
 
         let order = await Order.create({
             user: user._id,
-            address,
+            address: userAddress,
             paymentMethod,
             paymentStatus: 'Paid',
             orderId,
@@ -110,11 +111,11 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
                 message: 'order placed'
             })
 
-    } else if (paymentMethod == 'RazorPay') {
+    } else {
 
         let order = await Order.create({
             user: user._id,
-            address,
+            address: userAddress,
             paymentMethod,
             orderId,
             orderedItems,
@@ -126,7 +127,19 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
         await Cart.deleteOne({
             user: user._id
         })
+        if(paymentMethod == 'RazorPay') {
+            
         createRazorpayOrder(req, res, order);
+
+        } else if (paymentMethod == 'PayPal') {
+
+            createPayPalPayment(req, res, order);
+            
+            req.session.orderId = order._id;
+
+
+
+        }
         // return res.status(200)
         //     .json({
         //         success: true,
@@ -352,7 +365,42 @@ const razorpaySuccess = asyncHandler(async (req, res) => {
 const razorpayFailure = asyncHandler(async (req, res) => {
 
     console.log('req.body', req.body);
-    let { paymentId, orderId } = req.body;
+    let { orderId } = req.body;
+    let order = await Order.findOneAndUpdate({
+        _id: orderId
+    },
+        {
+            $set: {
+                orderStatus: 'Pending',
+                paymentStatus: "Failed",
+            
+
+            }
+
+        },
+        {
+            new: true
+        }
+    )
+    console.log('orderId',orderId)
+
+    return res.status(400)
+        .json({
+            
+            success: true,
+            error: false,
+            data: order,
+            message: "RazorPay payment failure"
+        })
+
+})
+
+const paypalSuccess = asyncHandler( async (req, res) => {
+    let orderId = req.session.orderId;
+    req.session.orderId = null;
+    console.log(req.query)
+
+    let { paymentId } = req.query;
     let order = await Order.findOneAndUpdate({
         _id: orderId
     },
@@ -369,17 +417,54 @@ const razorpayFailure = asyncHandler(async (req, res) => {
             new: true
         }
     )
+    return res.redirect('/api/v1/order-success?orderId='+orderId)
+
+    
+
+    // return res.status(200)
+    //     .json({
+    //         success: true,
+    //         error: false,
+    //         data: order,
+    //         message: "RazorPay payment successfull"
+    //     })
+
+
+})
+
+
+const paypalFailure = asyncHandler( async (req, res) => {
+    
+    console.log('req.body', req.body);
+    let orderId = req.session.orderId;
+    req.session.orderId = null;
+    let order = await Order.findOneAndUpdate({
+        _id: orderId
+    },
+        {
+            $set: {
+                orderStatus: 'Pending',
+                paymentStatus: "Failed",
+            
+
+            }
+
+        },
+        {
+            new: true
+        }
+    )
     console.log('orderId',orderId)
+    return res.redirect(`api/v1/admin//my-orders/single-orderDetails?id=${orderId}`)
 
-    return res.status(200)
-        .json({
-            orderId,
-            success: true,
-            error: false,
-            data: order,
-            message: "RazorPay payment successfull"
-        })
-
+    // return res.status(400)
+    //     .json({
+            
+    //         success: true,
+    //         error: false,
+    //         data: order,
+    //         message: "RazorPay payment failure"
+    //     })
 })
 
 
@@ -392,6 +477,8 @@ module.exports = {
     loadMyOrders,
     loadSingleOrderDetails,
     razorpaySuccess,
-    razorpayFailure
+    razorpayFailure,
+    paypalSuccess,
+    paypalFailure
 
 }

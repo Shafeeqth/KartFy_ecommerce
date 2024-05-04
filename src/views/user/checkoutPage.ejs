@@ -17,11 +17,11 @@
 		</nav><!-- End .breadcrumb-nav -->
 
 		<div class="page-content">
-			<div class="checkout">
+			<div class="checkout" id="Reload">
 				<div class="container">
 
 
-					<form onsubmit="event.preventDefault()">
+					<form method="post" action="/api/v1/order-place" onsubmit="return placeOrder(event)">
 						<div class="row m-0">
 							<div class="col-lg-9 ">
 								<div class="accordion " id="accordionExample">
@@ -88,7 +88,7 @@
 																		<input
 																			style="margin-left: 3rem; margin-top: 3rem"
 																			class="text-start" type="radio"
-																			name="address" value="<%=address[i]._id%>">
+																			name="addressId" value="<%=address[i]._id%>">
 																	</div>
 
 																	<div class="card-body pt-2">
@@ -197,8 +197,8 @@
 																			<td class="price-col">₹
 																				<%=cart.product.price%>.00
 																			</td>
-																			<%total=+cart.product.price *
-																				cart.quantity%>%>
+																			<!-- <%total=+cart.product.price *
+																				cart.quantity%>%> -->
 																				<td class="quantity-col">
 																					<div
 																						class="cart-product-quantity row">
@@ -213,15 +213,15 @@
 																				</td>
 
 
-																				<td class="total-col">₹<%= total%>.00
+																				<td class="total-col">₹<%= cart.totalPrice%>.00
 																				</td>
-																				<td class="remove-col"><button
+																				<!-- <td class="remove-col"><button
 																						onclick="removeFromCart('<%=cart.id%>','<%=cart.product.title%>')"
 																						class="btn-remove"><i
 																							class="icon-close"></i></button>
-																				</td>
+																				</td> -->
 																		</tr>
-																		<% grandTotal +=+total %>
+																		
 																			<%})%>
 
 																				<%}else{%>
@@ -372,10 +372,12 @@
 
 
 
+							<div class="row align-items-center justify-content-center">
+								<div class="cart-discount my-1">
 
-								<div class="cart-discount my-4">
-
-									<a onclick="event.preventDefault()" style="margin-left: 40% ;" href=""> <button
+									
+									<%if(!cartData.isCouponApplied) {%>
+										<a onclick="event.preventDefault()" style="margin-left: 40% ;" href=""> <button
 											style="all: unset;" type="button" class="btn btn-primary"
 											data-toggle="modal" data-target="#couponModal">
 											click here to view coupons
@@ -388,8 +390,26 @@
 													class="icon-long-arrow-right"></i></button>
 										</div><!-- .End .input-group-append -->
 									</div><!-- End .input-group -->
+									<%}else{%>
+										<a class="text-danger" onclick="event.preventDefault()" style="margin-left: 30% ;" href=""> <button
+											style="all: unset;" type="button" class="btn btn-primary"
+											data-toggle="modal" data-target="#couponModal">
+											click here to view more coupons
+										</button></a>
+										<div class="input-group">
+											<input type="text" disabled class=" border-danger form-control m-0 font-weight-bold text-center text-danger "  value="<%=cartData.coupon.code%>"
+												>
+											<div class="input-group-append">
+												<button onclick="removeCoupon(event)" class="btn btn-outline-danger ">
+													<span class="btn-text"><i	class="icon-long-arrow-right"></i></span>
+													<span class="btn-hover-text px-2">Remove</span>
+													</button>
+											</div><!-- .End .input-group-append -->
+										</div><!-- End .input-group -->
+									<%}%>
 
 								</div><!-- End .cart-discount -->
+							</div>
 							</div><!-- End .col-lg-9 -->
 
 							<aside class="col-lg-3">
@@ -404,15 +424,27 @@
 
 											<tr class="summary-subtotal">
 												<td>Subtotal:</td>
-												<td>₹<%=grandTotal%>.00</td>
+												<td>₹<%=cartData.cartTotal + cartData?.coupon?.discount%>.00</td>
+												
+											
+												
+												<br>
+												
+
 											</tr><!-- End .summary-subtotal -->
+											<%if (cartData.isCouponApplied) {%>
+											<tr  class="text-primary">
+												<td>Coupon Saving:</td>
+												<td>₹<%= cartData?.coupon?.discount%>.00</td>
+											</tr>
+											<%}%>
 											<tr>
 												<td>Shipping:</td>
 												<td>Free shipping</td>
 											</tr>
 											<tr class="summary-total">
 												<td>Total:</td>
-												<td>₹<%=grandTotal%>.00</td>
+												<td>₹<%=cartData.cartTotal%>.00</td>
 											</tr><!-- End .summary-total -->
 
 										</tbody>
@@ -499,7 +531,7 @@
 														<input class="collapsed" role="button" data-bs-toggle="collapse"
 															data-bs-target="#collapse-5" aria-expanded="false"
 															aria-controls="collapse-5" class="text-start" type="radio"
-															name="paymentMethod" value="paypal">
+															name="paymentMethod" value="PayPal">
 
 														PayPal <small class="float-right paypal-link">What is
 															PayPal?</small>
@@ -519,7 +551,7 @@
 										</div><!-- End .accordion -->
 
 
-										<button type="button" onclick="placeOrder(event)"
+										<button type="submit" 
 											class="btn btn-outline-primary-2 btn-order btn-block">
 											<span class="btn-text">Place Order</span>
 											<span class="btn-hover-text">Confirm Order</span>
@@ -539,14 +571,20 @@
 	<script>
 
 		function placeOrder(event) {
-			event.preventDefault()
+		
+
 
 			let payment = document.getElementsByName('paymentMethod');
-			let address = document.getElementsByName('address');
+			let address = document.getElementsByName('addressId');
 
 			let addressId = Array.from(address).filter(item => item.checked)[0].value
 			let paymentMethod = Array.from(payment).filter(item => item.checked)[0].value
 			console.log(paymentMethod, addressId)
+			if(paymentMethod == 'PayPal') {
+				return true
+			}
+			
+			event.preventDefault();
 
 			fetch('/api/v1/order-place', {
 				method: 'POST',
@@ -591,6 +629,7 @@
 						let razorpayObject = new Razorpay(options);
 						razorpayObject.on('payment.failed', (response) => {
 							console.log(response);
+							handleRazorpayFailure(response, data);
 						})
 						razorpayObject.open();
 					}
@@ -619,13 +658,46 @@
 									showConfirmButton: false,
 									timer: 1500,
 								});
-								// setTimeout(() => {
-								// 	location.href = `/api/v1/order-success?orderId=${data.orderId}`
+								setTimeout(() => {
+									location.href = `/api/v1/order-success?orderId=${data.data._id}`
 									
-								// }, 1600);
+								}, 1600);
 							
 
 							})
+
+						function handleRazorpayFailure(response, data) {
+
+							let orderId = data.orderId;
+						fetch('orders/razorpay-failure', {
+							method: 'PUT',
+							body: JSON.stringify({ orderId }),
+							headers: {
+								'Content-Type': 'application/json',
+
+							}
+
+						}).then(response => response.json())
+						.then(data => {
+							console.log(data)
+							Swal.fire({
+									titleText: 'Something went wrong',
+									width: '300px',
+									padding: '10px',
+									icon: 'error',
+								
+
+									showConfirmButton: false,
+									timer: 1500,
+								});
+								setTimeout(() => {
+									location.href = `api/v1/admin//my-orders/single-orderDetails?id=${data.data._id}`
+									
+								}, 1600);
+						})
+
+
+						}
 
 					}
 				})
@@ -666,7 +738,30 @@
 
 			}).then(response => response.json())
 				.then(data => {
-					console.log(data)
+					if(data.success){
+						Swal.fire({
+									text: data.message,
+									width: '300px',
+									padding: '10px',
+									icon: 'success',
+								
+
+									showConfirmButton: false,
+									timer: 1500,
+								});
+							}else{
+								Swal.fire({
+									titleText: data.message,
+									width: '300px',
+									padding: '10px',
+									icon: 'error',
+								
+
+									showConfirmButton: false,
+									timer: 1500,
+								});
+
+							}
 				})
 		}
 

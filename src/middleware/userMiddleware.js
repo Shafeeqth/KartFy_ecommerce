@@ -284,8 +284,8 @@ const addToWishlist = asyncHandler(async (req, res, next) => {
     console.log(product)
 
 
-    if (user) {
-        res.json({
+    if (!user) {
+        return res.json({
             success: false,
             error: true,
             message: 'User not logged in!',
@@ -309,7 +309,7 @@ const addToWishlist = asyncHandler(async (req, res, next) => {
     } else {
         let wishlist = await Wishlist.create({ product, user });
 
-        //  
+        
         return res
             .status(201)
             .json({
@@ -433,7 +433,7 @@ const updateCartCount = asyncHandler(async (req, res, next) => {
 
 const findDeliveryCharge = asyncHandler(async (req, res, next) => {
     let { pincode } = req.body;
-    console.log(req.body)
+    
     let companyPincode = `676525`;
     let [sourceCordinate, targetCordinates] = await getCordinates(companyPincode, pincode); // find the cordinates of the company and users pincode
 
@@ -646,6 +646,7 @@ const addCoupon = asyncHandler(async (req, res) => {
     let coupon = await Coupon.findOne({
         couponCode: code
     })
+    let cart = await Cart.findOne({ user: user._id });
     console.log('coupon', coupon)
     let now = new Date;
 
@@ -658,12 +659,12 @@ const addCoupon = asyncHandler(async (req, res) => {
             })
     }
     let expiryDate = new Date(coupon.expiryDate)
-    if (now.getTime() > expiryDate.getTime()) {
+    if (cart.cartTotal < coupon.minCost) {
         return res.status(400)
             .json({
                 success: false,
                 error: true,
-                message: 'Coupon is expired!'
+                message: 'Order amount is less than coupn Min Order amount!'
             })
 
     }
@@ -698,13 +699,15 @@ const addCoupon = asyncHandler(async (req, res) => {
     coupon.appliedUsers.push(user._id)
     await coupon.save()
 
-    let cart = await Cart.findOne({ user: user._id });
-    let discount = Math.trunc((coupon.discount * cart.cartTotal) / 100)
+   
+    let discount = Math.floor((coupon.discount * cart.cartTotal) / 100)
     cart.isCouponApplied = true;
     cart.coupon = {
         name: coupon.title,
+        code: coupon.couponCode,
         discount,
     }
+    cart.cartTotal -= discount;
     cart = await cart.save();
     return res.status(200)
         .json({

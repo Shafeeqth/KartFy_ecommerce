@@ -154,7 +154,12 @@ router.put('orders/razorpay-success', userOrderController.razorpaySuccess)
 router.put('orders/razorpay-failure', userOrderController.razorpayFailure)
 
 
+//RazorPay success
+router.get('orders/paypal-success', userOrderController.paypalSuccess)
 
+
+//RazorPay failure
+router.get('orders/paypal-failure', userOrderController.paypalFailure)
 
 
 
