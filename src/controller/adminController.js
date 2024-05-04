@@ -10,6 +10,9 @@ const Offer = require('../models/offerModel');
 const Address = require('../models/addressModel');
 const { v4: uuidv4, v5: uuidv5 } = require('uuid');
 const Category = require('../models/categoryModel');
+const Banner = require('../models/bannerModel');
+const path = require('node:path');
+const sharp = require('sharp');
 
 
 
@@ -287,20 +290,20 @@ const listAndUnlistCoupon = asyncHandler(async (req, res) => {
             }
 
         )
-    }else{
+    } else {
         coupon = await Coupon.findOneAndUpdate({
             _id: id
         },
-        {
-            $set: {
-                isListed: true
+            {
+                $set: {
+                    isListed: true
+                }
+            },
+            {
+                new: true
             }
-        },
-        {
-            new: true
-        }
-    
-    )
+
+        )
     }
     return res.status(200)
         .json({
@@ -312,15 +315,98 @@ const listAndUnlistCoupon = asyncHandler(async (req, res) => {
 })
 
 
-const loadOffers = asyncHandler( async (req, res) => {
+const loadOffers = asyncHandler(async (req, res) => {
     let offers = Offer.find({});
-    let categories = await Category.find({isListed: true});
-    res.render('admin/offerManagement',{categories, offers, page: 0, couponLength: 0})
-    
+    let categories = await Category.find({ isListed: true }).select('title subCategories');
+    console.log('categories', categories);
+    res.render('admin/offerManagement', { categories, offers, page: 0, couponLength: 0 })
+
+})
+
+const loadBanners = asyncHandler(async (req, res) => {
+    let banners = await Banner.find({isListed: true});
+
+    console.log('categories', banners);
+    res.render('admin/bannerManagement', { banners, page: 0, couponLength: 0 })
+
+})
+
+const createBanner = asyncHandler(async (req, res) => {
+    let { name, description, url } = req.body;
+    let cropPath = path.join(__dirname, '../../public/Data/banners/sharped');
+    let crop = await sharp(req.file.path).resize(1600, 900).toFile(`${cropPath}/${req.file.originalname}`);
+
+    let banner = await Banner.create({
+        title: name,
+        description,
+        url,
+        image: req.file.originalname
+    })
+    return res.status(201)
+        .json({
+            success: true,
+            error: false,
+            message: 'Banner created successfylly'
+        })
+    // .then((result) => {
+    //     console.log(result);
+    // })
+    // .catch((error) => {
+    //     console.log(error);
+    // })
+    console.log(req.file)
+
 })
 
 
+const editBanner = asyncHandler(async (req, res) => {
+    let { name, description, url, bannerId } = req.body;
+    
+    
+    if (req.file) {
+        let cropPath = path.join(__dirname, '../../public/Data/banners/sharped');
+        let crop = await sharp(req.file.path).resize(1600, 900).toFile(`${cropPath}/${req.file.originalname}`);
+    }
+    if (req.file) {
 
+        let newBanner = await Banner.findOneAndUpdate({
+            _id: bannerId
+        },
+            {
+                $set: {
+                    title: name,
+                    description,
+                    url,
+                   image: req.file.originalname
+                }
+            }
+        )
+    } else {
+        let newBanner = await Banner.findOneAndUpdate({
+            _id: bannerId
+        },
+            {
+                $set: {
+                    title: name,
+                    description,
+                    url
+                }
+            },
+            {
+                new: true
+            }
+        )
+
+    }
+    return res.status(200)
+        .json({
+            success: true,
+            error: false,
+            data: newBanner,
+            message: 'Banner updated successfully'
+        })
+
+})
 
 
 
@@ -349,7 +435,9 @@ module.exports = {
     createCoupon,
     editCoupon,
     listAndUnlistCoupon,
-    loadOffers
+    loadOffers,
+    loadBanners,
+    createBanner
 
 
 

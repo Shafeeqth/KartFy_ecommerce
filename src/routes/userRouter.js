@@ -114,6 +114,11 @@ router.get('/checkout',  userMiddleware.isUserAutharized, userController.loadChe
 router.post('/apply-coupon', userMiddleware.addCoupon);
 
 
+//add address of users
+router.put('/remove-coupon', userMiddleware.removeCoupon);
+
+
+
 
 
 

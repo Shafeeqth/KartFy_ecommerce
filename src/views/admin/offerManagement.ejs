@@ -46,7 +46,7 @@
               ></button>
             </div>
             <div class="modal-body">
-              <form action="/api/v1/admin/offers/offer-coupon" method="post">
+              <form action="/api/v1/admin/offers/create-offer" method="post">
                 <label for="form-label">Name</label>
                 <input
                   type="text"
@@ -70,14 +70,16 @@
                   class="form-control my-2"
                 />
 
-
+                <%if(Array.isArray(categories) && categories.length > 0)  {%>
                 <label for="form-label">MIn Order Amount</label>
-                <input
-                  type="text"
-                  name="minOrder"
-                  placeholder="Enter Min Amount"
-                  class="form-control my-2"
-                />
+                <select name="category" id="category" class="form-control">
+                  <%categories.forEach(category => {%>
+                  <option value="<%=category.title%>" selected="selected"><%=category.title%></option>
+                  
+                <%})%>
+                </select>
+                <%}%>
+                
 
                 
 
@@ -89,14 +91,7 @@
                   class="form-control my-2"
                 />
 
-                <label for="form-label">Limit of use</label>
-                <input
-                  type="text"
-                  name="limit"
-                  placeholder="Enter how many user can use"
-                  class="form-control my-2"
-                />
-
+                
                 
                 <div class="modal-footer">
                   <button
@@ -138,7 +133,7 @@
               ></button>
             </div>
             <div class="modal-body">
-              <form action="/api/v1/admin/offer/edit-offer" method="post">
+              <form action="/api/v1/admin/offers/edit-offer" method="post">
                 <label for="form-label">Name</label>
                 <input style="visibility: hidden;" type="text" name="id" id="couponId">
                 <input

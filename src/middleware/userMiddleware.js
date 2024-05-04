@@ -14,6 +14,7 @@ const { Product, Inventory } = require('../models/productModels');
 const { Cart, Wishlist } = require('../models/CartAndWishlistModel');
 const asyncHandler = require('../utilities/asyncHandler');
 const { calculateDeliveryCharge, getCordinates, getDistance } = require('../helpers/calculateDeliveryCharge');
+const { findOneAndUpdate } = require('../models/walletModel');
 
 
 
@@ -309,7 +310,7 @@ const addToWishlist = asyncHandler(async (req, res, next) => {
     } else {
         let wishlist = await Wishlist.create({ product, user });
 
-        
+
         return res
             .status(201)
             .json({
@@ -433,7 +434,7 @@ const updateCartCount = asyncHandler(async (req, res, next) => {
 
 const findDeliveryCharge = asyncHandler(async (req, res, next) => {
     let { pincode } = req.body;
-    
+
     let companyPincode = `676525`;
     let [sourceCordinate, targetCordinates] = await getCordinates(companyPincode, pincode); // find the cordinates of the company and users pincode
 
@@ -699,7 +700,7 @@ const addCoupon = asyncHandler(async (req, res) => {
     coupon.appliedUsers.push(user._id)
     await coupon.save()
 
-   
+
     let discount = Math.floor((coupon.discount * cart.cartTotal) / 100)
     cart.isCouponApplied = true;
     cart.coupon = {
@@ -720,6 +721,51 @@ const addCoupon = asyncHandler(async (req, res) => {
 
 });
 
+const removeCoupon = asyncHandler(async (req, res) => {
+    let { discount } = req.body;
+    let user = req.session.user._id
+    console.log(discount);
+
+    let cart = await Cart.findOneAndUpdate({
+         user
+    },
+        {
+            $set: {
+                isCouponApplied: false,
+
+            },
+            $unset: {
+                coupon: ""
+
+            },
+            $inc: {
+                cartTotal: discount
+            }
+
+
+
+        }
+
+    )
+    console.log('===========================================coupon Code', cart.coupon.code)
+    await Coupon.findOneAndUpdate({
+        couponCode: cart.coupon.code
+    },
+        {
+            $pull: {
+                appliedUsers: user
+
+            }
+        }
+    )
+
+    return res.json({
+        success: true,
+        error: true,
+        message: 'Coupon removed successfully'
+    })
+})
+
 /* =======================================Order======================================== */
 
 
@@ -737,16 +783,17 @@ module.exports = {
     removeFromCart,
     addAddress,
     addCoupon,
-    
+    removeCoupon,
+
     updateCartCount,
     deleteAddress,
     editAddress,
     changePassword,
     changeUserDetails,
-    
-  
+
+
     findDeliveryCharge,
-    
+
 
 
 

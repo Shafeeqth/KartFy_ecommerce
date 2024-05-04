@@ -128,6 +128,20 @@ router.put('/orders/single-order-details/change-orderStatus', adminController.ch
 router.delete('/orders/delete_order/:id', );
 
 
+/*================================Routes related to Banner Management ================================*/
+
+//view Banners
+router.get('/banners', adminMiddleware.isLoged, adminController.loadBanners);
+
+//view a purticular request
+router.post('/banners/create-banner',upload.single('image'), adminController.createBanner);
+
+//reject return request
+router.put('/retuns/reject_return/:id');
+
+
+
+
 
 
 

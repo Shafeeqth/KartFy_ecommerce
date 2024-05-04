@@ -400,7 +400,7 @@
 											<input type="text" disabled class=" border-danger form-control m-0 font-weight-bold text-center text-danger "  value="<%=cartData.coupon.code%>"
 												>
 											<div class="input-group-append">
-												<button onclick="removeCoupon(event)" class="btn btn-outline-danger ">
+												<button onclick="return event.preventDefault(), removeCoupon('<%=cartData?.coupon?.discount%>')" class="btn btn-outline-danger ">
 													<span class="btn-text"><i	class="icon-long-arrow-right"></i></span>
 													<span class="btn-hover-text px-2">Remove</span>
 													</button>
@@ -424,7 +424,7 @@
 
 											<tr class="summary-subtotal">
 												<td>Subtotal:</td>
-												<td>₹<%=cartData.cartTotal + cartData?.coupon?.discount%>.00</td>
+												<td>₹<%=cartData.cartTotal + (cartData?.coupon?.discount ? cartData?.coupon?.discount: 0) %>.00</td>
 												
 											
 												
@@ -749,6 +749,11 @@
 									showConfirmButton: false,
 									timer: 1500,
 								});
+								setTimeout(() => {
+									$("#Reload").load(`/api/v1/checkout #Reload`)
+									
+								}, 1500);
+								
 							}else{
 								Swal.fire({
 									titleText: data.message,
@@ -760,6 +765,52 @@
 									showConfirmButton: false,
 									timer: 1500,
 								});
+
+							}
+				})
+		}
+
+
+
+		function removeCoupon( discount) {
+			console.log(discount)
+
+			fetch('/api/v1/remove-coupon', {
+				method: "put",
+				body: JSON.stringify({ discount }),
+				headers: {
+					'Content-Type': 'application/json',
+
+				}
+
+			}).then(response => response.json())
+				.then(data => {
+					if(!data.success){
+						Swal.fire({
+									text: data.message,
+									width: '300px',
+									padding: '10px',
+									icon: 'error',
+								
+
+									showConfirmButton: false,
+									timer: 1500,
+								});
+								
+							}else{
+								Swal.fire({
+									icon: 'success',
+									titleText: "Removed!",
+									showConfirmButton: false,
+									timer: 1000,
+								});
+								
+
+								setTimeout(() => {
+									$("#Reload").load(`/api/v1/checkout #Reload`)
+									
+								}, 1000);
+								
 
 							}
 				})
