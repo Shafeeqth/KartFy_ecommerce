@@ -85,7 +85,7 @@ const addToCart = asyncHandler(async (req, res, next) => {
     console.log('Inventory', inventory)
     let totalPrice = inventory.product.price;
 
-    let product = inventory.sizeVariant.find(item => item.size);
+    let product = inventory.sizeVariant.find(item => item.size == size);
 
     if (!product) {
         return res.json({
@@ -298,7 +298,7 @@ const addToWishlist = asyncHandler(async (req, res, next) => {
 
     if (exist) {
         return res
-            .status(401)
+            .status(200)
             .json({
                 success: false,
                 error: true,
@@ -353,15 +353,15 @@ const removeFromWishlist = asyncHandler(async (req, res, next) => {
 const updateCartCount = asyncHandler(async (req, res, next) => {
 
     let user = req.session.user._id
-    let { controlValue: count, cartId, productId, size, price } = req.body;
+    let {  count, cartId, productId, size, price } = req.body;
 
 
 
     console.log('count', count, 'productId', productId, 'cartId', cartId, 'size', size)
     let productItem = await Inventory.findOne({ product: productId });
-    console.log(productItem, 'productItem')
+  
     let product = productItem.sizeVariant.find(item => item.size == size);
-    console.log('prouduct', product)
+  
     if (!product) {
         return res.json({
             success: false,
@@ -395,36 +395,26 @@ const updateCartCount = asyncHandler(async (req, res, next) => {
         })
     }
 
-    console.log(count, product)
+   
     let userCart = await Cart.findOne({
         user,
-        'products._id': new mongoose.Types.ObjectId(cartId),
-        "products.size": size
     });
-    userCart.cartTotal -= userCart.products.find(item => item.size == size).totalPrice;
+   let cartItem = userCart.products.find(item => item.size == size && item.product == productId);
+   console.log(cartItem);
+   
+   userCart.cartTotal -= cartItem.totalPrice;
+   cartItem.quantity = count;
+   cartItem.totalPrice = price * count;
+   await cartItem.save()
 
-
-    console.log('userCart', userCart)
-    await Cart.updateOne({
-        user,
-        'products._id': new mongoose.Types.ObjectId(cartId),
-        "products.size": size,
-    },
-        {
-            $set: {
-                'products.$.quantity': count,
-                'products.$.totalPrice': count * price
-            }
-        })
-    userCart.cartTotal += count * price
-    await userCart.save()
-
+   userCart.cartTotal += count * price
+   await userCart.save();
+  
     return res.json({
         success: true,
         error: false,
         message: 'Prouduct count updated successfully'
     })
-
 
 
 
@@ -487,13 +477,14 @@ const addAddress = asyncHandler(async (req, res, next) => {
     body.user = req.session.user._id;
     console.log('===========================================================', body)
     let { name, phone, alternatePhone, state, district, locality, pincode, street, type } = req.body
-    let { error, value } = userHelper.addressValidator.validate({ name, phone, alternatePhone, locality, district, pincode, street });
-    if (error) {
-        req.flash('addressError', error.message)
-        return res.redirect('/profile/add-address')
-    }
+    // let { error, value } = userHelper.addressValidator.validate({ name, phone, alternatePhone, locality, district, pincode, street });
+    // if (error) {
+    //     req.flash('addressError', error.message)
+    //     return res.redirect('/api/v1/profile/add-address')
+    // }
     let address = await Address.create(body);
     res.redirect('/api/v1/profile')
+    
 
 
 
@@ -525,20 +516,20 @@ const editAddress = asyncHandler(async (req, res, next) => {
     if (user) {
 
         let id = req.session.user.editAddressId;
-        let { name, phone, alternatePhone, state, district, locality, pincode, street } = req.body
-        let { error, value } = userHelper.addressValidator.validate({
-            name,
-            phone,
-            alternatePhone,
-            locality,
-            district,
-            pincode,
-            street
-        });
-        if (error) {
-            req.flash('addressError', error.message)
-            return res.redirect(`/profile/edit-address?id=${id}`)
-        }
+        let { name, phone, alternatePhone, state, district, locality, pincode, street, type } = req.body
+        // let { error, value } = userHelper.addressValidator.validate({
+        //     name,
+        //     phone,
+        //     alternatePhone,
+        //     locality,
+        //     district,
+        //     pincode,
+        //     street
+        // });
+        // if (error) {
+        //     req.flash('addressError', error.message)
+        //     return res.redirect(`/profile/edit-address?id=${id}`)
+        // }
         req.session.user.editAddressId = undefined
 
 
@@ -548,6 +539,7 @@ const editAddress = asyncHandler(async (req, res, next) => {
             },
                 {
                     $set: {
+                        type,
                         name,
                         phone,
                         alternatePhone,
@@ -562,7 +554,7 @@ const editAddress = asyncHandler(async (req, res, next) => {
             consoel.log(error)
 
         }
-        res.redirect('/profile')
+        res.redirect('/api/v1/profile')
 
     } else {
 
@@ -766,6 +758,8 @@ const removeCoupon = asyncHandler(async (req, res) => {
     })
 })
 
+
+
 /* =======================================Order======================================== */
 
 
@@ -775,6 +769,7 @@ const removeCoupon = asyncHandler(async (req, res) => {
 
 
 module.exports = {
+
 
     isUserAutharized,
     addToCart,
@@ -793,6 +788,7 @@ module.exports = {
 
 
     findDeliveryCharge,
+    
 
 
 

@@ -23,13 +23,13 @@
 							
 
 	                		<div class="col-md-10 col-lg-10">
-	                			<div class="tab-content">
+	                			<div class="tab-content" id="exampleDiv">
 								    
 
 								    
 
 								    
-								    	 <form  onsubmit="validate()" action="/api/v1/profile/add-address" method="POST" >
+								    	 <form   action="/api/v1/profile/add-address" method="POST" >
 											<h4>Add New Address</h4>
 											<div class="p-0 col-12 mb-2">
 												<label class="col-sm-12">Address Type</label>
@@ -134,37 +134,136 @@
             </div><!-- End .page-content -->
         </main><!-- End .main -->
 		<script>
-			function validate() {
-				console.log('im in validate')
-			let name = document.getElementById('name');
-			let alternatePhone = document.getElementById('alternatePhone');
-			let phone = document.getElementById('phone');
-			let district = document.getElementById('district');
-			let locality = document.getElementById('locality');
-			let pincode = document.getElementById('pincode');
-			let street = document.getElementById('street');
-			console.log(name, locality, alternatePhone, district, pincode, street)
+			document.addEventListener("DOMContentLoaded", function () {
+    // Attach validation to the first form
+    attachFormValidation("#exampleDiv form");
 
-			let nameError = document.getElementById('nameError');
-			let alternateError = document.getElementById('alternateError');
-			let phoneError = document.getElementById('phoneError');
-			let stateError = document.getElementById('stateError');
-			let districtError = document.getElementById('districtError');
-			let localityError = document.getElementById('localityError');
-			let pincodeError = document.getElementById('pincodeError');
-			let streetError = document.getElementById('streetError');
+    // Attach validation to the second form
+    
 
-			if(name.value.trim().length < 3) {
-				name.style.border = '1px solid red';
-				nameError.textContent = 'Invalid name! Please check your name'
-				setTimeout(( ) => nameError.remove(),3000)
-				return false
+    function attachFormValidation(formSelector) {
+      const form = document.querySelector(formSelector);
 
-			}
+      form.addEventListener("submit", function (event) {
+        // Prevent the form from submitting by default
+        event.preventDefault();
+
+        // Remove previous error messages
+        clearErrorMessages(form);
+
+        // Perform validation
+        const name = form.elements.name.value.trim();
+		
+        const phone = form.elements.phone.value;
+        const alternatePhone = form.elements.alternatePhone.value.trim();
+        const district = form.elements.district.value.trim();
+        const locality = form.elements.locality.value.trim();
+        const pincode = form.elements.pincode.value.trim();
+
+		const street = form.elements.street.value.trim();
+       
+
+
+        if (name.length <=2 ) {
+          displayErrorMessage(form, "name", "Please enter a valid name.");
+          return;
+        }
+
+       
+
+        if (!/^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[6789]\d{9}$/.test(phone)) {
+          displayErrorMessage(
+            form,
+            "phone",
+            "Enter a valid phone number."
+          );
+          return;
+        }
+		if (!/^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[6789]\d{9}$/.test(alternatePhone)) {
+          displayErrorMessage(
+            form,
+            "alternatePhone",
+            "Enter a valid phone number."
+          );
+          return;
+        }
+        
+        if (name.length <=4 ) {
+          displayErrorMessage(
+            form,
+            "district",
+            "Please enter a valid district."
+          );
+          return;
+        }
+        
+		if (locality.length <=4 ) {
+          displayErrorMessage(
+            form,
+            "locality",
+            "Please enter a valid locality."
+          );
+          return;
+        }
+
+		if (!/^[1-9][0-9]{5}$/.test(pincode)) {
+          displayErrorMessage(
+            form,
+            "pincode",
+            "Enter a valid pincode number."
+          );
+          return;
+        }
+
+		if (street.length <=6 ) {
+          displayErrorMessage(
+            form,
+            "street",
+            "Please enter a valid street address."
+          );
+          return;
+        }
+        
+        
+
+
+       
+
+        // Validate discount amount is a number
+        
+
+        // If all validations pass, you can submit the form
+        form.submit();
+      });
+    }
+
+    function displayErrorMessage(form, fieldName, message) {
+      const field = form.elements[fieldName];
+      const errorDiv = document.createElement("div");
+      errorDiv.className = "error-message";
+      errorDiv.style.color = "red"; // Set color to red
+      errorDiv.textContent = message;
+      field.parentNode.insertBefore(errorDiv, field);
+
+      // Remove error message after 3000 milliseconds (3 seconds)
+      setTimeout(() => {
+        errorDiv.remove();
+      }, 3000);
+    }
+
+    function clearErrorMessages(form) {
+      const errorMessages = form.querySelectorAll(".error-message");
+      errorMessages.forEach((errorMessage) => {
+        errorMessage.remove();
+      });
+    }
+  });
+
+
+
+
 
 			
-
-			}
 
 			
 		</script>

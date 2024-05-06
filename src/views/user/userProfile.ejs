@@ -207,122 +207,7 @@
 
 									</div><!-- End .row -->
 								</div><!-- .End .tab-pane -->
-								<style>
- 
-
-									.containerrr {
-									  display: flex;
-									  flex-wrap: wrap;
-									}
 								
-									.sidebarrr {
-									  flex: 1;
-									  min-width: 20%;
-									  max-width: 25%;
-									  padding: 20px;
-									 
-									  color: #fff;
-									  min-height: 100vh;
-									}
-								
-									.main-contenttt {
-									  flex: 3;
-									  padding: 20px;
-									}hr{
-										color:black;
-									}
-								
-									.user-headerrr {
-									  display: flex;
-									  align-items: center;
-									  margin-bottom: 20px;
-									}
-								
-									.user-photooo {
-									  border-radius: 50%;
-									  width: 40px;
-									  height: 40px;
-									  margin-right: 10px;
-									  /* Placeholder background color for the user photo */
-									  background-color: #ddd;
-									}
-								
-									.user-nameee {
-									  font-size: .6rem;
-									  font-weight: bold;
-									}
-								
-									.menu-headinggg {
-									  font-size: .7rem;
-									  font-weight: bold;
-									  margin-bottom: 10px;
-									  color: rgba(127,127,127,1);
-									}
-								
-									.menu-itemmm {
-									  margin-bottom: 10px;
-								
-									}
-								
-									.menu-itemmm a {
-									 color: black;
-									  text-decoration: none;
-									  font-size: .9rem;
-									  font-family: 'Quicksand';
-									}
-									.menu-itemmm.selected {
-								  background-color: #f0f0f0;
-								  border-radius: 5px;
-								}
-								
-									@media screen and (max-width: 600px) {
-										.menu-itemmm a {
-									 color: black;
-									  text-decoration: none;
-									  font-size: .5rem;
-									}   
-								
-								}
-								
-								
-								
-								
-								/* wallet  */
-								.card{
-									border: none;
-									border-radius: 10px;
-									width: 50%;
-								  
-									
-								}
-								.fa-ellipsis-v{
-									font-size: 10px;
-									color: #C2C2C4;
-									margin-top: 6px;
-									cursor: pointer;
-								}
-								.text-dark{
-									font-weight: bold;
-									margin-top: 8px;
-									font-size: 13px;
-									letter-spacing: 0.5px;
-								}
-								.card-bottom{
-									background: #3E454D;
-									border-radius: 6px;
-								}
-								
-								.flex-column p{
-									letter-spacing: 1px;
-									font-size: 18px;
-								}
-								.btn-secondary{
-									height: 40px!important;
-									margin-top: 3px;
-								}
-								.btn-secondary:focus{
-									box-shadow: none;
-								}
 							 </style>
 
 
@@ -330,43 +215,58 @@
 									aria-labelledby="tab-wallet-link">
 									<div class="card-body">
 										<div id="edit-profile-section"   style="display: block;"  >
-											<h1>Wallet</h1>
+
+											<h1 class="text-center">Wallet</h1>
 											
 											<div class="mt-5">
 											 
 											 
 											 <div class="table-responsive">
-											   <div class=" d-flex ">
+											   <div class="  ">
 												 <div class="card p-3">
-												   <div class="d-flex flex-row justify-content-between text-align-center">
-											  
-													 <i class="fas fa-ellipsis-v"></i>
-												   </div>
-												   <p class="text-dark"><%= wallet?.user?.name  %> Account</p>
-												   <div class="card-bottom pt-3 px-3 mb-2">
-													 <div class="d-flex flex-row justify-content-between text-align-center">
-													   <div class="d-flex flex-column" style="	color: #adb5bd;
-													   font-size: 13px;" ><span>Balance amount</span><p>₹ <span class="text-white"><%= wallet?.balance  %></span></p></div>
-											   
-													 </div>
+												  <div class="row justify-content-between">
+												   <p class="text-dark ">User Name : <span class="font-weight-bold mx-2 text- font-italic"> <%= wallet?.user?.name  %> </span> </p>
+													<p class="mx-5 d-inline-block align-items-center" style="font-size: medium;"><span>Balance Amount: </span> <span class="font-weight-bold mx-2 text-primary font-italic" style="font-size: xx-large;"> ₹ <%= wallet.balance  %>.00</span>
+													</p>
+												</div>
+												  
 												   </div>
 												   <div class="new-div">
 													 <div class="car"  >
 													  <div class="card-body">
 													   <h4 class="card-title text-center">Transaction History</h4>
-													   <hr>
+													   <hr >
 													   <%if(wallet?.transactions?.length > 0){%>
-														 <% walletHistory.forEach((walletHistory)=>{ %>
-														   <div class="d-flex justify-content-between transction- " >
+														<div class="d-flex justify-content-between transction- " >
+															<h5 class="text-weight-bold fs-4 ">Date of Transaction</p>
+															<h5 class="text-weight-bold fs-4 ">Amount </p>
+															<h5 class="text-weight-bold fs-4 " >Transaction mode</p>
+														</div>
+														<hr class="m-0">
+														 <% wallet.transactions.forEach((walletHistory)=>{ %>
+														   <div class="d-flex justify-content-between transction- m-3 " >
 															 <p ><%= walletHistory.date.toLocaleDateString('en-US',
-															   { year: 'numeric', month: 'short', day: '2-digit'
+															   { year: 'numeric', month: 'short', day:  'numeric', hour:
+															   'numeric', minute: 'numeric', second: 'numeric', hour12:
+															   true
 															   }) %></p>
-															 <p>
-															   ₹<%=  walletHistory.amount %>
+															   <%if(walletHistory.mode == 'Debit') {%>
+															  
+															 <p class="text-success">
+															   ₹<%=  walletHistory.amount %> .00
 															 </p>
-															 <p>
+															 <p class="text-success">
 															   <%= walletHistory.mode %>
 															 </p>
+															<%}else{%>
+																<p class="text-danger">
+																	-₹<%=  walletHistory.amount %> .00
+																  </p>
+																  <p class="text-danger">
+																	<%= walletHistory.mode %>
+																  </p>
+
+															<%}%>
 														   </div>
 														 
 														   <%})%>
@@ -411,30 +311,30 @@
 
 									</div>
 									<div class="row" id="">
-										<%userProfile?.forEach(profile=> {%>
+										<%userProfile[0].addresses?.forEach(addresses=> {%>
 											<div class="col-lg-6">
 												<div class="card card-dashboard">
 													<div class="card-body">
 														<h3 class="card-title">
-															<%=profile.addresses?.name%>
+															<%=addresses?.name%>
 														</h3><!-- End .card-title -->
 
 
 														<p>
-															<%=profile.addresses?.phone%><br>
-																<%=profile.addresses?.state%><br>
-																	<%=profile.addresses?.district%><br>
-																		<%=profile.addresses?.locality%><br>
-																			<%=profile.addresses?.pincode%><br>
-																				<%=profile.addresses?.street%><br>
+															<%=addresses?.phone%><br>
+																<%=addresses?.state%><br>
+																	<%=addresses?.district%><br>
+																		<%=addresses?.locality%><br>
+																			<%=addresses?.pincode%><br>
+																				<%=addresses?.street%><br>
 																					<div class="row align-items-center"
 																						style="justify-content: space-evenly;">
 																						<a class="btn btn-primary"
-																							href="/api/v1/profile/edit-address?id=<%=profile.addresses._id%>">Edit
+																							href="/api/v1/profile/edit-address?id=<%=addresses._id%>">Edit
 																							<i
 																								class="icon-edit"></i></a>
 																						<button style="all: unset;"
-																							onclick="deleteAddress('<%=profile.addresses._id%>')"><a
+																							onclick="deleteAddress('<%=addresses._id%>')"><a
 																								class="btn btn-primary text-white pointer">
 																								Delete
 																								<i

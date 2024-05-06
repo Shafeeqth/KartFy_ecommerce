@@ -43,17 +43,17 @@
 												
 
 											
-										<tr>
+										<tr id="<%=cart._id%>" class="m-4">
 											<td class="product-col">
 												<div class="product">
 													<figure class="product-media">
-														<a href="/product-detail?id=<%=cart.product._id%>">
-															<img class="img-lg" src="/Data//uploads/<%=cart.product.images[0]%>" alt="Product image">
+														<a href="/api/v1/product-detail?id=<%=cart.product._id%>">
+															<img class="img-md " style="box-sizing: content-box;" src="/Data//uploads/<%=cart.product.images[0]%>" alt="Product image">
 														</a>
 													</figure>
 
 													<h3 class="product-title">
-														<a href="/product-detail?id=<%=cart.product._id%>"><%= cart.product.title%></a>
+														<a href="/api/v1/product-detail?id=<%=cart.product._id%>"><%= cart.product.title%></a>
 													</h3><!-- End .product-title -->
 													
 											
@@ -67,12 +67,12 @@
 											<td class="price-col">₹<%=cart.product.price%>.00</td>
 											<td class="quantity-col">
                                                 <div class="cart-product-quantity">
-                                                    <input onchange="changeCount('<%=cart._id%>','<%=cart.product._id%>','<%=cart.size%>','<%=cart.product.price%>')" id="<%=cart._id%>" type="number" class="countControl form-control" value="<%=cart.quantity%>" min="1"  max="6" step="1" data-decimals="0" required>
+                                                    <input onchange="changeCount(event,'<%=cart._id%>','<%=cart.product._id%>','<%=cart.size%>','<%=cart.product.price%>')" id="<%=cart._id%>" type="number" class="countControl form-control" value="<%=cart.quantity%>" min="1"  max="6" step="1" data-decimals="0" required>
                                                 </div><!-- End .cart-product-quantity -->
                                             </td>
 											
 											<td class="total-col">₹<%= cart?.totalPrice %>.00</td>
-											<td class="remove-col"><button onclick="removeFromCart('<%=cart._id%>','<%=cart.size%>','<%=total%>')" class="btn-remove"><i class="icon-close"></i></button></td>
+											<td class="remove-col"><button onclick="removeFromCart('<%=cart._id%>','<%=cart.size%>','<%=total%>')" style="margin-right: 0.3rem" class="btn-remove"><i class="icon-close"></i></button></td>
 										</tr>
 										
 										<%})%>
@@ -234,7 +234,7 @@
 	                				</table><!-- End .table table-summary -->
 									<%if(cart?.cartTotal > 0) {%>
 
-	                				<a href="/api/v1/checkout" class="btn btn-outline-primary-2 btn-order btn-block">PROCEED TO CHECKOUT</a>
+	                				<a onclick="proceedToCheckout(event)" href="" class="btn btn-outline-primary-2 btn-order btn-block">PROCEED TO CHECKOUT</a>
 									<%}%>
 	                			</div><!-- End .summary -->
 
@@ -245,6 +245,110 @@
                 </div><!-- End .cart -->
             </div><!-- End .page-content -->
         </main><!-- End .main -->
+		<style>
+			.notification {
+
+
+  background-color: #dff0ed; /* Mild red color */
+
+  border-radius: 50px !important;
+  animation: shake 0.5s ease-in-out 2; /* Shake animation */
+}
+
+.changeBg {
+	background-color: #e0edeb ;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25%, 75% {
+    transform: translateX(-10px);
+  }
+  50% {
+    transform: translateX(10px);
+  }
+}
+
+    /* Increase font size of title */
+    .swal2-title {
+      font-size: 28px; /* Adjust font size as needed */
+    }
+
+    /* Increase font size of content text */
+    .swal2-text {
+      font-size: 30px; /* Adjust font size as needed */
+    }
+
+
+			/* .notification {
+				place-content: center;
+
+				--border-angle :0turn;
+				--main-bg: conic-gradient(
+					from var(--border-angle),
+					#213,
+					#112 5%,
+					#112 60%,
+					#213 95%
+				);
+				border: solid 5px transparent;
+				border-radius: 50% !important;
+				--gradient-border: conic-gradient(from var(--border-angle),
+				transparent 25%, #08f, #f03 99%, transparent);
+
+				background: var(--main-bg)
+				padding-box,
+				var(--gradient-border)
+				border-box,
+				var(--main-bg)
+				border-box;
+				background-position: center center;
+				animation: bg-spin 3s linear infinite;
+
+				@keyframes bg-spin {
+					to {
+						--border-angle: 1turn;
+					}
+					
+				}
+				&:hover {
+					animation-play-state:paused;
+				}
+
+
+
+
+
+
+
+			} */
+
+
+
+			/* @keyframes shakeAndColorChange {
+				0%, 100%{
+					transform: translateX(0);
+					background-size: 100%;
+				}
+				25%, 75% {
+					transform: translateX(-10px);
+				}
+				50% {
+					transform: translateX(10px);
+				}
+				
+			} */
+
+
+
+
+
+
+		
+
+		</style>
 		
         <%-include('../partials/userFooter')%>
 
@@ -253,6 +357,55 @@
    
 </body>
 <script>
+
+	function proceedToCheckout(event) {
+		event.preventDefault()
+		fetch('/api/v1/proceed-to-checkout', {
+				method : "get",
+				headers: {
+          			'Content-Type': 'application/json',
+
+   					   }
+				
+			})
+			.then(response => response.json())
+			.then(data => {
+				console.log(data)
+				if(data.error) {
+					Swal.fire({
+           title: 'Error',
+           text: data.message + '\n remove them first',
+           icon: 'error',
+           showCancelButton: false,
+           timer: 3500,})
+					
+					data.errorData.forEach((element, row) => {
+						
+						row = document.getElementById(element)
+						row.classList.add('notification');
+						row.querySelectorAll('*').forEach(item => item.classList.add('changeBg'))
+						row.querySelectorAll('input').forEach(item => item.style.backgroundColor  =  '#e0edeb' )
+						setTimeout(() => {
+							row.classList.remove('notification')
+		
+					
+						}, 4000);
+						
+					});
+				
+					
+
+				}
+				if(data.success) {
+					location.href = "/api/v1/checkout"
+
+				}
+			})
+
+	}
+
+
+
 	function findDeliveryCharge(event) {
 		if( event.key == 'Enter' || event.keyCode == 13 ||
 		event.target.dataset?.id == 'good'){

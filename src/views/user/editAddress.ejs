@@ -1,5 +1,5 @@
 <%-include('../partials/userHeader')%>
-        <main class="main">
+        
             <nav aria-label="breadcrumb" class="breadcrumb-nav mb-3">
                 <div class="container">
                     <ol class="breadcrumb">
@@ -9,6 +9,281 @@
                     </ol>
                 </div><!--End .container-->
             </nav><!-- End .breadcrumb-nav -->
+
+            <div class="page-content">
+            	<div class="dashboard">
+					<div class="row align-items-center justify-content-center">
+						<%if(messages.addressError){%>
+							<div id="error-div" class="alert text-danger fw-bold bg-light rounded text-center important border border-danger" role="alert"><%= messages.addressError  %></div>
+			
+						<%}%> 
+					</div>
+	                <div class="container">
+	                	<div class="row align-items-center justify-content-center">
+							
+
+	                		<div class="col-md-10 col-lg-10">
+	                			<div class="tab-content" id="exampleDiv">
+								    
+
+								    
+
+								    
+								    	 <form   action="/api/v1/profile/edit-address" method="POST" >
+											<h4>Add New Address</h4>
+											<div class="p-0 col-12 mb-2">
+												<label class="col-sm-12">Address Type</label>
+												
+												<select name="type" class="form-select col-sm-12 text-center py-3 border-0 rounded bg-light" > 
+													<option selected value="<%=address.type%>"><%=address.type%></option>
+													<option  value="Home">Home</option>
+													<option  value="Work">Work</option>
+													
+													
+												</select>
+											</div>
+											
+												<label>Fullname *</label>
+												<div class="text-danger" id="nameError"
+                                                    style="position: absolute; top: -22px; left: 6px">
+                                                </div>
+												<input type="text" value="<%=address.name%>" class="form-control" id="name" name="name" required>
+												<small class="form-text">This will be how your name will be displayed in the account section and in reviews</small>
+											
+			                				<div class="row my-2">
+												
+			                					<div class="col-sm-6">
+			                						<label>Phone *</label>
+													<div class="text-danger" id="phoneError"
+                                                    style="position: absolute; top: -22px; left: 6px">
+                                                </div>
+			                						<input type="text" value="<%=address.phone%>" class="form-control" name="phone" id="phone" required>
+			                					</div><!-- End .col-sm-6 -->
+
+			                					<div class="col-sm-6">
+			                						<label>Alternate Phone </label>
+													<div class="text-danger" id="alternateError"
+                                                    style="position: absolute; top: -22px; left: 6px">
+                                                </div>
+			                						<input type="text" class="form-control" value="<%=address.alternatePhone%>" id="alternatePhone" name="alternatePhone" >
+			                					</div><!-- End .col-sm-6 -->
+			                				</div><!-- End .row -->
+											<div class="row my-2">
+											<div class="col-6">
+		                					<label class="col-sm-12">State</label>
+											
+		        							<select name="state" class="form-select col-sm-12 text-center py-3 border-0 rounded bg-light" >  
+												<option selected value="<%=address.state%>"> <%=address.state%></option>"
+
+												<option  value="kerala">Kerala</option>
+												<option  value="Karnataka">Karnataka</option>
+												<option  value="Utterpradesh">Utterpradesh</option>
+												<option  value="Jargargh">Jargargh</option>
+												<option  value="Telengana">Telengana</option>
+												<option  value="Telengana">Telengana</option>
+												<option  value="Andra-Pradesh">Andra Pradesh</option>
+												<option  value="Goa">Goa</option>
+												<option  value="Delhi">Delhi</option>
+												
+											</select>
+										</div>
+											<div class="col-6">
+												<label>District * </label>
+												<div class="text-danger" id="districtError"
+                                                    style="position: absolute; top: -22px; left: 6px">
+                                                </div>
+												<input type="text" value="<%=address.type%>"  class="form-control" id="district"  name="district" required>
+											</div>
+										</div>
+										<div class="row my-2">
+												
+											<div class="col-sm-6">
+												<label>Locality</label>
+												<div class="text-danger" id="localityError"
+                                                    style="position: absolute; top: -22px; left: 6px">
+                                                </div>
+		            						<input type="text" value="<%=address.locality%>" class="form-control" id="locality" name="locality">
+											</div><!-- End .col-sm-6 -->
+
+											<div class="col-sm-6">
+												<label>Pincode </label>
+												<div class="text-danger" id="pincodeError"
+                                                    style="position: absolute; top: -22px; left: 6px">
+                                                </div>
+												<input type="text" value="<%=address.pincode%>" class="form-control" id="pincode" name="pincode" required>
+											</div><!-- End .col-sm-6 -->
+										</div><!-- End .row -->
+											
+		            						
+
+		            						<label>House No. Street No.</label>
+											<div class="text-danger" id="streetError"
+                                                    style="position: absolute; top: -22px; left: 6px">
+                                                </div>
+		            						<input type="text" value="<%=address.street%>" class="form-control" id="street" name="street">
+
+		            						<hr>
+		                					<button type="submit" class="btn btn-outline-primary-2">
+			                					<span>SAVE </span>
+			            						<i class="icon-long-arrow-right"></i>
+			                				</button>
+			                			</form>
+								    </div><!-- .End .tab-pane -->
+							
+	                		</div><!-- End .col-lg-9 -->
+	                	</div><!-- End .row -->
+	                </div><!-- End .container -->
+                </div><!-- End .dashboard -->
+            </div><!-- End .page-content -->
+        </main><!-- End .main -->
+		<script>
+			document.addEventListener("DOMContentLoaded", function () {
+    // Attach validation to the first form
+    attachFormValidation("#exampleDiv form");
+
+    // Attach validation to the second form
+    
+
+    function attachFormValidation(formSelector) {
+      const form = document.querySelector(formSelector);
+
+      form.addEventListener("submit", function (event) {
+        // Prevent the form from submitting by default
+        event.preventDefault();
+
+        // Remove previous error messages
+        clearErrorMessages(form);
+
+        // Perform validation
+        const name = form.elements.name.value.trim();
+		
+        const phone = form.elements.phone.value;
+        const alternatePhone = form.elements.alternatePhone.value.trim();
+        const district = form.elements.district.value.trim();
+        const locality = form.elements.locality.value.trim();
+        const pincode = form.elements.pincode.value.trim();
+
+		const street = form.elements.street.value.trim();
+       
+
+
+        if (name.length <=2 ) {
+          displayErrorMessage(form, "name", "Please enter a valid name.");
+          return;
+        }
+
+       
+
+        if (!/^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[6789]\d{9}$/.test(phone)) {
+          displayErrorMessage(
+            form,
+            "phone",
+            "Enter a valid phone number."
+          );
+          return;
+        }
+		if (!/^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[6789]\d{9}$/.test(alternatePhone)) {
+          displayErrorMessage(
+            form,
+            "alternatePhone",
+            "Enter a valid phone number."
+          );
+          return;
+        }
+        
+        if (name.length <=4 ) {
+          displayErrorMessage(
+            form,
+            "district",
+            "Please enter a valid district."
+          );
+          return;
+        }
+        
+		if (locality.length <=4 ) {
+          displayErrorMessage(
+            form,
+            "locality",
+            "Please enter a valid locality."
+          );
+          return;
+        }
+
+		if (!/^[1-9][0-9]{5}$/.test(pincode)) {
+          displayErrorMessage(
+            form,
+            "pincode",
+            "Enter a valid pincode number."
+          );
+          return;
+        }
+
+		if (street.length <=6 ) {
+          displayErrorMessage(
+            form,
+            "street",
+            "Please enter a valid street address."
+          );
+          return;
+        }
+        
+        
+
+
+       
+
+        // Validate discount amount is a number
+        
+
+        // If all validations pass, you can submit the form
+        form.submit();
+      });
+    }
+
+    function displayErrorMessage(form, fieldName, message) {
+      const field = form.elements[fieldName];
+      const errorDiv = document.createElement("div");
+      errorDiv.className = "error-message";
+      errorDiv.style.color = "red"; // Set color to red
+      errorDiv.textContent = message;
+      field.parentNode.insertBefore(errorDiv, field);
+
+      // Remove error message after 3000 milliseconds (3 seconds)
+      setTimeout(() => {
+        errorDiv.remove();
+      }, 3000);
+    }
+
+    function clearErrorMessages(form) {
+      const errorMessages = form.querySelectorAll(".error-message");
+      errorMessages.forEach((errorMessage) => {
+        errorMessage.remove();
+      });
+    }
+  });
+
+
+
+
+
+			
+		</script>
+
+		<%-include('../partials/userFooter')%>
+    <!-- Plugins JS File -->
+    <script src="/assets/js/jquery.min.js"></script>
+    <script src="/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/jquery.hoverIntent.min.js"></script>
+    <script src="/assets/js/jquery.waypoints.min.js"></script>
+    <script src="/assets/js/superfish.min.js"></script>
+    <script src="/assets/js/owl.carousel.min.js"></script>
+    <!-- Main JS File -->
+    <script src="/assets/js/main.js"></script>
+</body>
+
+
+<!-- molla/dashboard.html  22 Nov 2019 10:03:13 GMT -->
+</html>
 
             <div class="page-content">
             	<div class="dashboard">

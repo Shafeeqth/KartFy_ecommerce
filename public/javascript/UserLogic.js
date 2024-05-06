@@ -1,3 +1,4 @@
+const { response } = require("express");
 
 
 function addToCartFromWishlist(id) {
@@ -60,6 +61,7 @@ function addToCartFromWishlist(id) {
 }
 
 function addToCart(id) {
+    console.log(id)
     let size = document.getElementById(`size${id}`).selectedOptions[0].value;
     console.log(size)
     $.ajax({
@@ -142,8 +144,8 @@ function addToCart(id) {
 function addToWishlist(id) {
 
     axios.post('/api/v1/add-wishlist', { id: id })
-        .then((response) => {
-            console.log(response)
+        // .then((response) =>response.json())
+        .then(response => {
             if (response.data.userNotFound) {
 
                 Swal.fire({
@@ -185,8 +187,22 @@ function addToWishlist(id) {
 
                 });
 
+            }else if (response.data.error== true) {
+                Swal.fire({
+                    title: 'Error!',
+                    text: data.message,
+                    icon: 'error',
+                    width: '300px',
+                  
+                    toast: true,
+                    showConfirmButton: false,
+                    timer: 1500,
+
+                });
+
             }
         })
+        .catch(error => console.log(error))
 }
 
 
@@ -236,18 +252,15 @@ function removeFromCart(id, size, total ) {
 
 
 }
-function changeCount(cartId, productId, size, price) {
+function changeCount(event, cartId, productId, size, price) {
 
 
 
-    let control = document.getElementById(`${cartId}`);
-   
-
-    let controlValue = control.value;
-    console.log(controlValue);
+    let count = event.target.value;
+    console.log(count);
 
 
-    let data = { controlValue, cartId , productId, size, price};
+    let data = { count, cartId , productId, size, price};
     console.log(data);
     $.ajax({
         method: 'put',
@@ -276,20 +289,6 @@ function changeCount(cartId, productId, size, price) {
         }
     })
 
-
-
-    //   fetch(,{
-    //     method: 'PUT',
-
-    //     body: JSON.stringify(data),
-    //     headers: {
-    //       'Content-Type': 'application/json',
-
-    //     }
-
-
-    //   }).then((response) => response.json())
-    //   .then((response)=> console.log(response))
 
 
 
@@ -321,8 +320,7 @@ function deleteAddress(id) {
 
                         Swal.fire({
                             titleText: 'Successfully addrees deleted',
-                            // width:'300px',
-                            // height:'300px',
+                          
                             icon: 'success',
                             toast: true,
 

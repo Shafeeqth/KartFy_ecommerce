@@ -10,7 +10,7 @@ const bannerSchema = mongoose.Schema({
         required: true
 
     },url: {
-        type: Date,
+        type: String,
         required: true,
 
     },image: {
@@ -19,9 +19,14 @@ const bannerSchema = mongoose.Schema({
 
     }, isListed: {
         type: Boolean,
+        default: true
 
-    }
+    },
+    
 
+},
+{
+    timestamps: true
 });
 
 const Banner = mongoose.model('Banner', bannerSchema);

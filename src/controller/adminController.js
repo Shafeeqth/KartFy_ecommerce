@@ -13,6 +13,7 @@ const Category = require('../models/categoryModel');
 const Banner = require('../models/bannerModel');
 const path = require('node:path');
 const sharp = require('sharp');
+const Wallet = require('../models/walletModel');
 
 
 
@@ -180,8 +181,39 @@ const blockOrUnblockUser = asyncHandler(async (req, res, next) => {
 const changeOrderStatus = asyncHandler(async (req, res, next) => {
 
 
-    let { orderId, productId, index, status, userId } = req.body
-    let order = await Order.findOneAndUpdate({ _id: orderId }, { $set: { orderStatus: status } }, { new: true });
+    let { orderId, productId, index, status, userId, orderAmount } = req.body;
+    let order = await Order.findOneAndUpdate({
+        _id: orderId
+    },
+        {
+            $set: {
+                orderStatus: status
+            }
+        },
+        {
+            new: true
+        });
+    if (orderStatus == 'Cancelled') {
+        if(['PayPal', 'RazorPay', 'Wallet'].includes(order.paymentMethod)) {
+            let order = await Wallet.updateOne({
+                user: userId
+            }, {
+                $inc: {
+                    balance: orderAmount
+    
+                },
+                $push: {
+                    transactions: {
+                        mode: 'Debit',
+                        amount: orderAmount
+                    }
+                }
+            })
+
+        }
+        
+    }
+
     console.log(order);
     return res.json({
         success: true,
@@ -324,7 +356,7 @@ const loadOffers = asyncHandler(async (req, res) => {
 })
 
 const loadBanners = asyncHandler(async (req, res) => {
-    let banners = await Banner.find({isListed: true});
+    let banners = await Banner.find({});
 
     console.log('categories', banners);
     res.render('admin/bannerManagement', { banners, page: 0, couponLength: 0 })
@@ -343,11 +375,12 @@ const createBanner = asyncHandler(async (req, res) => {
         image: req.file.originalname
     })
     return res.status(201)
-        .json({
-            success: true,
-            error: false,
-            message: 'Banner created successfylly'
-        })
+        .redirect('/api/v1/admin/banners')
+    // .json({
+    //     success: true,
+    //     error: false,
+    //     message: 'Banner created successfylly'
+    // })
     // .then((result) => {
     //     console.log(result);
     // })
@@ -360,30 +393,31 @@ const createBanner = asyncHandler(async (req, res) => {
 
 
 const editBanner = asyncHandler(async (req, res) => {
-    let { name, description, url, bannerId } = req.body;
-    
-    
+    let { name, description, url, id } = req.body;
+    console.log(req.body)
+    console.log(req.file)
+    // return     
+
     if (req.file) {
         let cropPath = path.join(__dirname, '../../public/Data/banners/sharped');
         let crop = await sharp(req.file.path).resize(1600, 900).toFile(`${cropPath}/${req.file.originalname}`);
-    }
-    if (req.file) {
+
 
         let newBanner = await Banner.findOneAndUpdate({
-            _id: bannerId
+            _id: id
         },
             {
                 $set: {
                     title: name,
                     description,
                     url,
-                   image: req.file.originalname
+                    image: req.file.originalname
                 }
             }
         )
     } else {
         let newBanner = await Banner.findOneAndUpdate({
-            _id: bannerId
+            _id: id
         },
             {
                 $set: {
@@ -399,12 +433,37 @@ const editBanner = asyncHandler(async (req, res) => {
 
     }
     return res.status(200)
+        .redirect('/api/v1/admin/banners')
+    // .json({
+    //     success: true,
+    //     error: false,
+    //     data: newBanner,
+    //     message: 'Banner updated successfully'
+    // })
+
+})
+
+const listAndUnlistBanner = asyncHandler(async (req, res) => {
+    const { bannerId } = req.body;
+
+    let banner = await Banner.findOne({
+        _id: bannerId
+    })
+    if (banner.isListed == true) {
+        banner.isListed = false
+    } else {
+        banner.isListed = true
+    }
+    banner = await banner.save();
+
+    return res.status(200)
         .json({
             success: true,
             error: false,
-            data: newBanner,
+            data: banner,
             message: 'Banner updated successfully'
         })
+
 
 })
 
@@ -437,7 +496,9 @@ module.exports = {
     listAndUnlistCoupon,
     loadOffers,
     loadBanners,
-    createBanner
+    createBanner,
+    editBanner,
+    listAndUnlistBanner
 
 
 

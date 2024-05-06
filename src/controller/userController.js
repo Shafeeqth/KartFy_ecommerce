@@ -41,7 +41,7 @@ const loadShop = asyncHandler(async (req, res) => {
     
 
     let categories = await Category.find({})
-    console.log('category', categories)
+    // console.log('category', categories)
 
     let inventory = await Inventory.aggregate([
         {
@@ -148,7 +148,7 @@ const loadShop = asyncHandler(async (req, res) => {
         
 
     // ])
-    console.log(inventory)
+    // console.log(inventory)
 
 
     let count = await Product.find().count()
@@ -190,7 +190,7 @@ const loadShop = asyncHandler(async (req, res) => {
             
 
         ])
-        console.log(inventory)
+        // console.log(inventory)
 
 
         return res.render('user/shopPage', { user, products, count });
@@ -212,20 +212,13 @@ const loadWishlist = asyncHandler(async (req, res) => {
 
 
     let user = req.session.user ? req.session.user : null;
-    let wishlist;
-    if (user) {
-        wishlist = await Wishlist.find({ user: user._id }).populate('product');
 
-
-        res.render('user/wishlistPage', { user, wishlist });
-
-
-    } else {
-        wishlist = null;
+    let wishlist = await Wishlist.find({ user: user._id }).populate('product');
+    console.log('wishlist', wishlist);
 
         res.render('user/wishlistPage', { user, wishlist });
 
-    }
+
 
 
 
@@ -253,9 +246,11 @@ const loadCheckout = asyncHandler(async (req, res) => {
         let address = await Address.find({ user });
         address = address ?? []
         let coupons = await Coupon.find({isListed: true})
+        let wallet = await Wallet.findOne({user:user._id}).select('balance');
+        console.log(wallet, 'wallet')
         coupons = coupons ?? []
         console.log(cartData, address, coupons)
-        res.render('user/checkoutPage', { user, cartData, address, coupons });
+        res.render('user/checkoutPage', { user, cartData, address, coupons, wallet });
 
     }
 
@@ -270,6 +265,7 @@ const loadProductDetail = asyncHandler(async (req, res) => {
     let product = await Inventory.findOne({ product: req.query.id })
                 .populate('product');
     console.log(product)
+    console.log(product.product.productReviews)
 
     res.status(200).render('user/productDetail', { user, product });
 
@@ -332,7 +328,7 @@ const editAddress = asyncHandler(async (req, res) => {
         req.session.user.editAddressId = id
 
         let address = await Address.findById({ _id: id })
-        console.log(address)
+        console.log("address========================================",address)
         res.render('user/editAddress', { user, address })
     } else {
 

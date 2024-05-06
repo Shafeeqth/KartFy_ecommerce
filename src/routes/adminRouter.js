@@ -135,9 +135,13 @@ router.get('/banners', adminMiddleware.isLoged, adminController.loadBanners);
 
 //view a purticular request
 router.post('/banners/create-banner',upload.single('image'), adminController.createBanner);
+//view a purticular request
+
+router.post('/banners/edit-banner',upload.single('image'), adminController.editBanner);
+
 
 //reject return request
-router.put('/retuns/reject_return/:id');
+router.put('/banners/list-unlist-banner', adminController.listAndUnlistBanner);
 
 
 

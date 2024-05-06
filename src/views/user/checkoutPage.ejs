@@ -1,4 +1,160 @@
 <%- include('../partials/userHeader')%>
+<script>
+	function placeOrder() {
+			checkCouponValid()
+
+
+
+			let payment = document.getElementsByName('paymentMethod');
+			let address = document.getElementsByName('address');
+	
+
+			let addressId = Array.from(address).filter(item => item.checked)[0].value
+			let paymentMethod = Array.from(payment).filter(item => item.checked)[0].value
+			
+			if (paymentMethod == 'PayPal') {
+				return true
+			}
+
+			event.preventDefault();
+
+			fetch('/api/v1/order-place', {
+				method: 'POST',
+				body: JSON.stringify({ address: addressId, paymentMethod }),
+				headers: {
+					'Content-Type': 'application/json',
+
+				}
+
+			}).then(response => response.json())
+				.then(data => {
+					console.log(data)
+
+					if (data.success && data.orderType == 'COD') {
+						return location.href = `/api/v1/order-success?orderId=${data.data._id}`
+					} else if (data.success && data.paymentType == 'RazorPay') {
+						let options = {
+							"key": "" + data.key_id + "",
+							"amount": "" + data.amount + "",
+							"currency": "INR",
+							"name": "Test Transaction",
+							"description": "It is a test Transaction",
+							"image": "https://dummyimage.com//600x400/000/fff",
+							"handler": function (response) {
+								console.log(response, data)
+								verifyRazorPay(response, data);
+							},
+							"prefill": {
+								"contact": "" + data.contact + "",
+								"name": "" + data.name + "",
+								"email": "" + data.email + ""
+							},
+							"notes": {
+								"description": "" + "It si test Description",
+							},
+							"theme": {
+								"color": "#c7a520"
+							}
+
+						}
+
+						let razorpayObject = new Razorpay(options);
+						razorpayObject.on('payment.failed', (response) => {
+							console.log(response);
+							handleRazorpayFailure(response, data);
+						})
+						razorpayObject.open();
+					}else if(data.error) {
+						Swal.fire({
+							title:'Insufficient balance!',
+							text: data.message,
+							width: '300px',
+							padding: '10px',
+							icon: 'error',
+
+
+							showConfirmButton: false,
+							timer: 2000,
+						});
+
+
+					}
+
+					function verifyRazorPay(response, data) {
+						let paymentId = response.razorpay_payment_id;
+						let orderId = data.orderId;
+						fetch('orders/razorpay-success', {
+							method: 'PUT',
+							body: JSON.stringify({ paymentId, orderId }),
+							headers: {
+								'Content-Type': 'application/json',
+
+							}
+
+						}).then(response => response.json())
+							.then(data => {
+								console.log(data)
+								Swal.fire({
+									titleText: 'Order placed successfylly',
+									width: '300px',
+									padding: '10px',
+									icon: 'success',
+
+
+									showConfirmButton: false,
+									timer: 1500,
+								});
+								setTimeout(() => {
+									location.href = `/api/v1/order-success?orderId=${data.data._id}`
+
+								}, 1600);
+
+
+							})
+
+						function handleRazorpayFailure(response, data) {
+
+							let orderId = data.orderId;
+							fetch('orders/razorpay-failure', {
+								method: 'PUT',
+								body: JSON.stringify({ orderId }),
+								headers: {
+									'Content-Type': 'application/json',
+
+								}
+
+							}).then(response => response.json())
+								.then(data => {
+									console.log(data)
+									Swal.fire({
+										titleText: 'Something went wrong',
+										width: '300px',
+										padding: '10px',
+										icon: 'error',
+
+
+										showConfirmButton: false,
+										timer: 1500,
+									});
+									setTimeout(() => {
+										location.href = `api/v1/admin//my-orders/single-orderDetails?id=${data.data._id}`
+
+									}, 1600);
+								})
+
+
+						}
+
+					}
+				})
+
+
+
+
+
+		}
+
+</script>
 
 	<main class="main">
 		<div class="page-header text-center" style="background-image: url('/assets/images/page-header-bg.jpg')">
@@ -21,7 +177,7 @@
 				<div class="container">
 
 
-					<form method="post" action="/api/v1/order-place" onsubmit="return placeOrder(event)">
+					<form onsubmit="return placeOrder()" action="/api/v1/order-place" method="post"   >
 						<div class="row m-0">
 							<div class="col-lg-9 ">
 								<div class="accordion " id="accordionExample">
@@ -88,7 +244,8 @@
 																		<input
 																			style="margin-left: 3rem; margin-top: 3rem"
 																			class="text-start" type="radio"
-																			name="addressId" value="<%=address[i]._id%>">
+																			name="address"
+																			value="<%=address[i]._id%>">
 																	</div>
 
 																	<div class="card-body pt-2">
@@ -199,42 +356,42 @@
 																			</td>
 																			<!-- <%total=+cart.product.price *
 																				cart.quantity%>%> -->
-																				<td class="quantity-col">
-																					<div
-																						class="cart-product-quantity row">
-																						<input disabled type="text"
-																							class="form-control"
-																							value="<%=cart.size%>">
-																						<input disabled type="text"
-																							class="form-control"
-																							value="<%=cart.quantity%>">
-																					</div>
-																					<!-- End .cart-product-quantity -->
-																				</td>
+																			<td class="quantity-col">
+																				<div class="cart-product-quantity row">
+																					<input disabled type="text"
+																						class="form-control"
+																						value="<%=cart.size%>">
+																					<input disabled type="text"
+																						class="form-control"
+																						value="<%=cart.quantity%>">
+																				</div>
+																				<!-- End .cart-product-quantity -->
+																			</td>
 
 
-																				<td class="total-col">₹<%= cart.totalPrice%>.00
-																				</td>
-																				<!-- <td class="remove-col"><button
+																			<td class="total-col">₹<%= cart.totalPrice%>
+																					.00
+																			</td>
+																			<!-- <td class="remove-col"><button
 																						onclick="removeFromCart('<%=cart.id%>','<%=cart.product.title%>')"
 																						class="btn-remove"><i
 																							class="icon-close"></i></button>
 																				</td> -->
 																		</tr>
-																		
-																			<%})%>
 
-																				<%}else{%>
-																					<tr class="h-100">
-																						<td colspan="5">
-																							<p class="text-center ">Your
-																								cart is empty please add
-																								items to the cart.</p>
-																						</td>
-																					</tr>
+																		<%})%>
+
+																			<%}else{%>
+																				<tr class="h-100">
+																					<td colspan="5">
+																						<p class="text-center ">Your
+																							cart is empty please add
+																							items to the cart.</p>
+																					</td>
+																				</tr>
 
 
-																					<%}%>
+																				<%}%>
 
 
 													</tbody>
@@ -372,44 +529,51 @@
 
 
 
-							<div class="row align-items-center justify-content-center">
-								<div class="cart-discount my-1">
+								<div class="row align-items-center justify-content-center">
+									<div class="cart-discount my-1">
 
-									
-									<%if(!cartData.isCouponApplied) {%>
-										<a onclick="event.preventDefault()" style="margin-left: 40% ;" href=""> <button
-											style="all: unset;" type="button" class="btn btn-primary"
-											data-toggle="modal" data-target="#couponModal">
-											click here to view coupons
-										</button></a>
-									<div class="input-group">
-										<input type="tedxt" class="form-control m-0" id="coupon-input"
-											placeholder="coupon code">
-										<div class="input-group-append">
-											<button onclick="checkCoupon(event)" class="btn btn-outline-primary-2"><i
-													class="icon-long-arrow-right"></i></button>
-										</div><!-- .End .input-group-append -->
-									</div><!-- End .input-group -->
-									<%}else{%>
-										<a class="text-danger" onclick="event.preventDefault()" style="margin-left: 30% ;" href=""> <button
-											style="all: unset;" type="button" class="btn btn-primary"
-											data-toggle="modal" data-target="#couponModal">
-											click here to view more coupons
-										</button></a>
-										<div class="input-group">
-											<input type="text" disabled class=" border-danger form-control m-0 font-weight-bold text-center text-danger "  value="<%=cartData.coupon.code%>"
-												>
-											<div class="input-group-append">
-												<button onclick="return event.preventDefault(), removeCoupon('<%=cartData?.coupon?.discount%>')" class="btn btn-outline-danger ">
-													<span class="btn-text"><i	class="icon-long-arrow-right"></i></span>
-													<span class="btn-hover-text px-2">Remove</span>
-													</button>
-											</div><!-- .End .input-group-append -->
-										</div><!-- End .input-group -->
-									<%}%>
 
-								</div><!-- End .cart-discount -->
-							</div>
+										<%if(!cartData.isCouponApplied) {%>
+											<a onclick="event.preventDefault()" style="margin-left: 40% ;" href="">
+												<button style="all: unset;" type="button" class="btn btn-primary"
+													data-toggle="modal" data-target="#couponModal">
+													click here to view coupons
+												</button></a>
+											<div class="input-group">
+												<input type="tedxt" class="form-control m-0" id="coupon-input"
+													placeholder="coupon code">
+												<div class="input-group-append">
+													<button onclick="checkCoupon(event)"
+														class="btn btn-outline-primary-2"><i
+															class="icon-long-arrow-right"></i></button>
+												</div><!-- .End .input-group-append -->
+											</div><!-- End .input-group -->
+											<%}else{%>
+												<a class="text-danger" onclick="event.preventDefault()"
+													style="margin-left: 30% ;" href=""> <button style="all: unset;"
+														type="button" class="btn btn-primary" data-toggle="modal"
+														data-target="#couponModal">
+														click here to view more coupons
+													</button></a>
+												<div class="input-group">
+													<input type="text" disabled
+														class=" border-danger form-control m-0 font-weight-bold text-center text-danger "
+														value="<%=cartData.coupon.code%>">
+													<div class="input-group-append">
+														<button id="remove-button"
+															data-discount="<%=cartData?.coupon?.discount%>"
+															onclick="return event.preventDefault(), removeCoupon('<%=cartData?.coupon?.discount%>')"
+															class="btn btn-outline-danger ">
+															<span class="btn-text"><i
+																	class="icon-long-arrow-right"></i></span>
+															<span class="btn-hover-text px-2">Remove</span>
+														</button>
+													</div><!-- .End .input-group-append -->
+												</div><!-- End .input-group -->
+												<%}%>
+
+									</div><!-- End .cart-discount -->
+								</div>
 							</div><!-- End .col-lg-9 -->
 
 							<aside class="col-lg-3">
@@ -424,28 +588,29 @@
 
 											<tr class="summary-subtotal">
 												<td>Subtotal:</td>
-												<td>₹<%=cartData.cartTotal + (cartData?.coupon?.discount ? cartData?.coupon?.discount: 0) %>.00</td>
-												
-											
-												
+												<td>₹<%=cartData.cartTotal + (cartData?.coupon?.discount ?
+														cartData?.coupon?.discount: 0) %>.00</td>
+
+
+
 												<br>
-												
+
 
 											</tr><!-- End .summary-subtotal -->
 											<%if (cartData.isCouponApplied) {%>
-											<tr  class="text-primary">
-												<td>Coupon Saving:</td>
-												<td>₹<%= cartData?.coupon?.discount%>.00</td>
-											</tr>
-											<%}%>
-											<tr>
-												<td>Shipping:</td>
-												<td>Free shipping</td>
-											</tr>
-											<tr class="summary-total">
-												<td>Total:</td>
-												<td>₹<%=cartData.cartTotal%>.00</td>
-											</tr><!-- End .summary-total -->
+												<tr class="text-primary">
+													<td>Coupon Saving:</td>
+													<td>₹<%= cartData?.coupon?.discount%>.00</td>
+												</tr>
+												<%}%>
+													<tr>
+														<td>Shipping:</td>
+														<td>Free shipping</td>
+													</tr>
+													<tr class="summary-total">
+														<td>Total:</td>
+														<td>₹<%=cartData.cartTotal%>.00</td>
+													</tr><!-- End .summary-total -->
 
 										</tbody>
 									</table><!-- End .table table-summary -->
@@ -464,9 +629,13 @@
 															class="text-start" type="radio" name="paymentMethod" checked
 															value="Wallet">
 
-														Pay Using Wallet
+														Pay Using Wallet <span
+															style="margin-left: 19%; font-size: medium;"
+															class="text-primary  ps-5 text-end">₹<%=wallet.balance%>
+																.00</span>
 
 													</h2>
+
 												</div><!-- End .card-header -->
 												<div id="collapse-1" class="collapse " aria-labelledby="heading-1"
 													data-parent="#accordion-payment" value="paypal">
@@ -551,8 +720,7 @@
 										</div><!-- End .accordion -->
 
 
-										<button type="submit" 
-											class="btn btn-outline-primary-2 btn-order btn-block">
+										<button type="submit" class="btn btn-outline-primary-2 btn-order btn-block">
 											<span class="btn-text">Place Order</span>
 											<span class="btn-hover-text">Confirm Order</span>
 										</button>
@@ -570,144 +738,91 @@
 
 	<script>
 
-		function placeOrder(event) {
-		
+		function checkCouponValid() {
 
 
-			let payment = document.getElementsByName('paymentMethod');
-			let address = document.getElementsByName('addressId');
 
-			let addressId = Array.from(address).filter(item => item.checked)[0].value
-			let paymentMethod = Array.from(payment).filter(item => item.checked)[0].value
-			console.log(paymentMethod, addressId)
-			if(paymentMethod == 'PayPal') {
-				return true
-			}
-			
-			event.preventDefault();
-
-			fetch('/api/v1/order-place', {
-				method: 'POST',
-				body: JSON.stringify({ addressId, paymentMethod }),
+			fetch('/api/v1/check-valid-coupon', {
+				method: 'get',
 				headers: {
 					'Content-Type': 'application/json',
 
 				}
 
 			}).then(response => response.json())
+
 				.then(data => {
 					console.log(data)
+					if (!data.success) {
+						Swal.fire({
+							title: 'Do you want to remove',
+							text: data.message,
+							icon: 'question',
+							showCancelButton: true,
+							confirmButtonColor: '#3085d6',
+							cancelButtonColor: '#d33',
+							confirmButtonText: 'Yes!',
+						}).then((decision) => {
+							if (decision.isConfirmed) {
+								let discount = document.getElementById('remove-button').getAttribute('data-discount');
+								removeCoupon(discount);
 
-					if (data.success && data.orderType == 'COD') {
-						return location.href = `/api/v1/order-success?orderId=${data.data._id}`
-					} else if (data.success && data.paymentType == 'RazorPay') {
-						let options = {
-							"key": "" + data.key_id + "",
-							"amount": "" + data.amount + "",
-							"currency": "INR",
-							"name": "Test Transaction",
-							"description": "It is a test Transaction",
-							"image": "https://dummyimage.com//600x400/000/fff",
-							"handler": function (response) {
-								console.log(response, data)
-								verifyRazorPay(response, data);
-							},
-							"prefill": {
-								"contact": "" + data.contact + "",
-								"name": "" + data.name + "",
-								"email": "" + data.email + ""
-							},
-							"notes": {
-								"description": "" + "It si test Description",
-							},
-							"theme": {
-								"color": "#c7a520"
-							}
 
-						}
-
-						let razorpayObject = new Razorpay(options);
-						razorpayObject.on('payment.failed', (response) => {
-							console.log(response);
-							handleRazorpayFailure(response, data);
-						})
-						razorpayObject.open();
-					}
-
-					function verifyRazorPay(response, data) {
-						let paymentId = response.razorpay_payment_id;
-						let orderId = data.orderId;
-						fetch('orders/razorpay-success', {
-							method: 'PUT',
-							body: JSON.stringify({ paymentId, orderId }),
-							headers: {
-								'Content-Type': 'application/json',
+							}else{
+								return false
 
 							}
-
-						}).then(response => response.json())
-							.then(data => {
-								console.log(data)
-								Swal.fire({
-									titleText: 'Order placed successfylly',
-									width: '300px',
-									padding: '10px',
-									icon: 'success',
-								
-
-									showConfirmButton: false,
-									timer: 1500,
-								});
-								setTimeout(() => {
-									location.href = `/api/v1/order-success?orderId=${data.data._id}`
-									
-								}, 1600);
-							
-
-							})
-
-						function handleRazorpayFailure(response, data) {
-
-							let orderId = data.orderId;
-						fetch('orders/razorpay-failure', {
-							method: 'PUT',
-							body: JSON.stringify({ orderId }),
-							headers: {
-								'Content-Type': 'application/json',
-
-							}
-
-						}).then(response => response.json())
-						.then(data => {
-							console.log(data)
-							Swal.fire({
-									titleText: 'Something went wrong',
-									width: '300px',
-									padding: '10px',
-									icon: 'error',
-								
-
-									showConfirmButton: false,
-									timer: 1500,
-								});
-								setTimeout(() => {
-									location.href = `api/v1/admin//my-orders/single-orderDetails?id=${data.data._id}`
-									
-								}, 1600);
 						})
 
-
-						}
 
 					}
 				})
 
 
-
-
-
 		}
 
+
+		window.addEventListener('load', () => {
+
+			fetch('/api/v1/check-valid-coupon', {
+				method: 'get',
+				headers: {
+					'Content-Type': 'application/json',
+
+				}
+
+			}).then(response => response.json())
+
+				.then(data => {
+					console.log(data)
+					if (!data.success) {
+						Swal.fire({
+							title: 'Do you want to remove Coupon',
+							text: data.message,
+							icon: 'question',
+							showCancelButton: true,
+							confirmButtonColor: '#3085d6',
+							cancelButtonColor: '#d33',
+							confirmButtonText: 'Yes!',
+						}).then((decision) => {
+							if (decision.isConfirmed) {
+								let discount = document.getElementById('remove-button').getAttribute('data-discount');
+								removeCoupon(discount);
+
+
+							}
+						})
+
+					}
+				})
+
+
+		})
+
+
+
+
+		
 
 
 
@@ -738,41 +853,41 @@
 
 			}).then(response => response.json())
 				.then(data => {
-					if(data.success){
+					if (data.success) {
 						Swal.fire({
-									text: data.message,
-									width: '300px',
-									padding: '10px',
-									icon: 'success',
-								
+							text: data.message,
+							width: '300px',
+							padding: '10px',
+							icon: 'success',
 
-									showConfirmButton: false,
-									timer: 1500,
-								});
-								setTimeout(() => {
-									$("#Reload").load(`/api/v1/checkout #Reload`)
-									
-								}, 1500);
-								
-							}else{
-								Swal.fire({
-									titleText: data.message,
-									width: '300px',
-									padding: '10px',
-									icon: 'error',
-								
 
-									showConfirmButton: false,
-									timer: 1500,
-								});
+							showConfirmButton: false,
+							timer: 1500,
+						});
+						setTimeout(() => {
+							$("#Reload").load(`/api/v1/checkout #Reload`)
 
-							}
+						}, 1500);
+
+					} else {
+						Swal.fire({
+							titleText: data.message,
+							width: '300px',
+							padding: '10px',
+							icon: 'error',
+
+
+							showConfirmButton: false,
+							timer: 1500,
+						});
+
+					}
 				})
 		}
 
 
 
-		function removeCoupon( discount) {
+		function removeCoupon(discount) {
 			console.log(discount)
 
 			fetch('/api/v1/remove-coupon', {
@@ -785,34 +900,34 @@
 
 			}).then(response => response.json())
 				.then(data => {
-					if(!data.success){
+					if (!data.success) {
 						Swal.fire({
-									text: data.message,
-									width: '300px',
-									padding: '10px',
-									icon: 'error',
-								
+							text: data.message,
+							width: '300px',
+							padding: '10px',
+							icon: 'error',
 
-									showConfirmButton: false,
-									timer: 1500,
-								});
-								
-							}else{
-								Swal.fire({
-									icon: 'success',
-									titleText: "Removed!",
-									showConfirmButton: false,
-									timer: 1000,
-								});
-								
 
-								setTimeout(() => {
-									$("#Reload").load(`/api/v1/checkout #Reload`)
-									
-								}, 1000);
-								
+							showConfirmButton: false,
+							timer: 1500,
+						});
 
-							}
+					} else {
+						Swal.fire({
+							icon: 'success',
+							titleText: "Removed!",
+							showConfirmButton: false,
+							timer: 1000,
+						});
+
+
+						setTimeout(() => {
+							$("#Reload").load(`/api/v1/checkout #Reload`)
+
+						}, 1000);
+
+
+					}
 				})
 		}
 
@@ -858,12 +973,7 @@
 		})
 
 
-		function sendPayPal() {
-			fetch('/paypal/pay', {
-				method: "POST"
-			}).then(response => response.json())
-				.then(response => console.log(response));
-		}
+		
 	</script>
 
 	<%- include('../partials/userFooter')%>

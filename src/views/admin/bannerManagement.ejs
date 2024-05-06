@@ -121,7 +121,7 @@
             </div>
           </div>
     
-          <!-- edit coupon modal -->
+          <!-- edit banner modal -->
           <div
             class="modal fade"
             id="exampleModal2"
@@ -129,7 +129,7 @@
             aria-labelledby="exampleModalLabel"
             aria-hidden="true"
           >
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-lg">
               <div class="modal-content">
                 <div class="modal-header">
                   <h1 class="modal-title fs-5" id="exampleModalLabel">
@@ -143,11 +143,13 @@
                   ></button>
                 </div>
                 <div class="modal-body">
-                  <form action="/api/v1/admin/coupons/edit-coupon" method="post">
+                  <form action="/api/v1/admin/banners/edit-banner" method="post" enctype="multipart/form-data">
+                    <input style="visibility: hidden;" type="text" name="id" id="bannerId">
                     <label for="form-label">Name</label>
                     <input
                       type="text"
                       name="name"
+                      id="name"
                       placeholder="Enter coupon name"
                       class="form-control my-2"
                     />
@@ -155,12 +157,14 @@
                     <input
                       type="text"
                       name="description"
+                      id="description"
                       placeholder="Enter Description here"
                       class="form-control my-2"
                     />
                     <label for="form-label">URL Link</label>
                     <input
                       type="text"
+                      id="url"
                       name="url"
                       placeholder="Example: shop?brand=levis"
                       class="form-control my-2"
@@ -173,8 +177,8 @@
                           margin-bottom: 1.5rem;
                         " />
 
-                        <input type="file" accept="image/jpeg" placeholder="Add image" name="image1"
-                          class="form-control" id="image1" data-id="" onchange="previewImage(event)" />
+                        <input type="file" accept="image/jpeg" placeholder="Add image" name="image"
+                          class="form-control" id="image1" data-id="" onchange="previewImage1(event)" />
                     </div>
     
                     
@@ -197,7 +201,7 @@
           </div>
           <section class="content-main">
             <div class="content-header">
-              <h2 class="content-title">Manage Coupon</h2>
+              <h2 class="content-title">Manage Banner</h2>
               <div>
                 <button
                   href="#"
@@ -205,7 +209,7 @@
                   data-bs-toggle="modal"
                   data-bs-target="#exampleModal"
                 >
-                  <i class="material-icons md-plus"></i> Create coupon
+                  <i class="material-icons md-plus"></i> Create Banner
                 </button>
               </div>
             </div>
@@ -216,12 +220,13 @@
                   <table class="table table-hover">
                     <thead>
                       <tr>
-                        <th>Name</th>
-                        <th>Coupon code</th>
+                        <th>Banner Image</th>
+                        <th>Title</th>
+                        <th>Description</th>
     
-                        <th>Activation date</th>
-                        <th>Expire date</th>
-                        <th>Discount amount</th>
+                        <th>URL</th>
+                        <th> Created date</th>
+                        
                         <th class="text-end">Action</th>
                       </tr>
                     </thead>
@@ -229,15 +234,22 @@
                       <% if(Array.isArray(banners) && banners.length> 0) {%> <%
                         banners.map((c)=> {%>
                       <tr>
-                        <td width="20%">
-                          <a href="#" class="itemside">
-                            <div class="left">
-                              <img
-                                src="/img/profile.jpg"
-                                class="img-sm"
-                                alt="Userpic"
-                              />
-                            </div>
+                       
+                            <td class="col-3 ">
+                                <a href="#" class="itemside">
+                                    <div class=" text-center">
+
+                                        <img src="/Data/banners/sharped/<%= c.image%>"
+                                            class="img-lg  " alt="Userpic" />
+
+                                    </div>
+                                    <!-- <div class="info pl-3">
+                                        <h6 class="mb-0 title" style="text-transform: capitalize;"></h6>
+                                        <small class="text-muted">Seller ID: #439</small>
+                                    </div> -->
+                                </a>
+                            </td>
+                            <td>
                             <div class="info pl-3">
                               <h6
                                 class="mb-0 title"
@@ -245,20 +257,19 @@
                               >
                                 <%= c.title %>
                               </h6>
-                              <small class="text-muted">Seller ID: #439</small>
+                            
                             </div>
                           </a>
                         </td>
-                        <td><%= c.couponCode%></td>
+                        <td><%= c.description%></td>
+                        <td><%= c.url%></td>
+                        
                         <% const formattedDate =
                         c.createdAt?.toLocaleString('en-US', { weekday: 'short',
                         month: 'short', day: 'numeric', year: 'numeric',  }); %>
                         <td><%= formattedDate%></td>
-                        <% const fDate =
-                        c.expiryDate?.toLocaleString('en-US', { weekday: 'short',
-                        month: 'short', day: 'numeric', year: 'numeric', }); %>
-                        <td><%= fDate%></td>
-                        <td><%= c.discount%>%</td>
+                        
+                       
     
                         <td class="text-end">
                           <button
@@ -274,7 +285,7 @@
                             id="button"
                             class="btn btn-sm btn-dark rounded font-sm mt-15"
                             data-user-id=""
-                            onclick="return editCoupon('<%= c._id%>', '<%= c.title%>', '<%= c.description%>', '<%= c.expiryDate%>', '<%= c.discount%>','<%= c.limit%>', '<%=c.minCost%>')"
+                            onclick="return editCoupon('<%= c._id%>', '<%=c.title%>', '<%=c.description%>', '<%=c.url%>',  '<%=c.image%>')"
                             data-status=""
                             data-bs-toggle="modal"
                             data-bs-target="#exampleModal2"
@@ -370,6 +381,35 @@ function previewImage(event) {
     
 }
 
+function previewImage1(event) {
+    const input = event.target.files[0]
+    // let idNumber = input.getAttribute('data-id');
+    console.log(input, 'id')
+
+
+    
+   
+
+   
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        console.log(input)
+
+
+      
+        document.getElementById(`imagePreview1`).src = e.target.result;
+        
+        };
+
+
+      
+      reader.readAsDataURL(input);
+
+
+    
+}
+
     
 
 
@@ -382,13 +422,14 @@ function previewImage(event) {
 
 
       function listOrUnlist(id) {
-        const data = { id: id };
+        const data = { bannerId: id };
         
         
     
         Swal.fire({
-          text: "Are you sure",
-          icon: "warning",
+          titleText: "Are you sure",
+          width: '400px',
+         
           showCancelButton: true,
           confirmButtonColor: "#3085d6",
           cancelButtonColor: "#d33",
@@ -397,14 +438,15 @@ function previewImage(event) {
           if (decision.isConfirmed) {
             $.ajax({
               method: "put",
-              url: "/api/v1/admin/coupons/list-unlist-coupon",
+              url: "/api/v1/admin/banners/list-unlist-banner",
               data: JSON.stringify(data),
               contentType: "application/json",
               success: (response) => {
                 if (response.success === true) {
-                  $("#Reload").load("/api/v1/admin/coupons #Reload", null, () => {
+                
+                  $("#Reload").load("/api/v1/admin/banners #Reload", null, () => {
                     Swal.fire({
-                      title: `success`,
+                      title: `Success`,
                       icon: "success",
                       width: '300px',
                       showConfirmButton: false,
@@ -419,24 +461,24 @@ function previewImage(event) {
       }
     </script>
     <script>
-      function editCoupon(id, name, description, edate, discount, limit, minCost) {
+      function editCoupon(id, name, description, url, image) {
         console.log("function is called");
-        console.log(edate);
+        // console.log(edate);
     
-        let date = new Date(edate)
-        let year = date.getFullYear();
-        let month = String(date.getMonth() + 1).padStart(2, '0');
-        let day = String(date.getDate()).padStart(2, '0');
-        edate = `${year}-${month}-${day}`
-        console.log(`${year}-${month}-${day}`)
+        // let date = new Date(edate)
+        // let year = date.getFullYear();
+        // let month = String(date.getMonth() + 1).padStart(2, '0');
+        // let day = String(date.getDate()).padStart(2, '0');
+        // edate = `${year}-${month}-${day}`
+        // console.log(`${year}-${month}-${day}`)
     
-        document.getElementById("couponId").value = id;
+        document.getElementById("bannerId").value = id;
         document.getElementById("name").value = name;
-        document.getElementById("minCost").value = minCost;
-        document.getElementById("edate").value = edate;
+        document.getElementById("url").value = url;
+     
         document.getElementById("description").value = description;
-        document.getElementById("discount").value = discount;
-        document.getElementById("limit").value = limit;
+        document.getElementById("imagePreview1").src ="/Data/banners/sharped/"+image
+       
         return;
       }
     </script>
@@ -552,7 +594,7 @@ function previewImage(event) {
             const name = form.elements.name.value.trim();
             const description = form.elements.description.value.trim();
             const url = form.elements.url.value.trim();
-            const image = form.elements.image;
+            const image = form.elements.image ?? null
     
             if (name.length <=2 ) {
               displayErrorMessage(form, "name", "Please enter a valid coupon name.");
@@ -578,14 +620,16 @@ function previewImage(event) {
               );
               return;
             }
-            if (image.files.length ==0) {
-              displayErrorMessage(
-                form,
-                "image",
-                "image is required."
-              );
-              return;
+            if(image) {
+                if (image.files.length ==0) {
+                     displayErrorMessage(
+                    form,
+                     "image",
+                    "image is required."
+                );
+                    return;
             }
+        }
             
            
     
@@ -624,146 +668,7 @@ function previewImage(event) {
       });
     </script>
     
-        <main class="main-wrap">
-
-            <section class="content-main">
-                <div class="content-header">
-                    <div>
-                        <h2 class="content-title card-title">Products List</h2>
-                        <p>Products at KartFy.</p>
-
-                    </div>
-                    <div>
-                        <a href="/api/v1/admin/banners/add-banner" class="btn btn-dark ">Add Banner</a>
-                    </div>
-                </div>
-                <div class="card mb-4 ">
-                    <header class="card-header">
-
-                        <div class="row">
-                            <div class="col-3 fw-bold ">Title</div>
-                            <div class="col-3 fw-bold ">Description</div>
-                            <div class="col-6 fw-bold ">Images</div>
-
-
-
-
-                        </div>
-
-
-                    </header>
-
-
-                    <div class="card-body">
-                        <div class="table-responsive" id="Reload">
-                            <table class="table table-hover">
-
-                                <tbody>
-
-
-
-                                    <%if(Array.isArray(banners) && banners.length> 0 ){%>
-                                       
-                                            <%banners.forEach((banner)=> { %>
-                                                <tr class="product-row  rounded shadow-sm  " data-target="<%=product._id%>">
-
-                                                <td class="col-2 ">
-                                                    <%=banner.title%>
-                                                </td>
-                                                
-                                                <td class="col-3">
-                                                    <%=banner.description%>
-                                                </td>
-
-
-                                                </td>
-
-                                                <td class="col-2 ">
-                                                    <a href="#" class="itemside">
-                                                        <div class="">
-
-                                                            <img src="/Data/uploads/<%= banner.images[0]%>"
-                                                                class="img-md rounded " alt="Userpic" />
-
-                                                        </div>
-                                                        <!-- <div class="info pl-3">
-                                                            <h6 class="mb-0 title" style="text-transform: capitalize;"></h6>
-                                                            <small class="text-muted">Seller ID: #439</small>
-                                                        </div> -->
-                                                    </a>
-                                                </td>
-
-                                                <td class="text-center col-3" id="status">
-                                                   
-                                                        <button id="button" class="btn btn-outline-secondary mx-1"
-                                                            onclick="listProduct('<%=banner._id%>','<%=banner.title%>','<%=banner.isListed%>')">
-                                                            <%= banner.isListed ? "Unlist" : "List" %>
-                                                        </button>     
-
-                                                                            <a href="/api/v1/admin/banners/edit-banner?id=<%=banner._id%>"
-                                                                                class="btn btn-outline-dark mx-1 ">
-                                                                                Edit
-                                                                            </a>
-                                                </td>
-                                                
-                                                
-                                        </tr>
-
-
-                                        <%})%>
-                                    <%}else{%>
-                                            <tr>
-                                                <td colspan="5">No Banner found</td>
-                                            </tr>
-
-
-                                            <%}%>
-
-                                </tbody>
-                            </table>
-                            <!--  table-responsive.// -->
-                        </div>
-                    </div>
-
-                </div>
-                <!-- card end// -->
-                <div class="pagination-area mt-15 mb-50">
-                    <nav aria-label="Page navigation example">
-                        <ul class="pagination">
-
-                            <a class="page-link" href="?page="><i class="material-icons md-chevron_left"></i></a>
-
-                            <li class="page-item ">
-                                <a class="page-link" href="?page="></a>
-                            </li>
-
-                            <li class="page-item disabled">
-                                <span class="page-link">...</span>
-                            </li>
-
-                            <a class="page-link" href="?page="><i class="material-icons md-chevron_right"></i></a>
-
-                        </ul>
-
-                    </nav>
-                </div>
-            </section>
-            <!-- content-main end// -->
-            <%- include('../partials/adminFooter.ejs') -%>
-        </main>
-        <script src="/node_modules/sweetalert2/dist/sweetalert2.all.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <script src="/assets/js/vendors/jquery-3.6.0.min.js"></script>
-        <script src="/assets/js/vendors/bootstrap.bundle.min.js"></script>
-        <script src="/assets/js/vendors/select2.min.js"></script>
-        <script src="/assets/js/vendors/perfect-scrollbar.js"></script>
-        <script src="/assets/js/vendors/jquery.fullscreen.min.js"></script>
-        <!-- Main Script -->
-        <script src="/assets/js/main.js" type="text/javascript"></script>
-</body>
-
-</html>
-
+       
 
 <script>
 

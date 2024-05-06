@@ -11,7 +11,7 @@ const razorpayInstance = new Razorpay({
 
 const createRazorpayOrder = async (req, res, myOrder) => {
     try {
-        const amount = myOrder.orderAmout * 100;
+        const amount = myOrder.orderAmount * 100;
         const options = {
             amount,
             currency: 'INR',
@@ -63,7 +63,20 @@ paypal.configure({
 const createPayPalPayment = async (req, res ,myOrder) => {
     try {
 
-        console.log('==============================comes here');
+        console.log(myOrder, 'order')
+     
+        let items = myOrder.orderedItems.map((item, index) => {
+            return {
+                "name": 'ABC',
+                "sku": ""+(index+1),
+                "price": ""+item.totalPrice / item.quantity,
+                "currency": "USD",
+                "quantity": ""+item.quantity
+
+            }
+        })
+     
+       
         const create_payment_json = {
             "intent": "sale",
             "payer": {
@@ -75,18 +88,12 @@ const createPayPalPayment = async (req, res ,myOrder) => {
             },
             "transactions": [{
                 "item_list": {
-                    "items": [{
-                        "name": "Red Sox Hat",
-                        "sku": "001",
-                        "price": "25.00",
-                        "currency": "USD",
-                        "quantity": 1
-                    }]
+                    "items":items
     
                 },
                 "amount": {
                     "currency": "USD",
-                    "total": "25.00",
+                    "total": "" + myOrder.orderAmount+".00",
     
                 },
                 "description": "Hat for the best team ever"

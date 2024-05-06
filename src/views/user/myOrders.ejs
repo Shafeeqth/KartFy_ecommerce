@@ -135,25 +135,40 @@
 					<%})%>
 				  </td>
 				  
-				  <td class="text-center col-1">₹<%= order.orderAmout%>.00</td>
+				  <td class="text-center col-1">₹<%= order.orderAmount || order.orderAmout%>.00</td>
 				  <td class="text-center col-2">
+					
 					<%if(order.orderStatus== 'Delivered'){%>
 					  <span class=" px-4 py-2 rounded-pill" style="font-weight: 400; background-color: rgb(46, 168, 56); color: #e1d8d8;">
+						<%= order.orderStatus%>
+					  </span>
 					   
 					  <%}else if(order.orderStatus== 'Cancelled'){%>
 						<span class=" px-4 py-2 rounded-pill" style="font-weight: 400; background-color: rgb(177, 16, 16); color: #e1d8d8;">
+							<%= order.orderStatus%>
+						</span>
 
 					  <%}else if(order.orderStatus== 'Out For Delivery'){%>
 						<span class=" px-4 py-2 rounded-pill" style="font-weight: 400; background-color: rgb(18, 163, 163); color: #e1d8d8;">
+							<%= order.orderStatus%>
+						</span>
 
 					  <%}else if(order.orderStatus== 'Pending'){%>
 						<span class=" px-4 py-2 rounded-pill" style="font-weight: 400; background-color: rgb(12, 95, 120); color: #e1d8d8;">
+							<%= order.orderStatus%>
+						</span>
 						
 					  <%}else if(order.orderStatus== 'Shipped'){%>
-					<span class=" px-4 py-2 rounded-pill" style="font-weight: 400; background-color: rgb(101, 15, 32); color: #e1d8d8;">
-					  <%}%>
+					<span class=" px-4 py-2 rounded-pill bg-tertiary" >
+					
 					  <%= order.orderStatus%>
 					</span>
+					<%}else if(order.orderStatus== 'Placed'){%>
+						<span class=" px-4 py-2 rounded-pill bg-primary" style="font-weight: 400; background-color: rgb(101, 15, 32); color: #e1d8d8;">
+						  
+						  <%= order.orderStatus%>
+						</span>
+						<%}%>
 				  </td class="text-center col-2">
 				  <% const formattedDate=order.createdAt.toLocaleString('en-US',
 				  { weekday: 'short' , month: 'short' , day: 'numeric' ,
@@ -161,8 +176,10 @@
 				  second: 'numeric' , hour12: true }); %>
 				  <td><%= formattedDate%></td>
 				  <td class="text-center col-2 ">
-					<%if(order.orderStatus== 'Delivered'){%>
-						<button onclick="orderDetails('<%=order._id%>')" class=" btn btn-warning rounded">View Details</button>
+					<%if(order.paymentStatus == 'Failed') {%>
+						<button onclick="orderDetails('<%=order._id%>')"  class=" btn bg-warning rounded"><i class="fa-solid fa-indian-rupee-sign"></i>Retry Payment</button>
+					<%}else if(order.orderStatus== 'Delivered'){%>
+						<button onclick="orderDetails('<%=order._id%>')" class=" btn btn-info rounded">View Details</button>
 
 						<%}else if(order.orderStatus== 'Cancelled'){%>
 
@@ -273,16 +290,16 @@
 	document.addEventListener('DOMContentLoaded', function () {
   // Get modal elements
   var cancelOrderModal = document.getElementById('cancelOrderModal');
-  var returnOrderModal = document.getElementById('returnOrderModal');
+
 
   // Get buttons to trigger modals
   var cancelOrderButton = document.getElementById('confirmCancelOrder');
-  var returnOrderButton = document.getElementById('confirmReturnOrder');
+
 
   // Example trigger events
   // Replace these with your own trigger logic
-  var cancelOrderTrigger = document.querySelector('.cancelOrderTrigger');
-  var returnOrderTrigger = document.querySelector('.returnOrderTrigger');
+  var cancelOrderTrigger = document.querySelectorAll('.cancelOrderTrigger');
+
 
   document.querySelectorAll('.closeButton').forEach(item => {
 	item.addEventListener('click' ,() => {
@@ -297,20 +314,23 @@
     cancelOrderModal.classList.add('show');
     cancelOrderModal.style.display = 'block';
     document.body.classList.add('modal-open');
-  }
 
-  // Function to open return order modal
-  function openReturnOrderModal() {
-    returnOrderModal.classList.add('show');
-    returnOrderModal.style.display = 'block';
-    document.body.classList.add('modal-open');
-  }
 
-  // Add event listener to cancel order button
-  cancelOrderButton.addEventListener('click', function () {
+  }
+  // Example trigger events
+  // Replace these with your own trigger logic
+  var cancelOrderTrigger = document.querySelectorAll('.cancelOrderTrigger');
+
+
+  cancelOrderTrigger.forEach(item => {
+	item.addEventListener('click', () => {
+		openCancelOrderModal()
+
+	// Add event listener to cancel order button
+	cancelOrderButton.addEventListener('click', function () {
     var reason = document.getElementById('cancelReason').value;
     var comments = document.getElementById('cancelComments').value;
-	let id = cancelOrderTrigger.getAttribute("data-orderId");
+	let id = item.getAttribute("data-orderId");
 
 	fetch('/api/v1/order-cancel',{
 		method:"PUT",
@@ -331,36 +351,19 @@
 			window.location.reload(true)
 		}
 	})
-    
+});
 
 
-
-
-
-
+});
+ 
+});
 
     cancelOrderModal.classList.remove('show');
     document.body.classList.remove('modal-open');
   });
 
-  // Add event listener to return order button
-  returnOrderButton.addEventListener('click', function () {
-    var reason = document.getElementById('returnReason').value;
-    var comments = document.getElementById('returnComments').value;
-    // Process return logic here
-    // Close modal after processing
-    returnOrderModal.classList.remove('show');
-    document.body.classList.remove('modal-open');
-  });
 
-  // Example trigger events
-  // Replace these with your own trigger logic
-  var cancelOrderTrigger = document.querySelectorAll('.cancelOrderTrigger');
-  var returnOrderTrigger = document.querySelectorAll('.returnOrderTrigger');
-
-  cancelOrderTrigger.forEach(item => item.addEventListener('click', openCancelOrderModal));
-  returnOrderTrigger.forEach(item => item.addEventListener('click', openReturnOrderModal));
-});
+  
 
  </script>
 </main>

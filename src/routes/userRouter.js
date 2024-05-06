@@ -95,6 +95,7 @@ router.post('/find-delivery-charge', userMiddleware.findDeliveryCharge)
 
 
 
+
 /*=====================Load shop ===============================================================*/
 
 //load shop
@@ -125,7 +126,10 @@ router.put('/remove-coupon', userMiddleware.removeCoupon);
 /* ================================orders ======================================================= */
 
 
+router.get('/check-valid-coupon', userOrderController.checkValidCoupon)
+
 // Get orders
+router.get('proceed-to-checkout', userOrderController.proceedtToCheckout)
 
 router.get('/my-orders',userMiddleware.isUserAutharized, userOrderController.loadMyOrders);
 

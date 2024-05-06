@@ -67,7 +67,7 @@
 
                                     <div class="ratings-container">
                                         <div class="ratings">
-                                            <div class="ratings-val" style="width: 80%;"></div><!-- End .ratings-val -->
+                                            <div class="ratings-val" style="width: <%=(product.product.avgRating / 5) * 100%>%;"></div><!-- End .ratings-val -->
                                         </div><!-- End .ratings -->
                                         <a class="ratings-text" href="#product-review-link" id="review-link"><%=product.product.review ? product.product.review : 0%></a>
                                     </div><!-- End .rating-container -->
@@ -105,7 +105,7 @@
                                     <div class="details-filter-row details-row-size my-4">
                                         <label for="size">Size:</label>
                                         <div class="select-custom">
-                                            <select name="size" id="sizeSelect" onchange="productStock('<%=product.sizeVariant%>')" class="form-control">
+                                            <select name="size<%=product.product._id%>" id="size<%=product.product._id%>" onchange="productStock('<%=product.sizeVariant%>')" class="form-control">
                                                 
                                                 <option selected value="S">Small</option>
                                                 <option value="M">Medium</option>
@@ -134,13 +134,13 @@
                                         <div class="details-action-col">
 
                                             
-                                          <button style="all: unset;" onclick="addToCart('<%=product._id%>')"><a  class="btn-product btn-cart"><span>add to cart</span></a></button>  
+                                          <button style="all: unset;" onclick="addToCart('<%=product.product._id%>')"><a  class="btn-product btn-cart">add to cart</a></button>  
                                         </div><!-- End .details-action-col -->
 
                                        
                                         <%}%>
                                         <div class="details-action-wrapper">
-                                            <button style="all: unset;" onclick="addToWishlist('<%=product._id%>')"><a href="#" class="btn-product btn-wishlist" title="Wishlist"><span>Add to Wishlist</span></a></button>
+                                            <button style="all: unset;" onclick="addToWishlist('<%=product.product._id%>')"><a href="#" class="btn-product btn-wishlist" title="Wishlist"><span>Add to Wishlist</span></a></button>
                                             
                                         </div><!-- End .details-action-wrapper -->
                                     </div><!-- End .product-details-action -->

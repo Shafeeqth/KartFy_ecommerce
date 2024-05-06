@@ -21,16 +21,27 @@ const orderSchema = mongoose.Schema({
                 type: String,
                 required: true,
             },
+            totalPrice: {
+                type: Number,
+                required: true
+
+            },
             isReviewed: {
                 type: Boolean,
                 default: false,
             },
-            isReturned: {
-                type: Boolean,
-                default: false,
+            returnStatus: {
+                type: String,
+                default: 'False',
+                enum: ['Requested', 'Accepted','Rejected', 'False']
             },
         }
-    }], orderAmout: {
+    }],totalSaved: {
+        type: String,
+        required: false,
+        default: 0
+    },
+     orderAmount: {
         type: Number,
         required: true
     }, address: {
@@ -55,7 +66,7 @@ const orderSchema = mongoose.Schema({
         type: String,
         required: true,
         enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled', 'Returned', 'Placed'],
-        default: 'Placed'
+        default: 'Pending'
     },
     orderId: {
         type: Number,
@@ -105,28 +116,39 @@ const orderSchema = mongoose.Schema({
 
 const Order = mongoose.model('Order', orderSchema);
 
-
-const OrderReturnSchema = mongoose.Schema({
+const returnShcema = mongoose.Schema({
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+    },
     order: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Order',
-    }, reason: {
-        type: String,
         required: true,
-    }, reasonDesc: {
-        type: String,
-        required: false,
-    }, isApproved: {
-        type: String,
+
+    },
+    orderedItemId: {
+        type: mongoose.Schema.Types.ObjectId,
         required: true,
+
+    },
+    reason: {
+        type: String,
+        required: true
+
+    },
+    comments: {
+        type: String,
+        required: false
+
     }
 },
-    {
-        timestamps: true
-    }
-);
+{
+    timestamps: true
+})
 
-const OrderReturn = mongoose.model('Return', OrderReturnSchema);
+const Return = mongoose.model('Return', returnShcema);
 
 
 const reviewSchema = mongoose.Schema({
@@ -153,7 +175,7 @@ const Review = mongoose.model('Review', reviewSchema);
 
 module.exports = {
     Order,
-    OrderReturn,
+    Return,
     Review,
 
 

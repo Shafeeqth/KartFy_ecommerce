@@ -42,6 +42,34 @@
 								</div><!-- End .card-body -->
 							</div><!-- End .card-dashboard -->
 						</div>
+
+
+						<div class="col-md-6">
+							<!-- Add user details here, you can customize this section -->
+
+							<div class="card card-dashboard text-center">
+								<div class="card-body">
+									<h3>Payment Details</h3>
+									<h3 class="card-title">
+										Payment TYPE : <%=order.paymentMethod%>
+									</h3><!-- End .card-title -->
+
+
+									<p>
+										Payment Id: <%=order.paymentId%><br>
+											Total Amount: <%=order.orderAmout%><br>
+												Saved discount: <%=order.totalSaved%><br>
+													Payment Status: <%=order.paymentStatus%><br>
+														Delivery Charge: <%=order.deliveryCharge%><br>
+															Grand total: <%=order.total%><br>
+
+
+
+									</p>
+								</div><!-- End .card-body -->
+							</div><!-- End .card-dashboard -->
+						</div>
+
 						<div class="table-responsive">
 							<div id="reload">
 								<table class="table " id="ReloadTable">
@@ -127,13 +155,20 @@
 													</td>
 													<td class="text-center col-2 ">
 														<%if(order.orderStatus== 'Delivered' ){%>
-															<button onclick="returnProduct('<%=order._id%>','<%=item.product._id%>')" data-orderId="" 
-																data-productId="" 
+															<%if(item.returnStatus == 'False'){%>
+															<button
+																onclick="returnProduct('<%=order._id%>','<%=item._id%>')"
+																data-orderId="" data-productId=""
 																class="returnOrderTrigger btn btn-warning rounded">Return
 																Product</button>
+																<%}else{%>
+																	<button disabled														
+																
+																class="returnOrderTrigger btn btn-warning rounded"> Return <%=item.returnStatus%></button>
+																	<%}%>
 															<%if(!item.isReviewed){ %>
 																<button
-																	onclick="reviewModalLogic('<%=order._id%>','<%=item.product._id%>', '<%=item.size%>')"
+																	onclick="reviewModalLogic('<%=order._id%>','<%=item.product._id%>', '<%=item.size%>', '<%=item._id%>')"
 																	type="button" data-productId="" data-orderId=" "
 																	class="btn btn-primary">
 																	Add Review
@@ -158,7 +193,7 @@
 																					id="cancelOrderTrigger"
 																					class="btn btn-danger rounded">Track
 																					Order</button>
-																				<%}%>
+														<%}%>
 													</td>
 											</tr>
 
@@ -178,7 +213,8 @@
 				<div class="modal-content">
 					<div class="modal-header bg-dark text-light my-3">
 						<h5 class="modal-title text-white" id="returnOrderModalLabel">Return Order</h5>
-						<button type="button" class="close btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						<button type="button" class="close btn-close" data-bs-dismiss="modal"
+							aria-label="Close"></button>
 					</div>
 					<div class="modal-body m-3">
 						<div class="mb-3">
@@ -197,7 +233,7 @@
 						</div>
 					</div>
 					<div class="modal-footer " style="display: flex; justify-content: space-around;">
-						<button type="button" class="close btn btn-primary" > cancel</button>
+						<button type="button" class="close btn btn-primary"> cancel</button>
 						<button type="button" class="btn btn-warning" id="confirmReturnOrder">Confirm</button>
 					</div>
 				</div>
@@ -215,7 +251,9 @@
 					<div class="modal-body">
 						<form id="reviewForm" onsubmit="event.preventDefault()">
 							<div class="mb-3 ">
-								<label for="rating" class="form-label  text-center fs-3">Rating</label>
+
+
+
 								<div id="starRating" class="mb-3 text-center">
 									<span class="star" style="font-size: 6rem;" data-rating="1">&#9733;</span>
 									<span class="star" style="font-size: 6rem;" data-rating="2">&#9733;</span>
@@ -224,6 +262,12 @@
 									<span class="star" style="font-size: 6rem;" data-rating="5">&#9733;</span>
 								</div>
 								<input type="hidden" name="rating" id="rating">
+							</div>
+							<div class="">
+								<label for="review" class="form-label">Write your review*</label>
+								<div id="review" class="text-center">
+									<input type="text" class="form-control" required id="reviewInput" name="review">
+								</div>
 							</div>
 							<div class="mb-3">
 								<label for="comment" class="form-label">Comment (Optional)</label>
@@ -284,12 +328,13 @@
 
 		<!-- content-main end// -->
 
-		
+
 	</main>
 	<script>
 
 
-		function reviewModalLogic(orderId, productId, size) {
+		function reviewModalLogic(orderId, productId, size, orderedItemId) {
+
 
 			let reviewModal = document.getElementById('reviewModal');
 			reviewModal.classList.add('show');
@@ -314,28 +359,65 @@
 					if (starRating <= rating) {
 						star.classList.add('filled');
 					} else {
-						star.style.background = 'white' ;
-						star.style.color = 'lightgoldenrodyellow' ;
+						star.style.background = 'white';
+						star.style.color = 'lightgoldenrodyellow';
 					}
 				});
 			}
-			
+
 			// //hide the unfilled stars
 			// const maxRating = 5; // Maximum rating
 			// stars.forEach(star => {
 			// 	const starRating = parseInt(star.getAttribute('data-rating'));
 			// 	if (starRating > maxRating) {
-				
+
 			// 	}
 			// });
 
 			const reviewForm = document.getElementById('reviewForm');
 			reviewForm.addEventListener('submit', function (event) {
+				let form = document.forms['reviewForm']
+				let reviewInput = form.elements.reviewInput;
+				let comment = form.elements.comment;
+				let rate = form.elements.rating
+
+				if (!rate.value) {
+					displayErrorMessage(form, "rating", "rating is requred!.");
+					return;
+				}
+
+				if (reviewInput.value.trim().length <= 2) {
+					displayErrorMessage(form, "reviewInput", "Please enter a valid review.");
+					return;
+				}
+				if (comment.value) {
+
+					if (comment.value.trim().length <= 5) {
+						displayErrorMessage(form, "comment", "Please enter a valid comment.");
+						return;
+					}
+				}
+
+
+
+
+
+				// let reveiw = form.elements.reviewInput.value.trim();
+				// let comment = form.elements.comment.innerText.trim();
+				// console.log(review , comment);
+
+
+
+
 				event.preventDefault();
+
 				const formData = new FormData(reviewForm);
 				formData.append('orderId', orderId);
 				formData.append('productId', productId);
+				formData.append('review', reviewInput);
+				formData.append('orderedItemId', orderedItemId);
 				formData.append('size', size)
+
 				const data = Object.fromEntries(formData.entries());
 
 
@@ -373,21 +455,44 @@
 			});
 
 
+			function displayErrorMessage(form, fieldName, message) {
+				const field = form.elements[fieldName];
+				const errorDiv = document.createElement("div");
+				errorDiv.className = "error-message";
+				errorDiv.style.color = "red"; // Set color to red
+				errorDiv.textContent = message;
+				field.parentNode.insertBefore(errorDiv, field);
+
+				// Remove error message after 3000 milliseconds (3 seconds)
+				setTimeout(() => {
+					errorDiv.remove();
+				}, 3000);
+			}
+
+			function clearErrorMessages(form) {
+				const errorMessages = form.querySelectorAll(".error-message");
+				errorMessages.forEach((errorMessage) => {
+					errorMessage.remove();
+				});
+			}
+
+
 		};
 
-		function returnProduct(orderId, productId) {
+		function returnProduct(orderId, orderedItemId) {
+			let returnOrderButton = document.getElementById('confirmReturnOrder');
 			returnOrderButton.addEventListener('click', function () {
 				var reason = document.getElementById('returnReason').value;
 				var comments = document.getElementById('returnComments').value;
-				
+
 
 				fetch('/api/v1/orders/order-return', {
 					method: "POST",
 					body: JSON.stringify({
 						reason,
 						comments,
-						id,
-						productId
+						orderId,
+						orderedItemId
 					}),
 					headers: {
 						'Content-Type': 'application/json',
@@ -409,7 +514,7 @@
 
 
 
-					
+
 				document.body.classList.remove('modal-open');
 			});
 		}
@@ -429,14 +534,14 @@
 
 			// Function to open cancel order modal
 
-			 document.querySelectorAll('.close').forEach(btn => {
+			document.querySelectorAll('.close').forEach(btn => {
 				btn.addEventListener('click', (event) => {
 					returnOrderModal.classList.remove('show');
-				document.body.classList.remove('modal-open');
+					document.body.classList.remove('modal-open');
 
 				})
-			 })
-			
+			})
+
 
 			// Function to open return order modal
 			function openReturnOrderModal() {
@@ -447,15 +552,15 @@
 			console.log(returnOrderTrigger)
 
 			// Add event listener to cancel order button
-			
+
 
 			// Add event listener to return order button
-			
+
 
 			// Example trigger events
 			// Replace these with your own trigger logic
-			
-			
+
+
 			returnOrderTrigger.forEach(item => item.addEventListener('click', openReturnOrderModal));
 		});
 

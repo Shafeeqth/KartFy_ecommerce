@@ -49,6 +49,7 @@ const loadProductDetails = asyncHandler(async (req, res) => {
 
 
     ])
+   
     console.log(product)
 
     // let category = await Category.findOne({ _id: product.category }).sort({createdAt: 1})
@@ -97,39 +98,35 @@ const addProductStock = asyncHandler(async (req, res, next) => {
     try {
 
         let { id, size, quantity } = req.body;
-        console.log('addStock ', req.body)
 
         if (quantity < 1) {
-            return res
-                .status(400)
+            return res.status(400)
                 .json({
                     success: false,
                     error: true,
                     message: 'Quantity can\'t be less than 1'
                 })
         }
-        let inventory = await Inventory.findOne({ product: id });
-        let stock = inventory.sizeVariant?.reduce((acc, item) => item.stock, 0)
+        let inventory = await Inventory.findOne({ product: id });       
+        let totalStock = inventory.sizeVariant?.reduce((acc, item) => item.stock + acc, 0)
         if (inventory) {
             const existSizeVariant = inventory.sizeVariant.find(variant => variant.size === size);
-
+         
             if (existSizeVariant) {
                 existSizeVariant.stock += parseInt(quantity);
+                await existSizeVariant.save();
                 
-                inventory.totalStock = stock + parseInt(quantity)
+                inventory.totalStock = totalStock + parseInt(quantity)
 
             } else {
                 inventory.sizeVariant.push({
                     size: size,
                     stock: parseInt(quantity)
                 });
-                inventory.totalStock = stock+ parseInt(quantity)
+                inventory.totalStock = totalStock + parseInt(quantity)
             }
-
             inventory = await inventory.save();
-
-            res
-                .status(200)
+            res.status(200)
                 .json({
                     success: true,
                     error: false,
@@ -164,38 +161,6 @@ const addProductStock = asyncHandler(async (req, res, next) => {
 
     }
 
-    // let { id, quantity } = req.body;
-    // console.log(id, quantity)
-
-    // if (quantity < 1) return res.json({
-    //     success: false,
-    //     error: true,
-    //     message: 'Quantity can\'t be less than 1'
-    // })
-    // let product = await Product.find({ _id: id })
-    // console.log('**************************************************************', product)
-    // let inventory = await Product.findOneAndUpdate({ 
-    //     _id: new mongoose.Types.ObjectId(id) 
-    // }
-    // , { $inc: { 
-    //     stock: +quantity
-    //  } 
-    // }, { 
-    //     new: true 
-    // });
-    // console.log('==========================================================================', inventory)
-
-    // if (inventory) {
-    //     console.log('success')
-    //     return res.json({
-    //         success: true,
-    //         error: false,
-    //         message: 'stock added to Product'
-    //     })
-    // }
-
-
-
 })
 
 const addProduct = asyncHandler(async (req, res, next) => {
@@ -203,21 +168,11 @@ const addProduct = asyncHandler(async (req, res, next) => {
     category = category.map(item => item.split(',')).map(item => {
        return  {[item[0]] : item[1]}
     })
-
-    console.log('=========', category);
-
-    console.log('BODY=======================================', req.body)
     let images = req.files.map(item => item.filename);
     let cropPath = path.join(__dirname, '../../public/Data/sharped');
-
-
     let { error, value } = helper.productValidation.validate({
         title, mrpPrice, description, price,
     });
-
-    console.log(error || value);
-
-    console.log(images)
     images.forEach((item, index) => {
 
         sharp(req.files[index].path).resize(600, 600).toFile(`${cropPath}/${item}`)
@@ -228,9 +183,6 @@ const addProduct = asyncHandler(async (req, res, next) => {
                 console.log(error);
             })
     })
-
-
-
     let product = await Product.create({
         title,
         mrpPrice,
@@ -240,42 +192,23 @@ const addProduct = asyncHandler(async (req, res, next) => {
         images,
         color
     });
-    console.log('------------------', product)
     await Inventory.create({
         product: product._id
     })
-
     res.redirect('/api/v1/admin/products');
-
-
 
 
 })
 
 const editProduct = asyncHandler(async (req, res, next) => {
-
-    
-    console.log('body : ',req.body)
-
-    
-   
-    //  return 
     let { title, mrpPrice, description, price, color, category, imageIndexes, id } = req.body;
     
     category = Array.from(category).map(item => item.split(',')).map(item => {
         return  {[item[0]] : item[1]}
      })
-    console.log('----------------', category, 'category')
-    console.log('req.files', req.files)
- 
 
     let images = req.files?.map(item => item.filename);
     let cropPath = path.join(__dirname, '/../public/Data/sharped');
-
-
-
-    // let { error, value } = helper.productValidation.validate({ title, mrpPrice, description, price, stock });
-    // console.log(error || value);
 
 
     images?.forEach((item, index) => {
@@ -290,16 +223,14 @@ const editProduct = asyncHandler(async (req, res, next) => {
    
     console.log(Array.from(imageIndexes), 'array indexes')
 
-    Array.from(imageIndexes)?.forEach(async (item) => {
+    Array.from(imageIndexes)?.forEach(async (item, index) => {
         await Product.updateOne({
             _id: id
         },
         {
             $set: {
-                [`images.${item}`]: images[item]
+                [`images.${item}`]: images[index]
             }
-            
-
         }
     )
         

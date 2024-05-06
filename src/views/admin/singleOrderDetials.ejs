@@ -158,6 +158,7 @@
                           data-productId="<%= item.product._id%>"
                           data-index="<%= i%>"
                           data-userId="<%= order.user._id%>"
+                          data-orderAmount="<%= order.orderAmount%>"
                           class="form-select orderStatus"
                           id="orderStatus"
                           name="orderStatus"
@@ -254,6 +255,7 @@
         select.addEventListener("change", () => {
           const orderId = select.getAttribute("data-orderId");
           const productId = select.getAttribute("data-productId");
+          const orderAmount = select.getAttribute("data-orderAmount");
           const index = select.getAttribute("data-index");
           const userId = select.getAttribute("data-userId");
           console.log(orderId, productId, index, userId);
@@ -286,6 +288,7 @@
               index: index,
               status: select.value,
               userId: userId,
+              orderAmount
             };
             $.ajax({
               type: "PUT",

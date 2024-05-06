@@ -1,7 +1,7 @@
 
 
 const mongoose = require('mongoose');
-
+const Coupon = require('../models/couponModel');
 const cartSchema = mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
@@ -60,6 +60,15 @@ const cartSchema = mongoose.Schema({
     {
         timestamps: true
     });
+cartSchema.pre('save', async (next) => {
+    if(this.isCouponApplied === true) {
+        this.isCouponApplied = false;
+        this.cartTotal -= this.coupon.discount;
+        delete this.coupon
+
+    }
+    next();
+})
 
 const Cart = mongoose.model('Cart', cartSchema);
 
