@@ -32,7 +32,7 @@
 								</li>
 								<li class="nav-item">
 									<a class="nav-link" id="tab-wallet-link" data-toggle="tab" href="#tab-wallet"
-										role="tab" aria-controls="tab-address" aria-selected="false">My Wallet</a>
+										role="tab" aria-controls="tab-wallet" aria-selected="false">My Wallet</a>
 								</li>
 								<li class="nav-item">
 									<a class="nav-link" id="tab-downloads-link" href="/api/v1/wishlist"
@@ -45,7 +45,7 @@
 								</li>
 								
 								<li class="nav-item">
-									<a class="nav-link" id="tab-address-link" data-toggle="tab" href="#tab-address"
+									<a class="nav-link" data-toggle="tab" href="#tab-address"
 										role="tab" aria-controls="tab-address" aria-selected="false">Adresses</a>
 								</li>
 
@@ -290,13 +290,9 @@
 									   
 									</div>
 								</div><!-- .End .tab-pane -->
-
-								<div class="tab-pane fade" id="tab-downloads" role="tabpanel"
-									aria-labelledby="tab-downloads-link">
-									<p>No downloads available yet.</p>
-									<a href="category.html" class="btn btn-outline-primary-2"><span>GO SHOP</span><i
-											class="icon-long-arrow-right"></i></a>
-								</div><!-- .End .tab-pane -->
+								
+						
+							
 
 								<div class="tab-pane fade" id="tab-address" role="tabpanel"
 									aria-labelledby="tab-address-link">
@@ -310,7 +306,7 @@
 												Address</span></a>
 
 									</div>
-									<div class="row" id="">
+									<div class="row" >
 										<%userProfile[0].addresses?.forEach(addresses=> {%>
 											<div class="col-lg-6">
 												<div class="card card-dashboard">

@@ -451,13 +451,14 @@ const orderReturn = asyncHandler(async (req, res) => {
     console.log(req.body)
     let user = req.session.user
 
-    let {reason, comments, orderId, orderedItemId} = req.body;
+    let {reason, comments, orderId, orderedItemId, productId} = req.body;
     let userReturn = await Return.create({
         user:user._id,
         order: orderId,
         orderedItemId,
         reason,
-
+        returnStatus:'Requested',
+        productId,
         comments,
 
 
@@ -490,6 +491,7 @@ const orderReturn = asyncHandler(async (req, res) => {
 const loadMyOrders = asyncHandler(async (req, res) => {
 
     let user = req.session?.user;
+    let page = 
     if (!user) return res.redirect('/api/v1/')
 
     let order = await Order.find({

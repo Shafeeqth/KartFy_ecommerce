@@ -69,9 +69,13 @@ const addToCart = asyncHandler(async (req, res, next) => {
     console.log(req.body)
 
 
+
+
     let { id, addToCartFromWishlist, size } = req.body.data
     console.log(id, addToCartFromWishlist, size)
     let user = req.session.user?._id;
+   
+    
     if (!user) {
         return res.json({
             success: false,
@@ -81,6 +85,8 @@ const addToCart = asyncHandler(async (req, res, next) => {
 
         })
     }
+
+    
     let inventory = await Inventory.findOne({ product: id }).populate('product')
     console.log('Inventory', inventory)
     let totalPrice = inventory.product.price;
@@ -96,7 +102,26 @@ const addToCart = asyncHandler(async (req, res, next) => {
         })
     }
     console.log(product, 'product')
+    let userCart = await Cart.findOne({ user });
+    if(userCart && userCart.isCouponApplied) {
+        userCart.isCouponApplied = false,
+   
+        await Coupon.findOneAndUpdate({
+            couponCode: userCart.coupon.code
+        },
+        {
+            $pull: {
+                appliedUsers: user
+            }
+        },
+        {
+            new: true
 
+        }
+    )
+    userCart.totalPrice += userCart.coupon.discount;
+    delete user.coupon
+    }
     if (!product.stock > 0) {
         return res.json({
             success: false,
@@ -110,7 +135,7 @@ const addToCart = asyncHandler(async (req, res, next) => {
     if (addToCartFromWishlist === true) {
 
 
-        let userCart = await Cart.findOne({ user, });
+     
         if (!userCart) {
             let cartCreate = await Cart.create({
                 user,
@@ -172,7 +197,7 @@ const addToCart = asyncHandler(async (req, res, next) => {
 
 
     }
-    let userCart = await Cart.findOne({ user, })
+   
     if (!userCart) {
 
         let cartCreate = await Cart.create({
@@ -247,6 +272,27 @@ const removeFromCart = asyncHandler(async (req, res, next) => {
     let user = req.session.user
     let { id, size, total } = req.body;
     let product = await Product.findOne({ _id: id })
+    let userCart = await Cart.findOne({ user:user._id });
+    if(userCart && userCart.isCouponApplied) {
+        userCart.isCouponApplied = false,
+   
+        await Coupon.findOneAndUpdate({
+            couponCode: userCart.coupon.code
+        },
+        {
+            $pull: {
+                appliedUsers: user._id
+            }
+        },
+        {
+            new: true
+
+        }
+    )
+    userCart.totalPrice += userCart.coupon.discount;
+    delete user.coupon
+    }
+    await userCart.save()
 
 
     await Cart.updateOne({
@@ -399,6 +445,28 @@ const updateCartCount = asyncHandler(async (req, res, next) => {
     let userCart = await Cart.findOne({
         user,
     });
+  
+    if(userCart && userCart.isCouponApplied) {
+        userCart.isCouponApplied = false,
+   
+        await Coupon.findOneAndUpdate({
+            couponCode: userCart.coupon.code
+        },
+        {
+            $pull: {
+                appliedUsers: user
+            }
+        },
+        {
+            new: true
+
+        }
+    )
+    userCart.totalPrice += userCart.coupon.discount;
+    delete user.coupon
+    }
+   
+
    let cartItem = userCart.products.find(item => item.size == size && item.product == productId);
    console.log(cartItem);
    

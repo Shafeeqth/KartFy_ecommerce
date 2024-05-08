@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const ApiError = require('../utilities/apiError');
 const ApiResponse = require('../utilities/apiResponse');
 const asyncHandler = require('../utilities/asyncHandler');
-const { Order, OrderReturn, Review } = require('../models/orderModels');
+const { Order, OrderReturn, Review, Return } = require('../models/orderModels');
 const Coupon = require('../models/couponModel');
 const User = require('../models/userModel');
 const Offer = require('../models/offerModel');
@@ -14,6 +14,7 @@ const Banner = require('../models/bannerModel');
 const path = require('node:path');
 const sharp = require('sharp');
 const Wallet = require('../models/walletModel');
+const { pipeline } = require('node:stream');
 
 
 
@@ -129,8 +130,10 @@ const loadCoupons = asyncHandler(async (req, res) => {
 
 
 const loadReturns = asyncHandler(async (req, res) => {
-
-    res.render('admin/returnRequest');
+    let returns = await Return.find({}).populate('productId').populate('user').populate('order')
+    console.log(returns)
+   
+    res.render('admin/returnRequest', {returns});
 })
 
 

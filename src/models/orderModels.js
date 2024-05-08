@@ -133,6 +133,17 @@ const returnShcema = mongoose.Schema({
         required: true,
 
     },
+    productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
+        required: true,
+
+    },
+    returnStatus: {
+        type: String,
+        default: 'False',
+        enum: ['Requested', 'Accepted','Rejected', 'False']
+    },
     reason: {
         type: String,
         required: true

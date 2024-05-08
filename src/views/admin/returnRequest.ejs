@@ -35,7 +35,7 @@
           <!-- card-header end// -->
           <div class="card-body">
             <div class="table-responsive">
-              <%console.log(order)%> <%if(order.length > 0) {%>
+             <%if(returns.length > 0) {%>
               <table class="table table-hover">
                 <thead>
                   <tr>
@@ -49,19 +49,19 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <%order.forEach((item, i)=> {%>
+                  <%returns.forEach((item, i)=> {%>
 
                   <tr>
                     <td><%= i + 1%></td>
                     <td><b> <%= item.user. %> </b></td>
                     <td><%= item.user.name%></td>
-                    <td><%= item.totalAmount%></td>
+                    <td><%= item.order.orderAmount%></td>
                     <td>
                       <span class="badge rounded-pill alert-warning">
-                        <%= item.status%>
+                        <%= item.returnStatus%>
                       </span>
                     </td>
-                    <% const formattedDate=item.date.toLocaleString('en-US', {
+                    <% const formattedDate=item.createdAt.toLocaleString('en-US', {
                     weekday: 'short' , month: 'short' , day: 'numeric' , year:
                     'numeric' , hour: 'numeric' , minute: 'numeric' , second:
                     'numeric' , hour12: true }); %>

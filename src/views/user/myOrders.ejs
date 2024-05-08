@@ -177,7 +177,7 @@
 				  <td><%= formattedDate%></td>
 				  <td class="text-center col-2 ">
 					<%if(order.paymentStatus == 'Failed') {%>
-						<button onclick="orderDetails('<%=order._id%>')"  class=" btn bg-warning rounded"><i class="fa-solid fa-indian-rupee-sign"></i>Retry Payment</button>
+						<button onclick="retryPayment('<%=order._id%>', '<%=order.paymentMethod%>')"  class=" btn bg-warning rounded"><i class="fa-solid fa-indian-rupee-sign"></i>Retry Payment</button>
 					<%}else if(order.orderStatus== 'Delivered'){%>
 						<button onclick="orderDetails('<%=order._id%>')" class=" btn btn-info rounded">View Details</button>
 
@@ -283,6 +283,14 @@
 
   <!-- content-main end// -->
  <script>
+
+	function retryPayment(orderId, paymentMethod) {
+		console.log(orderId, paymentMethod)
+		
+	}
+
+
+
 	function orderDetails(id) {
 		window.location.href = 'api/v1/admin//my-orders/single-orderDetails?id='+id;
 	}

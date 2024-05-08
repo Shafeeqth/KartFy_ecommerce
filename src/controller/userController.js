@@ -278,7 +278,7 @@ const loadProfile = asyncHandler(async (req, res, next) => {
 
     let user = req.session.user ? req.session.user : null;
     if (user) {
-        let wallet = await Wallet.findOne({user: user._id }).populate('user');
+        let wallet = await Wallet.findOne({user: user._id }).populate('user').sort({createdAt: 1,'transactions.date':-1 });
         console.log('wallet', wallet)
         let userProfile = await User.aggregate([
             {
