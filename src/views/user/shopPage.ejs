@@ -19,7 +19,7 @@
                                 <input type="search" class="form-control rounded-pill" id="search-input"
                                     placeholder="Search for the product" aria-label="Email Adress">
                                 <div class="input-group-append">
-                                    <button class="btn btn-primary rounded-pill border-end-0"
+                                    <button onclick="updateSearch()" class="btn btn-primary rounded-pill border-end-0"
                                     id="search-button"
                                         type="submit"><span>Search</span><i
                                             class="fa-solid fa-magnifying-glass"></i></button>
@@ -807,11 +807,20 @@
         </div><!-- End .page-content -->
     </main><!-- End .main -->
     <script>
-       
 
+document.addEventListener('load' , () => {
+   
+})
 
 
 document.addEventListener('DOMContentLoaded', function () {
+    let searchValue = document.getElementById("search-input")
+          let currentUrl = new URL(window.location.href);
+          let existingSearch = currentUrl.searchParams.get('search');
+
+    if(existingSearch)  searchValue.value = existingSearch;
+  
+    
     let searchInput=document.getElementById('search-input');
 
     searchInput.addEventListener('keyup', function () {
@@ -831,22 +840,29 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  function updateSearch() {
+          let searchValue = document.getElementById("search-input").value;
+          let currentUrl = new URL(window.location.href);
+          let existingSearch = currentUrl.searchParams.get('search');
+          if (existingSearch) {
+            currentUrl.searchParams.set('search', searchValue);
+          } else {
+            currentUrl.searchParams.append('search', searchValue);
+          }
+          window.location.href = currentUrl.toString();
+        }
+
+
 
 function updateSort() {
           let selectedOption = document.getElementById("sortSelect").value;
           let currentUrl = new URL(window.location.href);
-
-          // Get the existing sort parameter
           let existingSort = currentUrl.searchParams.get('sort');
-
-          // Update the sort parameter or add a new one
           if (existingSort) {
             currentUrl.searchParams.set('sort', selectedOption);
           } else {
             currentUrl.searchParams.append('sort', selectedOption);
           }
-
-          // Update the window location
           window.location.href = currentUrl.toString();
         }
 

@@ -239,8 +239,9 @@
 													   <%if(wallet?.transactions?.length > 0){%>
 														<div class="d-flex justify-content-between transction- " >
 															<h5 class="text-weight-bold fs-4 ">Date of Transaction</p>
+																<h5 class="text-weight-bold fs-4 ">Description </p>
 															<h5 class="text-weight-bold fs-4 ">Amount </p>
-															<h5 class="text-weight-bold fs-4 " >Transaction mode</p>
+															<h5 class="text-weight-bold fs-4 " >Mode</p>
 														</div>
 														<hr class="m-0">
 														 <% wallet.transactions.forEach((walletHistory)=>{ %>
@@ -251,17 +252,25 @@
 															   true
 															   }) %></p>
 															   <%if(walletHistory.mode == 'Debit') {%>
+																<p class="text-success">
+																	<%=  walletHistory?.description%> 
+																  </p>
 															  
 															 <p class="text-success">
 															   ₹<%=  walletHistory.amount %> .00
 															 </p>
+															
 															 <p class="text-success">
 															   <%= walletHistory.mode %>
 															 </p>
 															<%}else{%>
 																<p class="text-danger">
+																	<%=  walletHistory?.description%> 
+																  </p>
+																<p class="text-danger">
 																	-₹<%=  walletHistory.amount %> .00
 																  </p>
+																
 																  <p class="text-danger">
 																	<%= walletHistory.mode %>
 																  </p>

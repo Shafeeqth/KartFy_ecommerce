@@ -111,6 +111,112 @@
         </div>
       </div>
 
+
+
+
+
+
+      <div
+        class="modal fade"
+        id="exampleModal3"
+        tabindex="-1"
+        aria-labelledby="exampleModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="exampleModalLabel">
+                Create product Offer
+              </h1>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <form action="/api/v1/admin/offers/edit-offer" method="post">
+                <label for="form-label">Name</label>
+                <input style="visibility: hidden;" type="text" name="id" id="couponId">
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  placeholder="Enter coupon name"
+                  class="form-control my-2"
+                />
+                <label for="form-label">Description</label>
+                <input
+                  type="text"
+                  id="description"
+                  name="description"
+                  placeholder="Enter Description here"
+                  class="form-control my-2"
+                />
+
+                <label for="form-label">Dicount Percentage</label>
+                <input
+                  type="text"
+                  id="discount"
+                  name="discount"
+                  placeholder="Enter in % "
+                  class="form-control my-2"
+                />
+
+
+                <label for="form-label">MIn Order Amount</label>
+                <input
+                  type="text"
+                  name="minOrder"
+                  id="minCost"
+                  placeholder="Enter Min Amount"
+                  class="form-control my-2"
+                />
+
+                
+
+                <label for="form-label">Expire date</label>
+                <input
+                  type="date"
+                  name="edate"
+                  id="edate"
+                  placeholder="DD-MM-YYYY"
+                  class="form-control my-2"
+                />
+
+                <label for="form-label">Limit of use</label>
+                <input
+                  type="text"
+                  id="limit"
+                  name="limit"
+                  placeholder="Enter how many user can use"
+                  class="form-control my-2"
+                />
+
+                
+                <div class="modal-footer">
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                  >
+                    Close
+                  </button>
+                  <button type="submit" class="btn btn-primary">
+                    Submit
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+
       <!-- edit coupon modal -->
       <div
         class="modal fade"
@@ -222,6 +328,16 @@
               <i class="material-icons md-plus"></i> Create Offer
             </button>
           </div>
+          <div>
+            <button
+              href="#"
+              class="btn btn-dark"
+              data-bs-toggle="modal"
+              data-bs-target="#exampleModal3"
+            >
+              <i class="material-icons md-plus"></i> Create Offer
+            </button>
+          </div>
         </div>
         <div class="card mb-4">
           <!-- card-header end// -->
@@ -318,7 +434,7 @@
               <a class="page-link" href="?page=<%= page - 1%>"
                 ><i class="material-icons md-chevron_left"></i
               ></a>
-              <%}%> <% for (let i = 0; i < couponLength; i++) { %> <% if (i ===
+              <%}%> <% for (let i = 0; i < total; i++) { %> <% if (i ===
               0 || i === couponLength - 1 || (i >= page - 2 && i <= page + 2)) {
               %>
               <li class="page-item <%= page == i ? 'active' : '' %>">
@@ -328,7 +444,7 @@
               <li class="page-item disabled">
                 <span class="page-link">...</span>
               </li>
-              <% } %> <% } %> <%if(page != couponLength) {%>
+              <% } %> <% } %> <%if(page != total) {%>
               <a class="page-link" href="?page=<%= page + 1%>"
                 ><i class="material-icons md-chevron_right"></i
               ></a>

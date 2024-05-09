@@ -14,6 +14,7 @@ const { createRazorpayOrder, createPayPalPayment } = require('../controller/paym
 const mongoose = require('mongoose');
 const Wallet = require('../models/walletModel');
 const { date } = require('joi');
+const { findDeliveryCharge } = require('../middleware/userMiddleware');
 
 
 
@@ -137,6 +138,15 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
 
 
     })
+    if(cart.deliveryCharge > 0) {
+       let [sourceCordinate , destinationCordinate] = getCordinates(userAddress.pincode);
+       if(!destinationCordinate) {
+        cart.deliveryCharge = 40
+       }
+       let distance = getDistance(sourceCordinate, destinationCordinate);
+       let deliveryCharge = calculateDeliveryCharge(distance)
+       cart.deliveryCharge = deliveryCharge;
+    }
 
 
     console.log('products,', JSON.stringify(cart))
@@ -196,6 +206,7 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
             orderId,
             orderedItems,
             orderAmount,
+            deliveryCharge: cart.deliveryCharge,
             orderStatus: 'Placed',
         });
         await Cart.deleteOne({
@@ -228,13 +239,20 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
                 orderId,
                 orderedItems,
                 orderAmount,
+                totalSaved: cart.coupon?.discount ? cart.coupon?.discount : 0,
+                deliveryCharge: cart.deliveryCharge,
                 orderStatus: 'Placed'
             });
             await Cart.deleteOne({
                 user: user._id
             })
             wallet.balance -= order.orderAmount;
-            wallet.transactions.push({ amount: order.orderAmount, mode: 'Credit' })
+            
+            wallet.transactions.push({ 
+                amount: order.orderAmount,
+                description: 'Product ordered ',
+                 mode: 'Credit'
+                 })
             await wallet.save()
             res.status(200)
             .json({
@@ -257,6 +275,7 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
             orderId,
             orderedItems,
             orderAmount,
+            deliveryCharge: cart.deliveryCharge,
             orderStatus: 'Placed'
         });
 
@@ -336,6 +355,7 @@ const orderCancel = asyncHandler(async (req, res, next) => {
                     transactions: {
                         amount: order.orderAmount,
                         mode: 'Debit',
+                        description: 'Order cancell amount debited ',
 
                     }
                 }
@@ -491,8 +511,13 @@ const orderReturn = asyncHandler(async (req, res) => {
 const loadMyOrders = asyncHandler(async (req, res) => {
 
     let user = req.session?.user;
-    let page = 
+    let page = parseInt(req.query.page) -1 || 0;
+    let limit = parseInt(req.query.limit) || 7;
+    page < 0 ? (page = 0) : page = page
     if (!user) return res.redirect('/api/v1/')
+    let total = await Order.countDocuments({});
+
+    (page > Math.trunc(total / limit) -1) ? ( page =  Math.trunc(total / limit) -1) : page = page
 
     let order = await Order.find({
         user: user._id
@@ -500,6 +525,8 @@ const loadMyOrders = asyncHandler(async (req, res) => {
         .populate('address')
         .populate('orderedItems.product')
         .sort({ createdAt: -1 })
+        .skip(page * limit)
+        .limit(limit)
     
 
     res
@@ -507,6 +534,8 @@ const loadMyOrders = asyncHandler(async (req, res) => {
             {
                 order,
                 user,
+                total,
+                page
             })
 
 
@@ -663,6 +692,62 @@ const paypalFailure = asyncHandler(async (req, res) => {
     //     })
 })
 
+const retryOrderPay = asyncHandler( async (req, res) => {
+    let orderId = req.body.orderId;
+    let order = await Order.findOne({_id:orderId});
+    createRazorpayOrder(req, res, order);
+    console.log(order)
+})
+
+const retryPaymentSuccess = asyncHandler( async (req, res) => {
+    let {orderId, paymentId} = req.body;
+    let order = await Order.findOneAndUpdate({
+    _id: orderId
+    },
+    {
+        paymentMethod: 'RazorPay',
+        paymentId,
+        orderStatus: 'Placed',
+        paymentStatus: "Paid",
+
+    },
+    {
+        new: true
+    }
+)
+return res.status(200)
+    .json({
+        success: true,
+        error: false,
+        data: order,
+        message: 'Payment complete successfully'
+    })
+})
+
+const retryPaymentFailure = asyncHandler( async (req, res) => {
+    let {orderId} = req.body;
+    let order = await Order.findOneAndUpdate({
+    _id: orderId
+    },
+    {
+        paymentMethod: 'RazorPay',
+        orderStatus: 'Pending',
+        paymentStatus: "Failed",
+
+    },
+    {
+        new: true
+    }
+)
+return res.status(200)
+    .json({
+        success: false,
+        error: true,
+        data: order,
+        message: 'Payment complete successfully'
+    })
+})
+
 
 
 module.exports = {
@@ -677,6 +762,9 @@ module.exports = {
     paypalSuccess,
     paypalFailure,
     proceedtToCheckout,
-    checkValidCoupon
+    checkValidCoupon,
+    retryOrderPay,
+    retryPaymentSuccess,
+    retryPaymentFailure,
 
 }

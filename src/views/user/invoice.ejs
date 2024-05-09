@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Invoice</title>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <!-- Optional theme -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      padding: 20px;
+    }
+    .invoice {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .invoice-header {
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 20px;
+      margin-bottom: 20px;
+    }
+    .invoice-header h1 {
+      font-size: 24px;
+      margin: 0;
+      color: #333;
+    }
+    .invoice-header p {
+      margin: 5px 0;
+      color: #777;
+    }
+    .invoice-details {
+      margin-bottom: 20px;
+    }
+    .invoice-details h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    .invoice-details p {
+      margin: 5px 0;
+      color: #777;
+    }
+    .invoice-table {
+      margin-bottom: 20px;
+    }
+    .invoice-table th,
+    .invoice-table td {
+      text-align: center;
+    }
+    .invoice-table th {
+      background-color: #f9f9f9;
+    }
+    .invoice-table td {
+      border-top: 1px solid #ddd;
+      padding: 10px;
+    }
+    .invoice-footer p {
+      margin: 5px 0;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="invoice">
+      <div class="invoice-header">
+        <h1>Order Invoice</h1>
+        <p>Thank you for your purchase!</p>
+      </div>
+      <div class="invoice-details">
+        <h2>Order Details</h2>
+        <p><strong>Order ID:</strong> <%= order._id %></p>
+        <p><strong>Order Date:</strong>  <% 
+          var orderDate = new Date(order.date);
+          var formattedDate = orderDate.toLocaleString('default', { month: 'long' }) + ' ' + 
+                              orderDate.getDate() + ', ' + 
+                              orderDate.getFullYear();
+      %>
+      <%= formattedDate %></p>
+        <p><strong>Invoice Date:</strong> <%= date.toLocaleDateString('en-US', { year:
+          'numeric', month: 'short', day: '2-digit'
+          }).replace(/\//g, '-') %></p>
+      </div>
+      <div class="invoice-details">
+        <h2>Shipping Details</h2>
+        <p><strong>Customer Name:</strong> <%= user.name %></p>
+        <p><strong>Address:</strong> <%= order.deliveryAddress.addressline %>, <%= order.deliveryAddress.city %>, <%= order.deliveryAddress.state %>, <%= order.deliveryAddress.pincode %></p>
+        <p><strong>Phone:</strong> <%= order.deliveryAddress.phone %></p>
+      </div>
+      <div class="invoice-table">
+        <h2>Order Summary</h2>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Product Name</th>
+              <th>Size</th>
+              <th>Quantity</th>
+              <th>Price</th>
+              <th>Total</th>
+              <th>Returned</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (order.products.length > 0) {
+              order.products.forEach((product, index) => { %>
+                <tr>
+                  <td><%= index + 1 %></td>
+                  <td><%= product.productId.name %></td>
+                  <td><%= product.sizes %></td>
+                  <td><%= product.quantity %></td>
+                  <td>₹ <%= product.productPrice %>.00</td>
+                  <td>₹ <%= product.totalPrice %>.00</td>
+                  <td><%= product.status === "returned" ? "Yes" : "No" %></td>
+                </tr>
+            <% }) } %>
+            <tr>
+              <td colspan="6" class="text-right"><strong>Discount:</strong></td>
+              <td class="text-danger">₹ <% if(order.couponApplied) { %><%= order.couponApplied.discountAmount %><% } else { %>00<% } %></td>
+            </tr>
+            <tr>
+              <td colspan="6" class="text-right"><strong>Total:</strong></td>
+              <td class="text-danger">₹ <%= order.total_amount %>.00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="invoice-footer">
+        <p><strong>Date:</strong> <%= date.toLocaleDateString('en-US', { year:
+          'numeric', month: 'short', day: '2-digit'
+          }).replace(/\//g, '-') %></p>
+        <p>Thanks for shopping with us!</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

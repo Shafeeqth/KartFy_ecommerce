@@ -10,12 +10,22 @@ const Category = require('../models/categoryModel');
 
 
 const loadCategories = asyncHandler(async (req, res) => {
+    let page = parseInt(req.query.page) -1 || 0;
+    let limit = parseInt(req.query.limit) || 7;
+    page < 0 ? (page = 0) : page = page
+
+    let total = await Category.countDocuments({});
 
     
-    const categories = await Category.find({}).sort({createdAt:-1});
+    const categories = await Category.find({})
+        .sort({createdAt:-1})
+        .skip(page * limit)
+        .limit(limit)
     res
     .render('admin/Catagery', { 
-        categories 
+        categories ,
+        page,
+        total
     });
 
 
@@ -62,6 +72,11 @@ const loadEditSubCategory = asyncHandler(async (req, res) => {
 })
 
 const loadSubCategories = asyncHandler(async (req, res) => {
+    // let page = parseInt(req.query.page) -1 || 0;
+    // let limit = parseInt(req.query.limit) || 7;
+    // page < 0 ? (page = 0) : page = page
+
+    // let total = await Category.countDocuments({});
 
     let id = req.query.id;
     req.session.categoryId = id;
@@ -75,12 +90,13 @@ const loadSubCategories = asyncHandler(async (req, res) => {
 const addCategory = asyncHandler(async (req, res, next) => {
 
     let { title, description } = req.body;
-    let { error, value } = helper.cagetoryValidation.validate({
-        title, description
-    });
-    console.log(error || value)
+    console.log(req.body)
+    // let { error, value } = helper.cagetoryValidation.validate({
+    //     title, description
+    // });
+    // console.log(error || value)
 
-    if (!error) {
+    // if (!error) {
 
         
             let alreadyCategory = await Category.findOne({
@@ -95,7 +111,10 @@ const addCategory = asyncHandler(async (req, res, next) => {
 
                 return res
                     .json({
-                        fail: true
+
+                        success: false,
+                        error: true,
+                        message: 'Same category name is not allowed'
                     });
 
 
@@ -109,7 +128,9 @@ const addCategory = asyncHandler(async (req, res, next) => {
                         if (saved) {
                             res
                                 .json({
-                                    saved: true
+                                    success: true,
+                                    error: false,
+                                    message: 'Category added successfully'
                                 });
                         }
                     })
@@ -124,9 +145,9 @@ const addCategory = asyncHandler(async (req, res, next) => {
         
 
 
-    } else {
+    // } else {
 
-    }
+    // }
 
 })
 

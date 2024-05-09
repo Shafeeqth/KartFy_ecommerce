@@ -68,27 +68,48 @@ const checkAuthentic = asyncHandler(async (req, res) => {
 
 
 const loadCustomers = asyncHandler(async (req, res) => {
+    let page = parseInt(req.query.page) -1 || 0;
+    let limit = parseInt(req.query.limit) || 7;
+    page < 0 ? (page = 0) : page = page
 
-    const customers = await User.find({}).sort({ createdAt: -1 });
-    console.log('fetched the customers');
+    let total = await User.countDocuments({});
+
+
+    // (page > Math.trunc(total / limit) -1) ? ( page =  Math.trunc(total / limit) -1) : page = page
+
+    const customers = await User.find({}).sort({ createdAt: -1 }).skip(page * limit).limit(limit)
+
     res
-        .render('admin/userManagement', { customers })
+        .render('admin/userManagement', { customers, page, total })
 
 
 
 })
 
 const loadOrders = asyncHandler(async (req, res) => {
+    let page = parseInt(req.query.page) -1 || 0;
+    let limit = parseInt(req.query.limit) || 7;
+    page < 0 ? (page = 0) : page = page
+
+    let total = await Order.countDocuments({});
+
+
+    // (page > Math.trunc(total / limit) -1) ? ( page =  Math.trunc(total / limit) -1) : page = page
+
 
     let order = await Order.find({})
         .populate('user')
         .populate('address')
         .populate('orderedItems.product')
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .skip(page * limit)
+        .limit(limit)
     console.log(order)
     res
         .render('admin/order-details', {
-            order
+            order,
+            page,
+            total
         });
 
 })
@@ -119,21 +140,39 @@ const loadSingleOrderDetails = asyncHandler(async (req, res) => {
 
 
 const loadCoupons = asyncHandler(async (req, res) => {
+    let page = parseInt(req.query.page) -1 || 0;
+    let limit = parseInt(req.query.limit) || 7;
+    page < 0 ? (page = 0) : page = page
 
-    let coupon = await Coupon.find({});
-    let couponLength = Coupon.find().count();
-    let page = 0;
+    let total = await Coupon.countDocuments({});
+
+
+    let coupon = await Coupon.find({}).skip(limit * page).limit(limit);
+    
+
     console.log(coupon)
-    res.render('admin/couponManagement', { coupon, couponLength, page });
+    res.render('admin/couponManagement', { coupon, total, page });
 })
 
 
 
 const loadReturns = asyncHandler(async (req, res) => {
-    let returns = await Return.find({}).populate('productId').populate('user').populate('order')
+    let page = parseInt(req.query.page) -1 || 0;
+    let limit = parseInt(req.query.limit) || 7;
+    page < 0 ? (page = 0) : page = page
+
+    let total = await Return.countDocuments({});
+
+
+    let returns = await Return.find({})
+            .populate('productId')
+            .populate('user')
+            .populate('order')
+            .skip(limit * page)
+            .limit(limit)
     console.log(returns)
    
-    res.render('admin/returnRequest', {returns});
+    res.render('admin/returnRequest', {returns, total, page});
 })
 
 
@@ -196,19 +235,21 @@ const changeOrderStatus = asyncHandler(async (req, res, next) => {
         {
             new: true
         });
-    if (orderStatus == 'Cancelled') {
+    if (status == 'Cancelled') {
         if(['PayPal', 'RazorPay', 'Wallet'].includes(order.paymentMethod)) {
-            let order = await Wallet.updateOne({
+            let wallet = await Wallet.updateOne({
                 user: userId
             }, {
                 $inc: {
-                    balance: orderAmount
+                    balance: order.orderAmount
     
                 },
                 $push: {
                     transactions: {
                         mode: 'Debit',
-                        amount: orderAmount
+                        amount: order.orderAmount,
+                        description: 'Order canceled by admin amount debited ',
+
                     }
                 }
             })
@@ -351,18 +392,32 @@ const listAndUnlistCoupon = asyncHandler(async (req, res) => {
 
 
 const loadOffers = asyncHandler(async (req, res) => {
-    let offers = Offer.find({});
+    let page = parseInt(req.query.page) -1 || 0;
+    let limit = parseInt(req.query.limit) || 7;
+    page < 0 ? (page = 0) : page = page
+
+    let total = await Offer.countDocuments({});
+
+
+    let offers = Offer.find({}).skip(page * limit).limit(limit)
     let categories = await Category.find({ isListed: true }).select('title subCategories');
     console.log('categories', categories);
-    res.render('admin/offerManagement', { categories, offers, page: 0, couponLength: 0 })
+    res.render('admin/offerManagement', { categories, offers, page, total })
 
 })
 
 const loadBanners = asyncHandler(async (req, res) => {
-    let banners = await Banner.find({});
+    let page = parseInt(req.query.page) -1 || 0;
+    let limit = parseInt(req.query.limit) || 7;
+    page < 0 ? (page = 0) : page = page
+
+    let total = await Coupon.countDocuments({});
+
+
+    let banners = await Banner.find({}).skip(limit * page).limit();
 
     console.log('categories', banners);
-    res.render('admin/bannerManagement', { banners, page: 0, couponLength: 0 })
+    res.render('admin/bannerManagement', { banners, page, total })
 
 })
 

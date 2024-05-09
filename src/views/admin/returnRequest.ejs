@@ -31,66 +31,112 @@
             <p>Lorem ipsum dolor sit amet.</p>
           </div>
         </div>
-        <div class="card mb-4">
-          <!-- card-header end// -->
-          <div class="card-body">
-            <div class="table-responsive">
-             <%if(returns.length > 0) {%>
-              <table class="table table-hover">
-                <thead>
-                  <tr>
-                    <th>Index</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Email</th>
-                    <th scope="col">Total</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Date</th>
-                    <th scope="col">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <%returns.forEach((item, i)=> {%>
-
-                  <tr>
-                    <td><%= i + 1%></td>
-                    <td><b> <%= item.user. %> </b></td>
-                    <td><%= item.user.name%></td>
-                    <td><%= item.order.orderAmount%></td>
-                    <td>
-                      <span class="badge rounded-pill alert-warning">
-                        <%= item.returnStatus%>
-                      </span>
-                    </td>
-                    <% const formattedDate=item.createdAt.toLocaleString('en-US', {
-                    weekday: 'short' , month: 'short' , day: 'numeric' , year:
-                    'numeric' , hour: 'numeric' , minute: 'numeric' , second:
-                    'numeric' , hour12: true }); %>
-                    <td><%= formattedDate%></td>
-                    <td class="">
-                      <%const returns=true%>
-                      <a
-                        href="/api/v1/admin/single-orderDetails?orderId=<%= item._id%>&returns=<%= returns%>"
-                        >More details</a
-                      >
-                      <!-- dropdown //end -->
-                    </td>
-                  </tr>
-
-                  <%})%>
-                </tbody>
-              </table>
-              <%} else {%>
-
-              <p class="text-center" style="margin: 2rem 0; font-weight: 900">
-                No return requests
-              </p>
-
+        <div class="table-responsive">
+          <div id="reload">
+          <table class="table " id="ReloadTable">
+            <thead class="font-bold">
+            <tr>
+              <th class="text-center col-1">Order ID</th>
+              <th class="text-center col-4" scope="col">Products</th>
+              
+              <th class="text-center col-1" scope="col">Total</th>
+              <th class="text-center col-2" scope="col">Status</th>
+              <th class="text-center col-2" scope="col">Ordered Date</th>
+              <th class="text-center col-2" scope="col" class="text-end">Action</th>
+            </tr>
+            </thead>
+           
+            <tbody>
+            <%if(Array.isArray(returns)&& returns.length > 0) {%>
+              <%returns.forEach(order=>{%>
+            
+            <tr style="width: 100%;" class="shadow" >
+              <td class="text-center col-1"><%=order.order.orderId%></td>
+              <td class="text-center col-3 " >
+              
+                <div style="float:left; flex-wrap: wrap;" class="m-2">
+                  <a href="api/v1/product-detail?id=<%=order.productId?._id%>">
+                <img
+                src="/Data/uploads/<%=order.productId?.images[0]%>"
+                alt=""
+                class="img-md rounded mx-2 shadow"
+                />
+                <p  class="text-start text-dark" style=" font-size:smaller;"><%= order.productId?.title%></p>
+              </a>
+              </div>
+    
+           
+              </td>
+              
+              <td class="text-center col-1">₹<%= order.orderAmount || order.orderAmout%>.00</td>
+              <td class="text-center col-2">
+              
+              <%if(order.returnStatus== 'False'){%>
+                <span class=" px-4 py-2 rounded-pill" style="font-weight: 400; background-color: rgb(46, 168, 56); color: #e1d8d8;">
+                <%= order.returnStatus%>
+                </span>
+                 
+                <%}else if(order.returnStatus== 'Requested'){%>
+                  <button onclick="orderDetails('<%=order._id%>')" class=" btn btn-info rounded"><%= order.orderStatus%></button>
+                
+                <%}else{%>
+                  <span class=" px-4 py-2 rounded-pill" style="font-weight: 400; background-color: rgb(134, 32, 78); color: #e1d8d8;">
+                    <%= order.returnStatus%>
+                    </span>
+                  <%}%>
+              </td class="text-center col-2">
+              <% const formattedDate=order.createdAt.toLocaleString('en-US',
+              { weekday: 'short' , month: 'short' , day: 'numeric' ,
+              year: 'numeric' , hour: 'numeric' , minute: 'numeric' ,
+              second: 'numeric' , hour12: true }); %>
+              <td><%= formattedDate%></td>
+              <td class="text-center col-2 ">
+              
+              </td >
+    
+            </tr>
+            
+            </tbody>
+            <%})%>
+            <%}else{%>
+              <tr>
+                <dt colspan="5" >
+                  No orders found.
+    
+                </dt>
+              </tr>
+              
               <%}%>
-            </div>
-            <!-- table-responsive //end -->
+           
+          
+          </table>
+          
           </div>
+          
+          
+          
           <!-- card-body end// -->
         </div>
+        <div class="pagination-area mt-15 mb-50">
+          <nav aria-label="Page navigation example">
+              <ul class="pagination  justify-content-center">
+
+                  <a class="page-link" href="?page=<%=page+1-1%>"><i class="material-icons md-chevron_left"></i><%page+1+1%></a>
+
+                  <li class="page-item ">
+                      <a class="page-link" href="?page=<%=page+1%>"><%=page+1%></a>
+                  </li>
+
+                  <li class="page-item disabled">
+                      <span class="page-link">...</span>
+                  </li>
+
+                  <a class="page-link" href="?page=<%=page+1+1%>"><%page+1+1%><i class="material-icons md-chevron_right"></i></a>
+
+              </ul>
+
+          </nav>
+      </div>
         <!-- card end// -->
       </section>
       <!-- content-main end// -->

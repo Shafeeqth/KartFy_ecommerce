@@ -3,6 +3,7 @@
 
 
 <!-- Cartfy/index-17.html  22 Nov 2019 10:00:25 GMT -->
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -47,7 +48,7 @@
             transition: cubic-bezier(0.075, 0.82, 0.165, 1);
         } */
 
-/* 
+        /* 
             @keyframes shake {
                 0% { transform: translate(1px, 1px) rotate(0deg);}
                 10% { transform: translate(-1px, -2px) rotate(-1deg);}
@@ -62,17 +63,12 @@
                100% { transform: translate(1px, -1px) rotate(-1deg);}
                 
             } */
-
-
-        
-
-
     </style>
 </head>
 
 
 <body>
-    <div class="page-wrapper">  
+    <div class="page-wrapper">
         <header class="header header-6 sticky-header">
             <div class="header-top">
                 <div class="container">
@@ -81,7 +77,8 @@
                             <li>
                                 <a href="#">Links</a>
                                 <ul>
-                                    <li><a href="tel:+91 9744491844"><i class="icon-phone"></i>Call: +91 9744491844 </a></li>
+                                    <li><a href="tel:+91 9744491844"><i class="icon-phone"></i>Call: +91 9744491844 </a>
+                                    </li>
                                 </ul>
                             </li>
                         </ul><!-- End .top-menu -->
@@ -89,46 +86,57 @@
 
                     <div class="header-right">
                         <div class="social-icons social-icons-color">
-                            <a href="#" class="social-icon social-facebook" title="Facebook" target="_blank"><i class="icon-facebook-f"></i></a>
-                            <a href="#" class="social-icon social-twitter" title="Twitter" target="_blank"><i class="icon-twitter"></i></a>
-                            <a href="#" class="social-icon social-instagram" title="Pinterest" target="_blank"><i class="icon-instagram"></i></a>
-                            <a href="#" class="social-icon social-pinterest" title="Instagram" target="_blank"><i class="icon-pinterest-p"></i></a>
+                            <a href="#" class="social-icon social-facebook" title="Facebook" target="_blank"><i
+                                    class="icon-facebook-f"></i></a>
+                            <a href="#" class="social-icon social-twitter" title="Twitter" target="_blank"><i
+                                    class="icon-twitter"></i></a>
+                            <a href="#" class="social-icon social-instagram" title="Pinterest" target="_blank"><i
+                                    class="icon-instagram"></i></a>
+                            <a href="#" class="social-icon social-pinterest" title="Instagram" target="_blank"><i
+                                    class="icon-pinterest-p"></i></a>
                         </div><!-- End .soial-icons -->
                         <ul class="top-menu top-link-menu">
                             <li>
                                 <a href="#">Links</a>
-                                
+
                             </li>
                         </ul><!-- End .top-menu -->
                         <%if(user) {%>
-                        
-                        <div class="header-dropdown">
-                            <a class="fw-bold text-md" href="#"><i class="fa-solid fa-user p-3"></i><%=user.name%></a>
-                            <div class="header-menu">
-                                <ul>
-                                    <li><a href="/api/v1/profile"><i class="fa-solid fa-user mx-3"></i>Profile</a></li>
-                                    <li><a href=""><button style="all:unset" onclick="logout()"><i class="fa-solid fa-user-plus mx-3"></i></i>Logout</a></button></li>
-                                </ul>
-                            </div><!-- End .header-menu -->
-                        </div><!-- End .header-dropdown -->
-                        <%}else{%>
+
                             <div class="header-dropdown">
-                                <a href="#"><i class="fa-solid fa-user m-3"></i>Login</a>
+                                <a class="fw-bold text-md" href="#"><i class="fa-solid fa-user p-3"></i>
+                                    <%=user.name%>
+                                </a>
                                 <div class="header-menu">
                                     <ul>
-                                        <li ><a href="/api/v1/signin"> <i class="fa-solid fa-right-to-bracket mx-3"></i> Login</a></li>
-                                        <li><a href="/api/v1/signup"><i class="fa-solid fa-user-plus mx-3"></i>signup</a></li>
+                                        <li><a href="/api/v1/profile"><i class="fa-solid fa-user mx-3"></i>Profile</a>
+                                        </li>
+                                        <li><a href=""><button style="all:unset" onclick="logout()"><i
+                                                        class="fa-solid fa-user-plus mx-3"></i></i>Logout</a></button>
+                                        </li>
                                     </ul>
                                 </div><!-- End .header-menu -->
                             </div><!-- End .header-dropdown -->
+                            <%}else{%>
+                                <div class="header-dropdown">
+                                    <a href="#"><i class="fa-solid fa-user m-3"></i>Login</a>
+                                    <div class="header-menu">
+                                        <ul>
+                                            <li><a href="/api/v1/signin"> <i
+                                                        class="fa-solid fa-right-to-bracket mx-3"></i> Login</a></li>
+                                            <li><a href="/api/v1/signup"><i
+                                                        class="fa-solid fa-user-plus mx-3"></i>signup</a></li>
+                                        </ul>
+                                    </div><!-- End .header-menu -->
+                                </div><!-- End .header-dropdown -->
 
 
-                            
 
 
-                        <%}%>
 
-                     
+                                <%}%>
+
+
                     </div><!-- End .header-right -->
                 </div>
             </div>
@@ -141,7 +149,8 @@
                                 <div class="header-search-wrapper search-wrapper-wide">
                                     <label for="q" class="sr-only">Search</label>
                                     <button class="btn btn-primary" type="submit"><i class="icon-search"></i></button>
-                                    <input type="search" class="form-control" name="q" id="q" placeholder="Search product ..." required>
+                                    <input type="search" class="form-control" name="q" id="q"
+                                        placeholder="Search product ..." required>
                                 </div><!-- End .header-search-wrapper -->
                             </form>
                         </div><!-- End .header-search -->
@@ -151,41 +160,123 @@
                             <img src="/assets/images/demos/demo-6/logo.png" alt="Molla Logo" width="82" height="20">
                         </a>
                     </div><!-- End .header-left -->
-                    <%if(user){%>
-                    <div class="header-right" id="header-right">
-                        <a href="/api/v1/wishlist" class="wishlist-link">
-                            <span class="wishlist-txt m-3">My Wishlist</span>
-                            <i class="icon-heart-o"></i>
-                            <span class="wishlist-count"><%=user.wishlistUser ? user.wishlistUser.length : 0 %></span>
-                            
-                        </a>
+                    <a href="/api/v1/user-notifications">
+                    <button id="notificationButton" class="shakingAnimation" >
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-count" id="notificationCount">0</span>
+                    </button>
+                </a>
+                    <style>
+                        .shakingAnimation {
+                            animation: shake 0.7s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite alternate;
 
-                        <div class="dropdown cart-dropdown">
-                            <a href="/api/v1/cart" class="dropdown-toggle" >
-                                <i class="icon-shopping-cart"></i>
-                                <span class="cart-count"><%=user.cartUser ? user.cartUser.length : 0%></span>
-                               
+                        }
+                        #notificationButton {
+                            font-size: larger;
+                            position: absolute;
+                            /* Ensures the button stays in place when scrolling */
+                            top: 14%;
+                            /* Adjust position as needed */
+                            right: -7%;
+                            /* Adjust position as needed */
+                            background-color: transparent;
+                            /* Transparent background */
+                            border: none;
+                            /* Remove default border */
+                            padding: 10px;
+                            /* Adjust padding for desired size */
+                            cursor: pointer;
+                            /* Indicate interactivity */
+                           
+                            /* Animation for shaking */
+                        }
+
+                        #notificationButton i {
+                            font-size: 2em;
+                            /* Adjust icon size as needed */
+                            color: rgb(230, 161, 41);
+                            /* Or any desired color */
+                        }
+
+                        .notification-count {
+                            background-color: red;
+                            color: white;
+                            border-radius: 50%;
+                            padding: 1px 6px;
+                            font-size: 12px;
+                            position: absolute;
+                            top: -1px;
+                            right: 2px;
+                        }
+
+                        @keyframes shake {
+                            0% {
+                                transform: rotateZ(0deg);
+                            }
+
+                            10% {
+                                transform: rotateZ(-10deg);
+                            }
+
+                            20% {
+                                transform: rotateZ(10deg);
+                            }
+
+                            30% {
+                                transform: rotateZ(-10deg);
+                            }
+
+                            40% {
+                                transform: rotateZ(10deg);
+                            }
+
+                            50% {
+                                transform: rotateZ(0deg);
+                            }
+                        }
+                    </style>
+
+                    <%if(user){%>
+                        <div class="header-right" id="header-right">
+                            <a href="/api/v1/wishlist" class="wishlist-link">
+                                <span class="wishlist-txt m-3">My Wishlist</span>
+                                <i class="icon-heart-o"></i>
+                                <span class="wishlist-count">
+                                    <%=user.wishlistUser ? user.wishlistUser.length : 0 %>
+                                </span>
+
                             </a>
 
-                            <div class="dropdown-menu d-none">
-                                <!-- End .cart-product --> 
+                            <div class="dropdown cart-dropdown">
+                                <a href="/api/v1/cart" class="dropdown-toggle">
+                                    <i class="icon-shopping-cart"></i>
+                                    <span class="cart-count">
+                                        <%=user.cartUser ? user.cartUser.length : 0%>
+                                    </span>
 
-                        <!-- <div class="dropdown-cart-total">
+                                </a>
+
+                                <div class="dropdown-menu d-none">
+                                    <!-- End .cart-product -->
+
+                                    <!-- <div class="dropdown-cart-total">
                                     <span>Total</span>
 
                                     <span class="cart-total-price">$160.00</span>
                                 </div>End .dropdown-cart-total  -->
 
-                                
-                            </div><!-- End .dropdown-menu -->
-                        </div><!-- End .cart-dropdown -->
-                    </div>
-                    <%}else{%>
-                        
-                        <div class="header-right">
-                            <i class="la la-lightbulb-o fs-4"></i><p class="m-3 fs-4">Clearance<span class="highlight fw-bold">&nbsp;Up to 30% Off</span></p>
+
+                                </div><!-- End .dropdown-menu -->
+                            </div><!-- End .cart-dropdown -->
                         </div>
-                    <%}%>
+                        <%}else{%>
+
+                            <div class="header-right">
+                                <i class="la la-lightbulb-o fs-4"></i>
+                                <p class="m-3 fs-4">Clearance<span class="highlight fw-bold">&nbsp;Up to 30% Off</span>
+                                </p>
+                            </div>
+                            <%}%>
                 </div><!-- End .container -->
             </div><!-- End .header-middle -->
             <!-- <div class="row justify-content-center align-items-center text-center">
@@ -193,9 +284,9 @@
             </div> -->
             <script>
                 function logout() {
-                    fetch('/api/v1/logout' ,{
+                    fetch('/api/v1/logout', {
                         method: "GET",
-                        
+
                     }).then((res) => {
                         window.location.reload(true);
                     }).catch((error) => {

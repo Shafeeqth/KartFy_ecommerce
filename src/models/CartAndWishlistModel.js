@@ -52,6 +52,11 @@ const cartSchema = mongoose.Schema({
 
 
     },
+    deliveryCharge: {
+        type: Number,
+        required: false,
+        default: 0
+    },
     cartTotal: {
         type: Number,
         required: true,

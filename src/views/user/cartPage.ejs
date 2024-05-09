@@ -194,7 +194,7 @@
 	                						</tr><!-- End .summary-shipping-row -->
 											<%}else if( cart?.cartTotal > 0){%>
 
-	                						<tr id="output-div" class="summary-shipping-row text-primary" style="display: none;">
+	                						<tr id="output-div" class="summary-shipping-row text-primary" style="">
 	                							<td>
 	                								<div class="custom-control custom-">
 														
@@ -203,7 +203,7 @@
 
 													</div><!-- End .custom-control -->
 	                							</td>
-	                							<td>₹ <span id="output-span"></span>.00</td>
+	                							<td>₹ <span id="output-span"><%=cart.deliveryCharge%></span>.00</td>
 	                						</tr><!-- End .summary-shipping-row -->
 
 	                						

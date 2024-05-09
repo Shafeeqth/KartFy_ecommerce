@@ -417,8 +417,6 @@ const updateCartCount = asyncHandler(async (req, res, next) => {
     }
 
 
-
-    // console.log('product itme stock', stock, count)
     if (+count < 1) {
         return res.json({
             success: false,
@@ -492,6 +490,7 @@ const updateCartCount = asyncHandler(async (req, res, next) => {
 
 const findDeliveryCharge = asyncHandler(async (req, res, next) => {
     let { pincode } = req.body;
+    let user = req.session.user;
 
     let companyPincode = `676525`;
     let [sourceCordinate, targetCordinates] = await getCordinates(companyPincode, pincode); // find the cordinates of the company and users pincode
@@ -523,7 +522,16 @@ const findDeliveryCharge = asyncHandler(async (req, res, next) => {
             })
     }
     console.log('distance', distance)
-    let delivaryCharge = calculateDeliveryCharge(distance)
+    let delivaryCharge = calculateDeliveryCharge(distance);
+    await Cart.findOneAndUpdate({
+        user: user._id
+    },
+    {
+        $set: {
+            deliveryCharge: delivaryCharge + 20
+        }
+    }
+)
     return res.status(200)
         .json({
             success: true,

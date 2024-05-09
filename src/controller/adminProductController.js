@@ -12,14 +12,24 @@ const sharp = require('sharp');
 
 
 const loadProducts = asyncHandler(async (req, res) => {
+    let page = parseInt(req.query.page) -1 || 0;
+    let limit = parseInt(req.query.limit) || 7;
+    page < 0 ? (page = 0) : page = page
+
+    let total = await Product.countDocuments({});
+
 
 
     let products = await Product.find({})
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .skip(limit * page)
+        .limit(limit)
 
     res
         .render('admin/adminProducts', {
-            products
+            products,
+            page,
+            total
         });
 
 

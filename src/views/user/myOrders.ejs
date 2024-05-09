@@ -176,7 +176,7 @@
 				  second: 'numeric' , hour12: true }); %>
 				  <td><%= formattedDate%></td>
 				  <td class="text-center col-2 ">
-					<%if(order.paymentStatus == 'Failed') {%>
+					<%if(order.paymentStatus == 'Failed' || order.paymentStatus == 'Pending' && order.paymentMethod != 'COD' ) {%>
 						<button onclick="retryPayment('<%=order._id%>', '<%=order.paymentMethod%>')"  class=" btn bg-warning rounded"><i class="fa-solid fa-indian-rupee-sign"></i>Retry Payment</button>
 					<%}else if(order.orderStatus== 'Delivered'){%>
 						<button onclick="orderDetails('<%=order._id%>')" class=" btn btn-info rounded">View Details</button>
@@ -196,21 +196,45 @@
 			  </tbody>
 			  <%})%>
 				<%}else{%>
-					
+					<tr>
 						<dt colspan="5" >
 							No orders found.
 
 						</dt>
+					</tr>
 					
 					<%}%>
 			 
 			
-				
 			</table>
+			
 		  </div>
+		  
+		  <div class="pagination-area p-2 ">
+			<nav aria-label="Page navigation example">
+				<ul class="pagination justify-content-center">
+
+					<a class="page-link p-3 text-primary bg-light" href="?page=<%=page+1-1%>"><i class="material-icons md-chevron_left"></i></a>
+
+					<li class="page-item ">
+						<a class="page-link text-primary" href="?page=<%=page+1%>"><%=page+1%></a>
+					</li>
+
+					<li class="page-item disabled">
+						
+						<input disabled class="page-link" type="text" value="<%=total%>" name="" id="">
+					</li>
+
+					<a class="page-link p-3 text-primary bg-light" href="?page=<%=page+1+1%>"><i class="material-icons md-chevron_right"></i></a>
+
+				</ul>
+
+			</nav>
+		</div>
 		</div>
 	  </div>
 	</div>
+	  
   </section>
   <!-- Cancel Order Modal -->
 <div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
@@ -282,10 +306,142 @@
   <!-- ... Your existing code ... -->
 
   <!-- content-main end// -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
  <script>
 
 	function retryPayment(orderId, paymentMethod) {
-		console.log(orderId, paymentMethod)
+		console.log(orderId, )
+		fetch('/api/v1/retry-order-payment', {
+				method: 'PUT',
+				body: JSON.stringify({ orderId}),
+				headers: {
+					'Content-Type': 'application/json',
+
+				}
+
+			}).then(response => response.json())
+				.then(data => {
+					console.log(data)
+
+					
+					 if (data.success ) {
+						let options = {
+							"key": "" + data.key_id + "",
+							"amount": "" + data.amount + "",
+							"currency": "INR",
+							"name": "Test Transaction",
+							"description": "It is a test Transaction",
+							"image": "https://dummyimage.com//600x400/000/fff",
+							"handler": function (response) {
+								console.log(response, data)
+								verifyRazorPay(response, data);
+							},
+							"prefill": {
+								"contact": "" + data.contact + "",
+								"name": "" + data.name + "",
+								"email": "" + data.email + ""
+							},
+							"notes": {
+								"description": "" + "It si test Description",
+							},
+							"theme": {
+								"color": "#c7a520"
+							}
+
+						}
+
+						let razorpayObject = new Razorpay(options);
+						razorpayObject.on('payment.failed', (response) => {
+							console.log(response);
+							handleRazorpayFailure(response, data);
+						})
+						razorpayObject.open();
+					}else if(data.error) {
+						Swal.fire({
+							title:'Insufficient balance!',
+							text: data.message,
+							width: '300px',
+							padding: '10px',
+							icon: 'error',
+
+
+							showConfirmButton: false,
+							timer: 2000,
+						});
+
+
+					}
+
+					function verifyRazorPay(response, data) {
+						let paymentId = response.razorpay_payment_id;
+						let orderId = data.orderId;
+						fetch('orders/razorpay-retry-success', {
+							method: 'PUT',
+							body: JSON.stringify({ paymentId, orderId }),
+							headers: {
+								'Content-Type': 'application/json',
+
+							}
+
+						}).then(response => response.json())
+							.then(data => {
+								console.log(data)
+								Swal.fire({
+									titleText: 'Order placed successfylly',
+									width: '300px',
+									padding: '10px',
+									icon: 'success',
+
+
+									showConfirmButton: false,
+									timer: 1500,
+								});
+								setTimeout(() => {
+									location.href = `/api/v1/order-success?orderId=${data.data._id}`
+
+								}, 1600);
+
+
+							})
+
+						function handleRazorpayFailure(response, data) {
+
+							let orderId = data.orderId;
+							fetch('orders/razorpay-retry-failure', {
+								method: 'PUT',
+								body: JSON.stringify({ orderId }),
+								headers: {
+									'Content-Type': 'application/json',
+
+								}
+
+							}).then(response => response.json())
+								.then(data => {
+									console.log(data)
+									Swal.fire({
+										titleText: 'Something went wrong',
+										width: '300px',
+										padding: '10px',
+										icon: 'error',
+
+
+										showConfirmButton: false,
+										timer: 1500,
+									});
+									setTimeout(() => {
+										location.href = `api/v1/admin//my-orders/single-orderDetails?id=${data.data._id}`
+
+									}, 1600);
+								})
+
+
+						}
+
+					}
+				})
+
+
 		
 	}
 

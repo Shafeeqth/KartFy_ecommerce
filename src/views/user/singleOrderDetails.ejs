@@ -68,6 +68,12 @@
 									</p>
 								</div><!-- End .card-body -->
 							</div><!-- End .card-dashboard -->
+							<div class="row justify-content-center ">
+								<button  type="button" onclick="printInvoice(<%=order._id%>)" class="btn btn-sm btn-primary w-50 h-25">
+									<i class="fas fa-file-invoice"></i>	Download Invoice
+								</button>
+
+							</div>
 						</div>
 
 						<div class="table-responsive">
@@ -121,35 +127,52 @@
 												</td>
 												<td>
 													<%if(order.orderStatus== 'Delivered' ){%>
-														<span class=" px-4 py-2 rounded-pill"
-															style="font-weight: 400; background-color: rgb(46, 168, 56); color: #e1d8d8;">
+														<%if(item.returnStatus) {%>
+															<span class=" px-4 py-2 rounded-pill"
+																style="font-weight: 400; background-color: rgb(241, 89, 142); color: #e1d8d8;">
+																Return <%=item.returnStatus%>
+															</span>
 
-															<%}else if(order.orderStatus=='Canceled' ){%>
+
+															<%}%>
+
 																<span class=" px-4 py-2 rounded-pill"
-																	style="font-weight: 400; background-color: rgb(177, 16, 16); color: #e1d8d8;">
+																	style="font-weight: 400; background-color: rgb(46, 168, 56); color: #e1d8d8;">
 
-																	<%}else if(order.orderStatus=='Placed' ){%>
-																		<span class=" px-4 py-2 rounded-pill"
-																			style="font-weight: 400; background-color: rgb(48, 114, 152); color: #e1d8d8;">
-		
-																			<%}else if(order.orderStatus=='Out For Delivery'
-																		){%>
-																		<span class=" px-4 py-2 rounded-pill"
-																			style="font-weight: 400; background-color: rgb(18, 163, 163); color: #e1d8d8;">
 
-																			<%}else if(order.orderStatus=='Pending' ){%>
+
+																	<%}else if(order.orderStatus=='Cancelled' ){%>
+																		<span class=" px-4 py-2 rounded-pill"
+																			style="font-weight: 400; background-color: rgb(177, 16, 16); color: #e1d8d8;">
+
+																			<%}else if(order.orderStatus=='Placed' ){%>
 																				<span class=" px-4 py-2 rounded-pill"
-																					style="font-weight: 400; background-color: rgb(12, 95, 120); color: #e1d8d8;">
+																					style="font-weight: 400; background-color: rgb(48, 114, 152); color: #e1d8d8;">
 
 																					<%}else
-																						if(order.orderStatus=='Shipped'
+																						if(order.orderStatus=='Out For Delivery'
 																						){%>
 																						<span
 																							class=" px-4 py-2 rounded-pill"
-																							style="font-weight: 400; background-color: rgb(101, 15, 32); color: #e1d8d8;">
-																							<%}%>
-																								<%= order.orderStatus%>
-																						</span>
+																							style="font-weight: 400; background-color: rgb(18, 163, 163); color: #e1d8d8;">
+
+																							<%}else
+																								if(order.orderStatus=='Pending'
+																								){%>
+																								<span
+																									class=" px-4 py-2 rounded-pill"
+																									style="font-weight: 400; background-color: rgb(12, 95, 120); color: #e1d8d8;">
+
+																									<%}else
+																										if(order.orderStatus=='Shipped'
+																										){%>
+																										<span
+																											class=" px-4 py-2 rounded-pill"
+																											style="font-weight: 400; background-color: rgb(101, 15, 32); color: #e1d8d8;">
+																											<%}%>
+																												<%=
+																													order.orderStatus%>
+																										</span>
 												</td>
 												<% const formattedDate=order.createdAt.toLocaleString('en-US', {
 													weekday: 'short' , month: 'short' , day: 'numeric' , year: 'numeric'
@@ -159,45 +182,49 @@
 													</td>
 													<td class="text-center col-2 ">
 														<%if(order.orderStatus== 'Delivered' ){%>
-															<%if(item.returnStatus == 'False'){%>
-															<button
-																onclick="returnProduct('<%=order._id%>','<%=item._id%>','<%= item.product._id%>')"
-																data-orderId="" data-productId=""
-																class="returnOrderTrigger btn btn-warning rounded">Return
-																Product</button>
-																<%}else{%>
-																	<button disabled														
-																
-																class="returnOrderTrigger btn btn-warning rounded"> Return <%=item.returnStatus%></button>
-																	<%}%>
-															<%if(!item.isReviewed){ %>
+															<%if(item.returnStatus=='False' ){%>
 																<button
-																	onclick="reviewModalLogic('<%=order._id%>','<%=item.product._id%>', '<%=item.size%>', '<%=item._id%>')"
-																	type="button" data-productId="" data-orderId=" "
-																	class="btn btn-primary">
-																	Add Review
-																</button>
+																	onclick="returnProduct('<%=order._id%>','<%=item._id%>','<%= item.product._id%>')"
+																	data-orderId="" data-productId=""
+																	class="returnOrderTrigger btn btn-warning rounded">Return
+																	Product</button>
 																<%}else{%>
-																	<button disabled type="button"
-																		class="btn btn-primary">
-																		Already Reviewed
-																	</button>
+																	<button disabled
+																		class="returnOrderTrigger btn btn-warning rounded">
+																		Return <%=item.returnStatus%></button>
 																	<%}%>
-
-
-																		<%}else if(order.orderStatus=='Cancelled' ){%>
-
-																			<button disabled
-																				class="btn btn-danger rounded">Order
-																				Cancelled</button>
-																			<!-- <a href="/api/v1/shop">Continue shopping</a> -->
-
+																		<%if(!item.isReviewed){ %>
+																			<button
+																				onclick="reviewModalLogic('<%=order._id%>','<%=item.product._id%>', '<%=item.size%>', '<%=item._id%>')"
+																				type="button" data-productId=""
+																				data-orderId=" "
+																				class="btn btn-primary">
+																				Add Review
+																			</button>
 																			<%}else{%>
-																				<button data-orderId="<%=order._id%>"
-																					id="cancelOrderTrigger"
-																					class="btn btn-danger rounded">Track
-																					Order</button>
-														<%}%>
+																				<button disabled type="button"
+																					class="btn btn-primary">
+																					Already Reviewed
+																				</button>
+																				<%}%>
+
+
+																					<%}else
+																						if(order.orderStatus=='Cancelled'
+																						){%>
+
+																						<button disabled
+																							class="btn btn-danger rounded">Order
+																							Cancelled</button>
+																						<!-- <a href="/api/v1/shop">Continue shopping</a> -->
+
+																						<%}else{%>
+																							<button
+																								data-orderId="<%=order._id%>"
+																								id="cancelOrderTrigger"
+																								class="btn btn-danger rounded">Track
+																								Order</button>
+																							<%}%>
 													</td>
 											</tr>
 

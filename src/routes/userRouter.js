@@ -171,6 +171,12 @@ router.get('orders/paypal-success', userOrderController.paypalSuccess)
 router.get('orders/paypal-failure', userOrderController.paypalFailure)
 
 
+router.put('retry-order-payment', userOrderController.retryOrderPay);
+
+router.put('orders/razorpay-retry-failure', userOrderController.retryPaymentFailure)
+
+router.put('orders/razorpay-retry-success', userOrderController.retryPaymentSuccess)
+
 
 
 /* ======================================User profile======================================= */

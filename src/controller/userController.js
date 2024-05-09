@@ -13,13 +13,15 @@ const { Product, Inventory } = require('../models/productModels');
 const { Cart, Wishlist } = require('../models/CartAndWishlistModel');
 const { pipeline } = require('nodemailer/lib/xoauth2');
 const Wallet = require('../models/walletModel');
-const {calculateDistance} = require('../helpers/calculateDeliveryCharge');
+const Banner = require('../models/bannerModel');
 
 
 const loadHome = asyncHandler(async (req, res) => {
     let user = req.session.user ? req.session.user : null;
+    let banners = await Banner.find({isListed: true})
+    console.log(banners)
 
-    res.status(200).render('user/homePage', { user });
+    res.status(200).render('user/homePage', { user ,banners});
 
 
 })
@@ -34,14 +36,48 @@ const loadShop = asyncHandler(async (req, res) => {
     
 
     let page = parseInt(req.query.page) -1 || 0;
-    let limit = parseInt(req.query.limit) || 7;
-    let category = req.query.Category || 'All';
-    let size = req.query.size || 'All';
-    let brand = req.query.brand || 'All'
+    let limit = parseInt(req.query.limit) || 15;
+    let category =  (Array.isArray(req.query.Category) ? req.query.Category : req.query.Category?.split(' '));
+    let size = req.query.size || [];
+    let gender = (Array.isArray(req.query.Gender) ? req.query.Gender : req.query.Gender?.split(' '));
+    let brand = (Array.isArray(req.query.Brands) ? req.query.Brands : req.query.Brands?.split(' '));
+    console.log('gnede', gender, 'brand', brand, 'categ', category)
+    // let categor = [];
+    if( gender)categor.push({Gender:{$in: gender }})
+    // if( category)categor.push({Category: {$in:category}})
+    // if( brand)categor.push({Brands:{$in: brand}})
+    // let matchValue = {};
+    // console.log(categor)
+
+    let genderMatch = 
+
+    let sort = req.query.sort || ''
+
+    let search = req.query.search || ''
+
+    if(gender ||category|| brand) {
+        matchValue = {
+            $or: categor
+        }
+        
+    }
+
+
+    if(sort == 'high to Low') {
+        sort = { 'product.price': -1}
+    }else if(sort == 'low-to-High') sort = { 'product.price': 1}
+    else if(sort == 'date') sort = { 'product.createdAt': -1}
+    else if(sort == 'rating' || sort == '') sort = { 'product.avgRating': -1}
+
+    console.log(page, limit, category, size, brand, sort, search);
     
 
-    let categories = await Category.find({})
-    // console.log('category', categories)
+    
+
+    let categories = await Category.find({isListed: true})
+ 
+
+    
 
     let inventory = await Inventory.aggregate([
         {
@@ -59,8 +95,29 @@ const loadShop = asyncHandler(async (req, res) => {
         },
         {
             $unwind: '$product'
+        },
+        {
+            $match: matchValue
+        },
+        {
+            $match: {
+                'product.title': { $regex: search, $options: "i" },
+
+            }
+        },
+        {
+            $sort: sort
+        },
+        {
+            $skip: page * limit
+        },
+        {
+            $limit: limit
         }
+        
     ])
+    console.log('ivn',inventory)
+   
         
 
     //     {
@@ -151,51 +208,51 @@ const loadShop = asyncHandler(async (req, res) => {
     // console.log(inventory)
 
 
-    let count = await Product.find().count()
-    if (req.query.sort) {
-        let sort = req.query.sort == 'low-to-High' ?
-            { 'product.price': 1 } : req.query.sort == 'high to Low' ?
-                { 'product.price': -1 } : req.query.sort == 'date' ?
-                    { 'product.createdAt': -1 } : null
+    let count = await Product.countDocuments()
+    // if (req.query.sort) {
+    //     let sort = req.query.sort == 'low-to-High' ?
+    //         { 'product.price': 1 } : req.query.sort == 'high to Low' ?
+    //             { 'product.price': -1 } : req.query.sort == 'date' ?
+    //                 { 'product.createdAt': -1 } : null
 
-        let products = await Inventory.aggregate([
+    //     let products = await Inventory.aggregate([
             
-            {
-                $lookup: {
-                    from: "products",
-                    localField: "product",
-                    foreignField: "_id",
-                    as: "product",
-                    pipeline: [
+    //         {
+    //             $lookup: {
+    //                 from: "products",
+    //                 localField: "product",
+    //                 foreignField: "_id",
+    //                 as: "product",
+    //                 pipeline: [
                        
-                        {
-                            $match: {
-                                isListed: true
-                            }
-                        },
-                        {
-                            $project: {
-                                product: 1,
-                                category: 'product.category.Brands',
+    //                     {
+    //                         $match: {
+    //                             isListed: true
+    //                         }
+    //                     },
+    //                     {
+    //                         $project: {
+    //                             product: 1,
+    //                             category: 'product.category.Brands',
                                 
 
-                            }
-                        }
+    //                         }
+    //                     }
                        
 
 
-                    ]
-                }
-            },
+    //                 ]
+    //             }
+    //         },
             
 
-        ])
-        // console.log(inventory)
+    //     ])
+    //     // console.log(inventory)
 
 
-        return res.render('user/shopPage', { user, products, count });
+    //     return res.render('user/shopPage', { user, products, count });
 
-    }
+    // }
 
 
 
@@ -278,7 +335,8 @@ const loadProfile = asyncHandler(async (req, res, next) => {
 
     let user = req.session.user ? req.session.user : null;
     if (user) {
-        let wallet = await Wallet.findOne({user: user._id }).populate('user').sort({createdAt: 1,'transactions.date':-1 });
+        let wallet = await Wallet.findOne({user: user._id }).populate('user')
+        wallet.transactions.sort((a, b) => b.date - a.date)
         console.log('wallet', wallet)
         let userProfile = await User.aggregate([
             {
