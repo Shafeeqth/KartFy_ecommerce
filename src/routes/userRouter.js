@@ -136,6 +136,7 @@ router.get('/my-orders',userMiddleware.isUserAutharized, userOrderController.loa
 //Load order details
 router.get('/my-orders/single-orderDetails', userMiddleware.isUserAutharized, userOrderController.loadSingleOrderDetails);
 
+router.post('/my-orders/single-orderDetails/order-invoice-download', userOrderController.downloadOrderInvoice)
 
 // confirm order
 router.post('/order-place', userMiddleware.isUserAutharized, userOrderController.orderConfirm);
@@ -156,26 +157,26 @@ router.post('orders/order-return', userOrderController.orderReturn  );
 /*==================================E-payment================================================= */
 
 //RazorPay success
-router.put('orders/razorpay-success', userOrderController.razorpaySuccess)
+router.put('/orders/razorpay-success', userOrderController.razorpaySuccess)
 
 
 //RazorPay failure
-router.put('orders/razorpay-failure', userOrderController.razorpayFailure)
+router.put('/orders/razorpay-failure', userOrderController.razorpayFailure)
 
 
 //RazorPay success
-router.get('orders/paypal-success', userOrderController.paypalSuccess)
+router.get('/orders/paypal-success', userOrderController.paypalSuccess)
 
 
 //RazorPay failure
-router.get('orders/paypal-failure', userOrderController.paypalFailure)
+router.get('/orders/paypal-failure', userOrderController.paypalFailure)
 
 
-router.put('retry-order-payment', userOrderController.retryOrderPay);
+router.put('/retry-order-payment', userOrderController.retryOrderPay);
 
-router.put('orders/razorpay-retry-failure', userOrderController.retryPaymentFailure)
+router.put('/orders/razorpay-retry-failure', userOrderController.retryPaymentFailure)
 
-router.put('orders/razorpay-retry-success', userOrderController.retryPaymentSuccess)
+router.put('/orders/razorpay-retry-success', userOrderController.retryPaymentSuccess)
 
 
 

@@ -13,18 +13,20 @@ const userHelper = require('../helpers/validations');
 const { createRazorpayOrder, createPayPalPayment } = require('../controller/paymentControllers');
 const mongoose = require('mongoose');
 const Wallet = require('../models/walletModel');
-const { date } = require('joi');
 const { findDeliveryCharge } = require('../middleware/userMiddleware');
+const puppeteer = require('puppeteer');
+const path = require('path');
+const fs = require('node:fs');
+const ejs = require('ejs');
 
 
+const checkValidCoupon = asyncHandler(async (req, res) => {
+    let user = req.session.user;
+    if (!user) return false
 
-const checkValidCoupon = asyncHandler( async (req, res) => {
-    let user = req.session.user ;
-    if(!user) return false
-    
-    let cart = await Cart.findOne({user: user._id});
-    if(!cart) return res.status(500)
-    if(cart.isCouponApplied == false) {
+    let cart = await Cart.findOne({ user: user._id });
+    if (!cart) return res.status(500)
+    if (cart.isCouponApplied == false) {
         return res.status(200)
             .json({
                 success: true,
@@ -32,13 +34,13 @@ const checkValidCoupon = asyncHandler( async (req, res) => {
                 message: 'No coupon found'
             })
     }
-    let coupon = await Coupon.findOne({couponCode:cart.coupon.code});
+    let coupon = await Coupon.findOne({ couponCode: cart.coupon.code });
     let today = new Date()
-    console.log('td',today)
+    console.log('td', today)
 
     console.log('exp', coupon.expiryDate)
 
-    if(coupon.minCost > cart.cartTotal) {
+    if (coupon.minCost > cart.cartTotal) {
         return res.status(400)
             .json({
                 success: false,
@@ -48,14 +50,14 @@ const checkValidCoupon = asyncHandler( async (req, res) => {
             })
 
     }
-    if(coupon.expiryDate < today){
+    if (coupon.expiryDate < today) {
         return res.status(400)
-        .json({
-            success: false,
-            error: true,
-            message: 'Coupon has expired'
+            .json({
+                success: false,
+                error: true,
+                message: 'Coupon has expired'
 
-        })
+            })
     }
     return res.status(200)
         .json({
@@ -67,45 +69,54 @@ const checkValidCoupon = asyncHandler( async (req, res) => {
 })
 
 
-const proceedtToCheckout = asyncHandler (async (req, res) => {
+const proceedtToCheckout = asyncHandler(async (req, res) => {
     let user = req.session.user;
-    let cart = await Cart.findOne({user: user._id})
+    let cart = await Cart.findOne({ user: user._id });
+
     let inventory = await Inventory.find({});
     console.log('inventory', inventory);
     console.log('cart', cart);
-   
+    // return 
+
     let product;
     let productVariant;
-    
+
     let outOfStockProducts = cart.products.filter(cartProduct => {
-   
-       product =  inventory.find(item =>  cartProduct.product.toString() == item.product.toString() )
-      
-       if(!product)  return false;
-      
+        product = inventory.find(item => cartProduct.product.toString() == item.product.toString())
+        if (!product) return false;
+        productVariant = product.sizeVariant.find(variant => cartProduct.size == variant.size);
+        if (!productVariant) return false
+        return productVariant.stock < cartProduct.quantity
 
-       productVariant = product.sizeVariant.find(variant => cartProduct.size == variant.size);
+    }).map(item => item._id);
 
-       if(!productVariant) return false
-    
-
-
-      return productVariant.stock < cartProduct.quantity    
-       
-      
-        
-    }).map(item => item._id)
-    console.log('out of stock products', outOfStockProducts);
-
-    if(!outOfStockProducts.length == 0) {
+    if (!outOfStockProducts.length == 0) {
         return res.status(400)
             .json({
                 success: false,
                 error: true,
-                errorData : outOfStockProducts,
+                errorData: outOfStockProducts,
                 message: 'Some products are out of stock'
             })
-    }
+    };
+    let listcart = await Cart.findOne({ user: user._id }).populate('products.product');
+    const unListedProducts = listcart.products.filter(cartProduct => cartProduct.product.isListed == false).map(item => item._id);
+    console.log('un', unListedProducts)
+
+    if (!unListedProducts.length == 0) {
+        return res.status(400)
+            .json({
+                success: false,
+                error: true,
+                errorData: unListedProducts,
+                message: 'Some products are Unavialable'
+            })
+    };
+
+
+
+
+
     return res.status(200)
         .json({
             success: true,
@@ -138,15 +149,16 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
 
 
     })
-    if(cart.deliveryCharge > 0) {
-       let [sourceCordinate , destinationCordinate] = getCordinates(userAddress.pincode);
-       if(!destinationCordinate) {
-        cart.deliveryCharge = 40
-       }
-       let distance = getDistance(sourceCordinate, destinationCordinate);
-       let deliveryCharge = calculateDeliveryCharge(distance)
-       cart.deliveryCharge = deliveryCharge;
-    }
+    let sourcePincode = '676525';
+    // if(cart.deliveryCharge > 0) {
+    //    let [sourceCordinate , destinationCordinate] = getCordinates(sourcePincode, userAddress.pincode);
+    //    if(!destinationCordinate) {
+    //     cart.deliveryCharge = 40
+    //    }
+    //    let distance = getDistance(sourceCordinate, destinationCordinate);
+    //    let deliveryCharge = calculateDeliveryCharge(distance)
+    //    cart.deliveryCharge = deliveryCharge;
+    // }
 
 
     console.log('products,', JSON.stringify(cart))
@@ -204,6 +216,7 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
             paymentMethod,
             paymentStatus: 'Paid',
             orderId,
+            coupon: cart.coupon ? cart.coupon: undefined,
             orderedItems,
             orderAmount,
             deliveryCharge: cart.deliveryCharge,
@@ -221,22 +234,23 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
                 message: 'order placed'
             })
 
-    }else if(paymentMethod == 'Wallet') {
-        let wallet = await Wallet.findOne({ user: user._id});
-        if(cart.cartTotal > wallet.balance) {
+    } else if (paymentMethod == 'Wallet') {
+        let wallet = await Wallet.findOne({ user: user._id });
+        if (cart.cartTotal > wallet.balance) {
             return res.status(400)
                 .json({
                     success: false,
                     error: true,
                     message: 'Wallet has insufficient balance'
                 })
-        }else {
+        } else {
             let order = await Order.create({
                 user: user._id,
                 address: userAddress,
                 paymentMethod,
                 paymentStatus: 'Paid',
                 orderId,
+                coupon: cart.coupon ? cart.coupon: undefined,
                 orderedItems,
                 orderAmount,
                 totalSaved: cart.coupon?.discount ? cart.coupon?.discount : 0,
@@ -247,21 +261,21 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
                 user: user._id
             })
             wallet.balance -= order.orderAmount;
-            
-            wallet.transactions.push({ 
+
+            wallet.transactions.push({
                 amount: order.orderAmount,
                 description: 'Product ordered ',
-                 mode: 'Credit'
-                 })
+                mode: 'Credit'
+            })
             await wallet.save()
             res.status(200)
-            .json({
-                success: true,
-                error: false,
-                data: order,
-                orderType: 'Wallet',
-                message: 'order placed'
-            })
+                .json({
+                    success: true,
+                    error: false,
+                    data: order,
+                    orderType: 'Wallet',
+                    message: 'order placed'
+                })
 
         }
 
@@ -274,6 +288,7 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
             paymentMethod,
             orderId,
             orderedItems,
+            coupon: cart.coupon ? cart.coupon: undefined,
             orderAmount,
             deliveryCharge: cart.deliveryCharge,
             orderStatus: 'Placed'
@@ -367,41 +382,43 @@ const orderCancel = asyncHandler(async (req, res, next) => {
         )
         console.log('new wallet', wallet);
     }
-        
-
-        order.isCancelled = true;
-        order.cancelDetails = cancelDetails;
-        order.orderStatus = 'Cancelled';
-
-        order = await order.save();
 
 
-        console.log(order, 'order')
+    order.isCancelled = true;
+    order.cancelDetails = cancelDetails;
+    order.orderStatus = 'Cancelled';
+
+    order = await order.save();
+
+
+    console.log(order, 'order')
 
 
 
 
-        return res.json({
-            success: true,
-            error: false,
-            data: order,
-            result: order,
-            message: 'Order cancelled successfully'
-        });
-
-
+    return res.json({
+        success: true,
+        error: false,
+        data: order,
+        result: order,
+        message: 'Order cancelled successfully'
     });
+
+
+});
 
 
 const orderProductReview = asyncHandler(async (req, res) => {
     let user = req.session.user
     if (!user) return res.redirect('/api/v1')
-    let { rating, comment,review, orderId, productId,orderedItemId, size } = req.body;
+    let { rating, comment, review, orderId, productId, orderedItemId, size } = req.body;
+console.log(req.body)
+
 
     let updatedReviewOrder = await Order.findOneAndUpdate({
         _id: orderId,
         'orderedItems._id': orderedItemId,
-       
+
 
     },
         {
@@ -416,7 +433,7 @@ const orderProductReview = asyncHandler(async (req, res) => {
     )
     console.log(updatedReviewOrder, 'updatedReview')
     let product = await Product.findOne({ _id: productId });
-    let ratingCount = +product.productReviews.length;
+    let ratingCount = await Review.countDocuments({product:productId})
     let currentRatingAvg = +product.avgRating;
     let newRatingAvg;
 
@@ -427,28 +444,13 @@ const orderProductReview = asyncHandler(async (req, res) => {
     }
 
 
-    let reviewProduct = await Product.findOneAndUpdate({
-        _id: productId
-    },
-        {
-            $set: {
-                avgRating: +newRatingAvg,
-
-
-            },
-            $push: {
-                productReviews: {
-                    rating,
-                    user: user._id,
-                    comment,
-                    review
-                }
-            }
-        },
-        {
-            new: true
-        }
-    )
+    let reviewProduct = await Review.create({
+        product: productId,
+        rating,
+        user: user._id,
+        comment,
+        review,
+    })
 
     return res.status(201)
         .json({
@@ -471,13 +473,13 @@ const orderReturn = asyncHandler(async (req, res) => {
     console.log(req.body)
     let user = req.session.user
 
-    let {reason, comments, orderId, orderedItemId, productId} = req.body;
+    let { reason, comments, orderId, orderedItemId, productId } = req.body;
     let userReturn = await Return.create({
-        user:user._id,
+        user: user._id,
         order: orderId,
         orderedItemId,
         reason,
-        returnStatus:'Requested',
+        returnStatus: 'Requested',
         productId,
         comments,
 
@@ -492,12 +494,12 @@ const orderReturn = asyncHandler(async (req, res) => {
         $set: {
             'orderedItems.$.returnStatus': 'Requested'
         }
-        
+
     },
-    {
-        new: true
-    }
-)
+        {
+            new: true
+        }
+    )
     return res.status(201)
         .json({
             success: true,
@@ -511,13 +513,13 @@ const orderReturn = asyncHandler(async (req, res) => {
 const loadMyOrders = asyncHandler(async (req, res) => {
 
     let user = req.session?.user;
-    let page = parseInt(req.query.page) -1 || 0;
+    let page = parseInt(req.query.page) - 1 || 0;
     let limit = parseInt(req.query.limit) || 7;
     page < 0 ? (page = 0) : page = page
     if (!user) return res.redirect('/api/v1/')
     let total = await Order.countDocuments({});
 
-    (page > Math.trunc(total / limit) -1) ? ( page =  Math.trunc(total / limit) -1) : page = page
+    (page > Math.trunc(total / limit) - 1) ? (page = Math.trunc(total / limit) - 1) : page = page
 
     let order = await Order.find({
         user: user._id
@@ -527,7 +529,7 @@ const loadMyOrders = asyncHandler(async (req, res) => {
         .sort({ createdAt: -1 })
         .skip(page * limit)
         .limit(limit)
-    
+
 
     res
         .render('user/myOrders',
@@ -558,6 +560,43 @@ const loadSingleOrderDetails = asyncHandler(async (req, res, next) => {
     }
 
     res.render('user/singleOrderDetails', { user, order })
+})
+
+const downloadOrderInvoice = asyncHandler(async (req, res) => {
+    let user = req.session.user;
+    let { orderId } = req.body;
+    let userDetails = await User.findById(user._id);
+    let orderDetails = await Order.findById(orderId).populate('orderedItems.product');
+    const data = {
+        order: orderDetails,
+        user: userDetails,
+    }
+    console.log(JSON.stringify(data))
+    // return 
+
+
+    let filePath = path.resolve(__dirname, '../views/user/invoice.ejs');
+
+    let html =  fs.readFileSync(filePath).toString();
+    const ejsData = ejs.render(html, data);
+
+    let browser = await puppeteer.launch({headless: 'new'});
+    let page = await browser.newPage();
+    await page.setContent(ejsData, {waitUntil: 'networkidle0'});
+    let pdfBytes = await page.pdf( {format: 'letter'});
+    await browser.close();
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
+        'Content-Disposition',
+        'attachment; filename= order invoice.pdf'
+    );
+    res.send(pdfBytes);
+    console.log(html,  data)
+
+
+
+
 })
 
 
@@ -679,7 +718,7 @@ const paypalFailure = asyncHandler(async (req, res) => {
             new: true
         }
     )
-   
+
     return res.redirect(`api/v1/admin//my-orders/single-orderDetails?id=${orderId}`)
 
     // return res.status(400)
@@ -692,60 +731,60 @@ const paypalFailure = asyncHandler(async (req, res) => {
     //     })
 })
 
-const retryOrderPay = asyncHandler( async (req, res) => {
+const retryOrderPay = asyncHandler(async (req, res) => {
     let orderId = req.body.orderId;
-    let order = await Order.findOne({_id:orderId});
+    let order = await Order.findOne({ _id: orderId });
     createRazorpayOrder(req, res, order);
     console.log(order)
 })
 
-const retryPaymentSuccess = asyncHandler( async (req, res) => {
-    let {orderId, paymentId} = req.body;
+const retryPaymentSuccess = asyncHandler(async (req, res) => {
+    let { orderId, paymentId } = req.body;
     let order = await Order.findOneAndUpdate({
-    _id: orderId
+        _id: orderId
     },
-    {
-        paymentMethod: 'RazorPay',
-        paymentId,
-        orderStatus: 'Placed',
-        paymentStatus: "Paid",
+        {
+            paymentMethod: 'RazorPay',
+            paymentId,
+            orderStatus: 'Placed',
+            paymentStatus: "Paid",
 
-    },
-    {
-        new: true
-    }
-)
-return res.status(200)
-    .json({
-        success: true,
-        error: false,
-        data: order,
-        message: 'Payment complete successfully'
-    })
+        },
+        {
+            new: true
+        }
+    )
+    return res.status(200)
+        .json({
+            success: true,
+            error: false,
+            data: order,
+            message: 'Payment complete successfully'
+        })
 })
 
-const retryPaymentFailure = asyncHandler( async (req, res) => {
-    let {orderId} = req.body;
+const retryPaymentFailure = asyncHandler(async (req, res) => {
+    let { orderId } = req.body;
     let order = await Order.findOneAndUpdate({
-    _id: orderId
+        _id: orderId
     },
-    {
-        paymentMethod: 'RazorPay',
-        orderStatus: 'Pending',
-        paymentStatus: "Failed",
+        {
+            paymentMethod: 'RazorPay',
+            orderStatus: 'Pending',
+            paymentStatus: "Failed",
 
-    },
-    {
-        new: true
-    }
-)
-return res.status(200)
-    .json({
-        success: false,
-        error: true,
-        data: order,
-        message: 'Payment complete successfully'
-    })
+        },
+        {
+            new: true
+        }
+    )
+    return res.status(200)
+        .json({
+            success: false,
+            error: true,
+            data: order,
+            message: 'Payment complete successfully'
+        })
 })
 
 
@@ -766,5 +805,6 @@ module.exports = {
     retryOrderPay,
     retryPaymentSuccess,
     retryPaymentFailure,
+    downloadOrderInvoice,
 
 }

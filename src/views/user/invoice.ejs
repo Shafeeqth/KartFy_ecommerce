@@ -78,23 +78,23 @@
       </div>
       <div class="invoice-details">
         <h2>Order Details</h2>
-        <p><strong>Order ID:</strong> <%= order._id %></p>
+        <p><strong>Order ID:</strong> <%= order.orderId %></p>
         <p><strong>Order Date:</strong>  <% 
-          var orderDate = new Date(order.date);
-          var formattedDate = orderDate.toLocaleString('default', { month: 'long' }) + ' ' + 
+          let orderDate = new Date(order.createdAt);
+          let formattedDate = orderDate.toLocaleString('default', { month: 'long' }) + ' ' + 
                               orderDate.getDate() + ', ' + 
                               orderDate.getFullYear();
       %>
       <%= formattedDate %></p>
-        <p><strong>Invoice Date:</strong> <%= date.toLocaleDateString('en-US', { year:
+        <p><strong>Invoice Date:</strong> <%= new Date().toLocaleDateString('en-US', { year:
           'numeric', month: 'short', day: '2-digit'
           }).replace(/\//g, '-') %></p>
       </div>
       <div class="invoice-details">
         <h2>Shipping Details</h2>
-        <p><strong>Customer Name:</strong> <%= user.name %></p>
-        <p><strong>Address:</strong> <%= order.deliveryAddress.addressline %>, <%= order.deliveryAddress.city %>, <%= order.deliveryAddress.state %>, <%= order.deliveryAddress.pincode %></p>
-        <p><strong>Phone:</strong> <%= order.deliveryAddress.phone %></p>
+        <p><strong>Customer Name:</strong> <%= order.address.name %></p>
+        <p><strong>Address:</strong> <%= order.address.district %>, <%= order.address.locality %>, <%= order.address.street %>, <%= order.address.pincode %></p>
+        <p><strong>Phone:</strong> <%= order.address.phone %></p>
       </div>
       <div class="invoice-table">
         <h2>Order Summary</h2>
@@ -107,38 +107,38 @@
               <th>Quantity</th>
               <th>Price</th>
               <th>Total</th>
-              <th>Returned</th>
+              <!-- <th>Returned</th> -->
             </tr>
           </thead>
           <tbody>
-            <% if (order.products.length > 0) {
-              order.products.forEach((product, index) => { %>
+            <% if (order.orderedItems.length > 0) {
+              order.orderedItems.forEach((product, index) => { %>
                 <tr>
                   <td><%= index + 1 %></td>
-                  <td><%= product.productId.name %></td>
-                  <td><%= product.sizes %></td>
+                  <td><%= product.product.title %></td>
+                  <td><%= product.size %></td>
                   <td><%= product.quantity %></td>
-                  <td>₹ <%= product.productPrice %>.00</td>
-                  <td>₹ <%= product.totalPrice %>.00</td>
-                  <td><%= product.status === "returned" ? "Yes" : "No" %></td>
+                  <td>₹ <%= product.product.price %>.00</td>
+                  <td>₹ <%= product.product.price * product.quantity %>.00</td>
+                  <!-- <td><%= product.status === "returned" ? "Yes" : "No" %></td> -->
                 </tr>
             <% }) } %>
             <tr>
-              <td colspan="6" class="text-right"><strong>Discount:</strong></td>
-              <td class="text-danger">₹ <% if(order.couponApplied) { %><%= order.couponApplied.discountAmount %><% } else { %>00<% } %></td>
+              <td colspan="5" class="text-right"><strong>Discount:</strong></td>
+              <td class="text-danger">₹ <% if(order.coupon) { %><%= order.coupon.discount %><% } else { %>00<% } %></td>
             </tr>
             <tr>
-              <td colspan="6" class="text-right"><strong>Total:</strong></td>
-              <td class="text-danger">₹ <%= order.total_amount %>.00</td>
+              <td colspan="5" class="text-right"><strong>Total:</strong></td>
+              <td class="text-danger">₹ <%= order.orderAmount  %>.00</td>
             </tr>
           </tbody>
         </table>
       </div>
       <div class="invoice-footer">
-        <p><strong>Date:</strong> <%= date.toLocaleDateString('en-US', { year:
+        <p><strong>Date:</strong> <%= new Date().toLocaleDateString('en-US', { year:
           'numeric', month: 'short', day: '2-digit'
           }).replace(/\//g, '-') %></p>
-        <p>Thanks for shopping with us!</p>
+        <p>Thanks for shopping with KartFy</p>
       </div>
     </div>
   </div>

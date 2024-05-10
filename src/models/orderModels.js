@@ -1,3 +1,4 @@
+const { required } = require('joi');
 const mongoose = require('mongoose');
 
 
@@ -85,9 +86,10 @@ const orderSchema = mongoose.Schema({
 
 
     },
-    appliedCoupon: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Coupon',
+    coupon: {
+        type: Object,
+        required: false       
+    
     },
     isCancelled: {
         type: Boolean,
@@ -162,26 +164,38 @@ const returnShcema = mongoose.Schema({
 const Return = mongoose.model('Return', returnShcema);
 
 
-const reviewSchema = mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-    }, product: {
+const reviewShcema = mongoose.Schema({
+    product:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product',
-    }, rating: {
-        type: Number,
-    }, review: {
+
+    },rating:{
         type: String,
         required: true,
-    }, dateAt: {
+
+    },user:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    },
+    review:{
+        type: String,
+        required: true,
+    },
+    comment:{
+        type: String,
+        required: false,
+    },
+    reviewedAt: {
         type: Date,
         default: Date.now(),
     }
 
-});
+},
+{
+    timestamps: true
+})
 
-const Review = mongoose.model('Review', reviewSchema);
+const Review = mongoose.model('Review', reviewShcema);
 
 
 module.exports = {

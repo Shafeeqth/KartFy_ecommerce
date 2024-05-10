@@ -36,6 +36,7 @@
     "passport-oauth2": "^1.8.0",
     "path": "^0.12.7",
     "paypal-rest-sdk": "^1.8.1",
+    "puppeteer": "^22.8.0",
     "sharp": "^0.33.2",
     "sweetalert": "^2.1.2",
     "sweetalert2": "^11.6.13",

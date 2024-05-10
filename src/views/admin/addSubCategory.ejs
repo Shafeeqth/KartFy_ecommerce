@@ -290,8 +290,9 @@
               }else if(response.error) {
                 
                   Swal.fire({
-                    title: response.error,
-                    icon: "warning",
+                    title: 'Oops..!',
+                    icon: "error",
+                    text: response.message,
                     showConfirmButton: false,
                     timer: 1500,
                   })

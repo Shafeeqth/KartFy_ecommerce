@@ -56,9 +56,11 @@
 														<a href="/api/v1/product-detail?id=<%=cart.product._id%>"><%= cart.product.title%></a>
 													</h3><!-- End .product-title -->
 													
-											
+													<%if(cart.product.isListed == false) {%>
+														<div  class="  text-center mx-5 p-2 py-3  bg-warning rounded" style="width: 50%; border: none;" type="text" id="<%=cart.product._id%>"  value="">Product Unavailable </div>
+													<%}else{%>
 														<input disabled class=" bg-light text-center mx-5 p-2 text-dark" style="width: 20%; border: none;" type="text" id="<%=cart.product._id%>"  value="<%=cart.size%>">
-														
+														<%}%>
 													
 												</div><!-- End .product -->
 												

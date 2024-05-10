@@ -252,10 +252,6 @@ const editSubCategory = asyncHandler(async (req, res, next) => {
         let category = await Category.findOne({
             _id: catId
 
-            // $and:
-
-            //     [{ title: {$regex: `^${title}$`, $options:'i'} }, { _id: { $ne: id } }]
-
         });
 
         console.log(category)
@@ -269,8 +265,7 @@ const editSubCategory = asyncHandler(async (req, res, next) => {
 
         let subCategoryExist =  category.subCategories.find(item => {
             if (title.toLowerCase()  === item.title.toString().toLowerCase() && 
-            item._id != subId
-        ) {
+            item._id != subId) {
                 return true
            
         }
@@ -320,23 +315,27 @@ const addSubCategory = asyncHandler(async (req, res, next) => {
     let id = req.session.categoryId;
     console.log('title: ', title, 'description: ', description);
     console.log(id, 'categoryId')
-    req.session.categoryId = undefined;
+   
 
-    let match = await Category.findOne({
+    let matchCategory = await Category.findOne({
         _id: id,
         "subCategories.title": {
              $regex: `^${title}$`, $options: 'i' 
             }
-    }).sort({})
+    })
+    let match = matchCategory.subCategories.find(category => new RegExp(`^${category.title}$`, 'i').test(title))
+    
 
     if (match) {
-        return res.json({
+        return res.status(400)
+            .json({
             success: false,
             error: true,
             message: 'Title already exist!',
             result: null,
         })
     }
+  
 
     let result = await Category.findOneAndUpdate({
         _id: id
@@ -344,10 +343,12 @@ const addSubCategory = asyncHandler(async (req, res, next) => {
         , {
             $push: {
                 subCategories: {
-                    title, description
+                    title,
+                    description
                 }
             }
         }, { new: true })
+        req.session.categoryId = undefined;
 
         return res.json({
             success: true,

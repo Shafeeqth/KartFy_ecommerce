@@ -42,14 +42,12 @@ const loadShop = asyncHandler(async (req, res) => {
     let gender = (Array.isArray(req.query.Gender) ? req.query.Gender : req.query.Gender?.split(' '));
     let brand = (Array.isArray(req.query.Brands) ? req.query.Brands : req.query.Brands?.split(' '));
     console.log('gnede', gender, 'brand', brand, 'categ', category)
-    // let categor = [];
-    if( gender)categor.push({Gender:{$in: gender }})
-    // if( category)categor.push({Category: {$in:category}})
-    // if( brand)categor.push({Brands:{$in: brand}})
-    // let matchValue = {};
-    // console.log(categor)
-
-    let genderMatch = 
+    let categor = [];
+    if(gender)categor.push({Gender:{$in: gender }});
+    if(category)categor.push({Category: {$in:category}})
+    if(brand)categor.push({Brands:{$in: brand}})
+    let matchValue = {};
+    console.log(categor)
 
     let sort = req.query.sort || ''
 
@@ -316,15 +314,45 @@ const loadCheckout = asyncHandler(async (req, res) => {
 })
 
 const loadProductDetail = asyncHandler(async (req, res) => {
-
+    
+    let productId = req.query['id'];
+    console.log(productId)
 
     let user = req.session.user ? req.session.user : null;
-    let product = await Inventory.findOne({ product: req.query.id })
-                .populate('product');
-    console.log(product)
-    console.log(product.product.productReviews)
+    let product = await Inventory.aggregate([
+        {
+            $match: {
+                product: new mongoose.Types.ObjectId(productId)
 
-    res.status(200).render('user/productDetail', { user, product });
+            }
+        },
+        {
+            $lookup: {
+                from: 'reviews',
+                localField: '_id',
+                 foreignField: 'product',
+                 as: 'review'
+    
+            }
+        },
+        {
+        $lookup: {
+             from: 'products',
+             localField: 'product',
+             foreignField: '_id',
+             as: 'product'
+             }
+        
+        },
+        {
+            $unwind: '$product'
+        }
+       
+        ])
+
+    // console.log(product.product.productReviews)
+
+    res.status(200).render('user/productDetail', { user, product :product[0] });
 
 
 

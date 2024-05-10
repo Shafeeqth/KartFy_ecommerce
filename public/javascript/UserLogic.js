@@ -1,6 +1,34 @@
 
 
 
+
+// function productStock(this, sizeVariant) {
+
+//     let quantityMessage = document.getElementById('quantity_message');
+//     let addToCart = document.getElementById('add-to-cart');
+//     let outOfStock = document.getElementById('out-of-stock');
+//     console.log(this.value);
+//     return
+
+//     if(product.totalStock && product.totalStock <= 10) {
+//         `Hurry! Only <span class="items"><%= product.totalStock %></span> left in stock.`
+
+
+
+//     }
+//     if(product.totalStock <= 0){
+//         `<span   class="text-white fw-bold">Out of Stock</span>`
+
+//     }
+    
+//    `<button style="all: unset;" onclick="addToCart('<%=product.product._id%>')"><a class="btn-product btn-cart">add to cart</a></button>`
+
+
+
+
+
+// } 
+
 function addToCartFromWishlist(id) {
     let size = document.getElementById('sizeVariant').selectedOptions[0].value
     console.log(size)
