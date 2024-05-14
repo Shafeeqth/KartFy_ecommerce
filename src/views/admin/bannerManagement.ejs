@@ -589,6 +589,9 @@ function previewImage1(event) {
             const name = form.elements.name.value.trim();
             const description = form.elements.description.value.trim();
             const url = form.elements.url.value.trim();
+            const id = form.elements.id?.value;
+            
+            
             const image = form.elements.image ?? null
     
             if (name.length <=2 ) {
@@ -615,7 +618,7 @@ function previewImage1(event) {
               );
               return;
             }
-            if(image) {
+            if(!id) {
                 if (image.files.length ==0) {
                      displayErrorMessage(
                     form,

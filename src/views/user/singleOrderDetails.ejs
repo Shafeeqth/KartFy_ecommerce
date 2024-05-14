@@ -129,19 +129,20 @@
 												</td>
 												<td>
 													<%if(order.orderStatus== 'Delivered' ){%>
-														<%if(item.returnStatus) {%>
+														<%if(item.returnStatus != 'False') {%>
 															<span class=" px-4 py-2 rounded-pill"
 																style="font-weight: 400; background-color: rgb(241, 89, 142); color: #e1d8d8;">
 																Return <%=item.returnStatus%>
 															</span>
 
 
-															<%}%>
+															<%}%> 
 
+															<%if(item.returnStatus == 'False'){%>
 																<span class=" px-4 py-2 rounded-pill"
 																	style="font-weight: 400; background-color: rgb(46, 168, 56); color: #e1d8d8;">
 
-
+																<%}%>
 
 																	<%}else if(order.orderStatus=='Cancelled' ){%>
 																		<span class=" px-4 py-2 rounded-pill"
@@ -172,10 +173,12 @@
 																											class=" px-4 py-2 rounded-pill"
 																											style="font-weight: 400; background-color: rgb(101, 15, 32); color: #e1d8d8;">
 																											<%}%>
+																												
+																											<%if(item.returnStatus == 'False'){%>
 																												<%=
-																													order.orderStatus%>
+																												order.orderStatus%>
 																										</span>
-												</td>
+												</td>															<%}%>
 												<% const formattedDate=order.createdAt.toLocaleString('en-US', {
 													weekday: 'short' , month: 'short' , day: 'numeric' , year: 'numeric'
 													}); %>
@@ -186,7 +189,7 @@
 														<%if(order.orderStatus== 'Delivered' ){%>
 															<%if(item.returnStatus=='False' ){%>
 																<button
-																	onclick="returnProduct('<%=order._id%>','<%=item._id%>','<%= item.product._id%>')"
+																	onclick="returnProduct('<%=order._id%>','<%=item.size%>','<%= item.product._id%>','<%=item.quantity%>','<%=item.product.price* item.quantity%>','<%=item._id%>')"
 																	data-orderId="" data-productId=""
 																	class="returnOrderTrigger btn btn-warning rounded">Return
 																	Product</button>
@@ -562,7 +565,7 @@
 
 		};
 
-		function returnProduct(orderId, orderedItemId, productId) {
+		function returnProduct(orderId, size, productId,quantity, price, orderedItemId) {
 			let returnOrderButton = document.getElementById('confirmReturnOrder');
 			returnOrderButton.addEventListener('click', function () {
 				var reason = document.getElementById('returnReason').value;
@@ -575,8 +578,11 @@
 						reason,
 						comments,
 						orderId,
-						orderedItemId,
-						productId
+						size,
+						productId,
+						quantity,
+						price,
+						orderedItemId
 					}),
 					headers: {
 						'Content-Type': 'application/json',
@@ -585,10 +591,25 @@
 
 				}).then(response => response.json())
 					.then(response => {
+						
+							setTimeout(() => {
+								window.location.reload(true)
+								
+							}, 1600);
+							
+						
 						console.log(response);
-						if (response.success == true) {
-							window.location.reload(true)
-						}
+						Swal.fire({
+							
+							icon: 'success',
+							text: data.message,
+							//  toast:true,
+
+							showConfirmButton: false,
+							timer: 1500,
+
+						});
+						
 					})
 
 

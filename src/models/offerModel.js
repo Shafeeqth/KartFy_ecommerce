@@ -10,7 +10,7 @@ const offerSchema = mongoose.Schema({
         required: true
 
     },
-     expiryDate: {
+     endDate: {
         type: Date,
         required: true,
 
@@ -20,12 +20,21 @@ const offerSchema = mongoose.Schema({
 
     }, isListed: {
         type: Boolean,
+        default: true
 
     },appliedCategory: {
         type: Array,
-    }
+    },
+    productIds:[{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'Product'
+    }],
 
-});
+},
+{
+    timestamps: true
+}
+);
 
 const Offer = mongoose.model('Offer', offerSchema);
 

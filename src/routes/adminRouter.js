@@ -16,6 +16,8 @@ const categoryController = require('../controller/adminCategoryController');
 //Get admin dashboard 
 router.get('/', adminMiddleware.isLoged, adminController.loadDashboard ); 
 
+router.get('/sales-report', adminController.loadSalesReport)
+
 //submit admin login
 router
 .route('/login')
@@ -159,7 +161,7 @@ router.get('/returns', );
 router.get('/returns', adminMiddleware.isLoged, adminController.loadReturns);
 
 //view a purticular request
-router.put('/retuns/confirm_return/:id');
+router.patch('/returns/change-status', adminController.returnChangeStatus);
 
 //reject return request
 router.put('/retuns/reject_return/:id');
@@ -172,16 +174,16 @@ router.put('/retuns/reject_return/:id');
 router.get('/offers', adminController.loadOffers);
 
 //Edit offer
-router.put('/offers/edit_offer/:id');
+router.put('/offers/get-offer-data', adminController.getOfferData);
 
 //delete offer
-router.delete('/offers/delete_offer/:id');
+router.post('/offers/create-offer', adminController.createOffer);
+router.post('/offers/edit-offer', adminController.editOffer);
 
 //List offer
-router.put('/offers/list_offer/:id');
+router.put('/offers/list-unlist-offer', adminController.listAndUnlistOffer);
 
-//Unlist offer
-router.put('/offers/unlist_offer/:id');
+
 
 
 

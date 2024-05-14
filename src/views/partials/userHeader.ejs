@@ -160,82 +160,7 @@
                             <img src="/assets/images/demos/demo-6/logo.png" alt="Molla Logo" width="82" height="20">
                         </a>
                     </div><!-- End .header-left -->
-                    <a href="/api/v1/user-notifications">
-                    <button id="notificationButton" class="shakingAnimation" >
-                        <i class="fas fa-bell"></i>
-                        <span class="notification-count" id="notificationCount">0</span>
-                    </button>
-                </a>
-                    <style>
-                        .shakingAnimation {
-                            animation: shake 0.7s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite alternate;
-
-                        }
-                        #notificationButton {
-                            font-size: larger;
-                            position: absolute;
-                            /* Ensures the button stays in place when scrolling */
-                            top: 14%;
-                            /* Adjust position as needed */
-                            right: -7%;
-                            /* Adjust position as needed */
-                            background-color: transparent;
-                            /* Transparent background */
-                            border: none;
-                            /* Remove default border */
-                            padding: 10px;
-                            /* Adjust padding for desired size */
-                            cursor: pointer;
-                            /* Indicate interactivity */
-                           
-                            /* Animation for shaking */
-                        }
-
-                        #notificationButton i {
-                            font-size: 2em;
-                            /* Adjust icon size as needed */
-                            color: rgb(230, 161, 41);
-                            /* Or any desired color */
-                        }
-
-                        .notification-count {
-                            background-color: red;
-                            color: white;
-                            border-radius: 50%;
-                            padding: 1px 6px;
-                            font-size: 12px;
-                            position: absolute;
-                            top: -1px;
-                            right: 2px;
-                        }
-
-                        @keyframes shake {
-                            0% {
-                                transform: rotateZ(0deg);
-                            }
-
-                            10% {
-                                transform: rotateZ(-10deg);
-                            }
-
-                            20% {
-                                transform: rotateZ(10deg);
-                            }
-
-                            30% {
-                                transform: rotateZ(-10deg);
-                            }
-
-                            40% {
-                                transform: rotateZ(10deg);
-                            }
-
-                            50% {
-                                transform: rotateZ(0deg);
-                            }
-                        }
-                    </style>
-
+                   
                     <%if(user){%>
                         <div class="header-right" id="header-right">
                             <a href="/api/v1/wishlist" class="wishlist-link">
@@ -269,6 +194,82 @@
                                 </div><!-- End .dropdown-menu -->
                             </div><!-- End .cart-dropdown -->
                         </div>
+                        <a href="/api/v1/user-notifications">
+                            <button id="notificationButton" class="shakingAnimation" >
+                                <i class="fas fa-bell"></i>
+                                <span class="notification-count" id="notificationCount">0</span>
+                            </button>
+                        </a>
+                            <style>
+                                .shakingAnimation {
+                                    animation: shake 0.7s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite alternate;
+        
+                                }
+                                #notificationButton {
+                                    font-size: larger;
+                                    position: absolute;
+                                    /* Ensures the button stays in place when scrolling */
+                                    top: 14%;
+                                    /* Adjust position as needed */
+                                    right: -7%;
+                                    /* Adjust position as needed */
+                                    background-color: transparent;
+                                    /* Transparent background */
+                                    border: none;
+                                    /* Remove default border */
+                                    padding: 10px;
+                                    /* Adjust padding for desired size */
+                                    cursor: pointer;
+                                    /* Indicate interactivity */
+                                   
+                                    /* Animation for shaking */
+                                }
+        
+                                #notificationButton i {
+                                    font-size: 2em;
+                                    /* Adjust icon size as needed */
+                                    color: rgb(230, 161, 41);
+                                    /* Or any desired color */
+                                }
+        
+                                .notification-count {
+                                    background-color: red;
+                                    color: white;
+                                    border-radius: 50%;
+                                    padding: 1px 6px;
+                                    font-size: 12px;
+                                    position: absolute;
+                                    top: -1px;
+                                    right: 2px;
+                                }
+        
+                                @keyframes shake {
+                                    0% {
+                                        transform: rotateZ(0deg);
+                                    }
+        
+                                    10% {
+                                        transform: rotateZ(-10deg);
+                                    }
+        
+                                    20% {
+                                        transform: rotateZ(10deg);
+                                    }
+        
+                                    30% {
+                                        transform: rotateZ(-10deg);
+                                    }
+        
+                                    40% {
+                                        transform: rotateZ(10deg);
+                                    }
+        
+                                    50% {
+                                        transform: rotateZ(0deg);
+                                    }
+                                }
+                            </style>
+        
                         <%}else{%>
 
                             <div class="header-right">

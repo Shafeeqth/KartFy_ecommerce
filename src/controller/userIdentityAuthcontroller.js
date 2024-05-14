@@ -1,4 +1,4 @@
-const OTP = require('../models/otpModel');
+ const OTP = require('../models/otpModel');
 const bcrypt = require('bcrypt');
 const userHelper = require('../helpers/validations');
 const sendMail = require('../helpers/nodeMailer');
@@ -197,7 +197,8 @@ const resetPassword = asyncHandler(async (req, res, next) => {
 
 const resendOtp = asyncHandler(async (req, res, next) => {
 
-    let email = req.session.user?.email;
+    let email = req.session.value?.email;
+    console.log(email);
     if(!email){
        return res.status(400)
        .json({

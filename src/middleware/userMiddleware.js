@@ -68,9 +68,6 @@ const isUserAutharized = asyncHandler(async (req, res, next) => {
 const addToCart = asyncHandler(async (req, res, next) => {
     console.log(req.body)
 
-
-
-
     let { id, addToCartFromWishlist, size } = req.body.data
     console.log(id, addToCartFromWishlist, size)
     let user = req.session.user?._id;
@@ -120,7 +117,7 @@ const addToCart = asyncHandler(async (req, res, next) => {
         }
     )
     userCart.totalPrice += userCart.coupon.discount;
-    delete user.coupon
+    delete userCart.coupon;
     }
     if (!product.stock > 0) {
         return res.json({
@@ -161,7 +158,6 @@ const addToCart = asyncHandler(async (req, res, next) => {
             if (item.size === size && item.product._id == id) return true
             return false;
         });
-        console.log(existInCart, 'exist in cart')
 
         if (existInCart) {
 
@@ -290,7 +286,7 @@ const removeFromCart = asyncHandler(async (req, res, next) => {
         }
     )
     userCart.totalPrice += userCart.coupon.discount;
-    delete user.coupon
+    delete userCart.coupon
     }
     await userCart.save()
 
@@ -461,7 +457,7 @@ const updateCartCount = asyncHandler(async (req, res, next) => {
         }
     )
     userCart.totalPrice += userCart.coupon.discount;
-    delete user.coupon
+    delete userCart.coupon
     }
    
 

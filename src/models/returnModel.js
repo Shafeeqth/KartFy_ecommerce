@@ -9,12 +9,14 @@ const returnShcema = mongoose.Schema({
     },
     order: {
         type: mongoose.Schema.Types.ObjectId,
+        
         ref: 'Order',
         required: true,
 
     },
     orderedItemId: {
         type: mongoose.Schema.Types.ObjectId,
+        ref: 'Order.orderedItems',
         required: true,
 
     },

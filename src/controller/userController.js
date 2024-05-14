@@ -43,9 +43,9 @@ const loadShop = asyncHandler(async (req, res) => {
     let brand = (Array.isArray(req.query.Brands) ? req.query.Brands : req.query.Brands?.split(' '));
     console.log('gnede', gender, 'brand', brand, 'categ', category)
     let categor = [];
-    if(gender)categor.push({Gender:{$in: gender }});
-    if(category)categor.push({Category: {$in:category}})
-    if(brand)categor.push({Brands:{$in: brand}})
+    if(gender)categor.push({'product.category.Gender':{$in: gender }});
+    if(category)categor.push({'product.category.Category': {$in:category}})
+    if(brand)categor.push({'product.category.Brands':{$in: brand}})
     let matchValue = {};
     console.log(categor)
 
@@ -101,6 +101,13 @@ const loadShop = asyncHandler(async (req, res) => {
             $match: {
                 'product.title': { $regex: search, $options: "i" },
 
+            }
+        },
+        {
+            $addFields: {
+                category: {
+                    $first: "$product.category.Gender"
+                }
             }
         },
         {
@@ -329,9 +336,27 @@ const loadProductDetail = asyncHandler(async (req, res) => {
         {
             $lookup: {
                 from: 'reviews',
-                localField: '_id',
-                 foreignField: 'product',
-                 as: 'review'
+                localField: 'product',
+                foreignField: 'product',
+                 as: 'reviews',
+                 pipeline: [
+                    {
+                        $lookup: {
+                            from: 'users',
+                            localField: 'user',
+                            foreignField: '_id',
+                             as: 'user',
+                             pipeline: [{
+                                
+                                $project: {
+                                    name: 1
+                                }
+                        }]
+                
+                        }
+            
+                    },
+                 ]
     
             }
         },
@@ -349,10 +374,13 @@ const loadProductDetail = asyncHandler(async (req, res) => {
         }
        
         ])
+        console.log(JSON.stringify(product))
 
     // console.log(product.product.productReviews)
+    const sizeVariant = JSON.stringify(product[0].sizeVariant)
+    console.log(sizeVariant)
 
-    res.status(200).render('user/productDetail', { user, product :product[0] });
+    res.status(200).render('user/productDetail', { user, product :product[0],sizeVariant });
 
 
 

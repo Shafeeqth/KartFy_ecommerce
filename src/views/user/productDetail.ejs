@@ -1,12 +1,15 @@
 <%-include('../partials/userHeader')%>
 
 <script>
-    function productStock(this, sizeVariant) {
+    function productStock(event, sizeVariant) {
 
         let quantityMessage = document.getElementById('quantity_message');
         let addToCart = document.getElementById('add-to-cart');
         let outOfStock = document.getElementById('out-of-stock');
-        console.log(this.value);
+        console.log(event.target.value);
+        
+
+       
         
 
         if(product.totalStock && product.totalStock <= 10) {
@@ -98,7 +101,7 @@
                                         <div class="ratings">
                                             <div class="ratings-val" style="width: <%=(product.product.avgRating / 5) * 100%>%;"></div><!-- End .ratings-val -->
                                         </div><!-- End .ratings -->
-                                        <a class="ratings-text" href="#product-review-link" id="review-link"><%=product.product.review ? product.product.review : 0%></a>
+                                        <a class="ratings-text" href="#product-review-link" id="review-link"><%=product.reviews?.length || 0%></a>
                                     </div><!-- End .rating-container -->
 
                                     <div class="product-price">
@@ -114,7 +117,7 @@
                                     <div class="details-filter-row details-row-size my-4">
                                         <label for="size">Size:</label>
                                         <div class="select-custom">
-                                            <select name="size<%=product.product._id%>" id="size<%=product.product._id%>" onchange="productStock(this,'<%=product.sizeVariant%>')" class="form-control">
+                                            <select name="size<%=product.product._id%>" id="size<%=product.product._id%>" onchange="productStock(event,'<%=sizeVariant%>')" class="form-control">
                                                 
                                                 <option selected value="S">Small</option>
                                                 <option value="M">Medium</option>
@@ -187,7 +190,7 @@
                                 <a class="nav-link" id="product-shipping-link" data-toggle="tab" href="#product-shipping-tab" role="tab" aria-controls="product-shipping-tab" aria-selected="false">Shipping & Returns</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" id="product-review-link" data-toggle="tab" href="#product-review-tab" role="tab" aria-controls="product-review-tab" aria-selected="false">Reviews (2)</a>
+                                <a class="nav-link" id="product-review-link" data-toggle="tab" href="#product-review-tab" role="tab" aria-controls="product-review-tab" aria-selected="false">Reviews (<%=product.reviews?.length || 0%>)</a>
                             </li>
                         </ul>
                         <div class="tab-content">
@@ -232,23 +235,26 @@
                             </div><!-- .End .tab-pane -->
                             <div class="tab-pane fade" id="product-review-tab" role="tabpanel" aria-labelledby="product-review-link">
                                 <div class="reviews">
-                                    <h3>Reviews (2)</h3>
+                                    <h3>Reviews (<%=product.reviews?.length || 0%>)</h3>
+                                   <% if(Array.isArray(product.reviews) && product.reviews.length > 0) {%>
+                                    <%product.reviews.forEach(review => {%>
                                     <div class="review">
                                         <div class="row no-gutters">
                                             <div class="col-auto">
-                                                <h4><a href="#">Samanta J.</a></h4>
+                                                <h4><a href="#"><%=review.user[0].name%></a></h4>
                                                 <div class="ratings-container">
                                                     <div class="ratings">
-                                                        <div class="ratings-val" style="width: 80%;"></div><!-- End .ratings-val -->
+                                                        <div class="ratings-val" style="width: <%=(review.rating * 100 ) / 5%>%;"></div><!-- End .ratings-val -->
                                                     </div><!-- End .ratings -->
                                                 </div><!-- End .rating-container -->
-                                                <span class="review-date">6 days ago</span>
+                                                <span style="font-size:12px ;" class="review-date"><%=review.createdAt.toLocaleDateString('en-US',
+                                                    { year: 'numeric', month: 'short', day:  'numeric'})%></span>
                                             </div><!-- End .col -->
                                             <div class="col">
-                                                <h4>Good, perfect size</h4>
+                                                <h4><%=review.review%></h4>
 
                                                 <div class="review-content">
-                                                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ducimus cum dolores assumenda asperiores facilis porro reprehenderit animi culpa atque blanditiis commodi perspiciatis doloremque, possimus, explicabo, autem fugit beatae quae voluptas!</p>
+                                                    <p><%=review.comment%></p>
                                                 </div><!-- End .review-content -->
 
                                                 <div class="review-action">
@@ -258,6 +264,8 @@
                                             </div><!-- End .col-auto -->
                                         </div><!-- End .row -->
                                     </div><!-- End .review -->
+                                    <%})%>
+                                    <%}%>
 
                                     <div class="review">
                                         <div class="row no-gutters">

@@ -140,7 +140,7 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
     let cart = await Cart.findOne({
         user: new mongoose.Types.ObjectId(user._id)
     }).populate('products.product')
-
+    // return console.log(cart, 'cart')
     let orderedItems = await Cart.findOne({
         user: new mongoose.Types.ObjectId(user._id)
     }, {
@@ -168,7 +168,7 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
     cart.products.forEach(async (item) => {
 
         let newProduct = await Inventory.findOneAndUpdate({
-            product: item.product,
+            product: item.product._id,
             'sizeVariant.size': item.size
         }, {
             $inc: {
@@ -264,7 +264,7 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
 
             wallet.transactions.push({
                 amount: order.orderAmount,
-                description: 'Product ordered ',
+                description: 'Product ordered with wallet ',
                 mode: 'Credit'
             })
             await wallet.save()
@@ -370,7 +370,7 @@ const orderCancel = asyncHandler(async (req, res, next) => {
                     transactions: {
                         amount: order.orderAmount,
                         mode: 'Debit',
-                        description: 'Order cancell amount debited ',
+                        description: 'Order cancel amount debited ',
 
                     }
                 }
@@ -438,7 +438,7 @@ console.log(req.body)
     let newRatingAvg;
 
     if (ratingCount != 0) {
-        newRatingAvg = ((+ratingCount * +currentRatingAvg) + +rating) / (+ratingCount + 1)
+        newRatingAvg = ((+ratingCount * +currentRatingAvg) + +rating) / (+ratingCount + 1).toFixed(1);
     } else {
         newRatingAvg = +rating
     }
@@ -473,15 +473,18 @@ const orderReturn = asyncHandler(async (req, res) => {
     console.log(req.body)
     let user = req.session.user
 
-    let { reason, comments, orderId, orderedItemId, productId } = req.body;
+    let { reason, comments, orderId, quantity, price, size, productId,orderedItemId } = req.body;
     let userReturn = await Return.create({
         user: user._id,
         order: orderId,
-        orderedItemId,
+        size,
         reason,
         returnStatus: 'Requested',
         productId,
         comments,
+        quantity,
+        productPrice: price,
+        orderedItemId
 
 
     })

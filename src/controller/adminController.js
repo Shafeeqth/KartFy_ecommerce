@@ -13,16 +13,49 @@ const Category = require('../models/categoryModel');
 const Banner = require('../models/bannerModel');
 const path = require('node:path');
 const sharp = require('sharp');
+const { Product } = require('../models/productModels')
 const Wallet = require('../models/walletModel');
 const { pipeline } = require('node:stream');
 
 
 
 const loadDashboard = asyncHandler(async (req, res) => {
+    let products = await Product.countDocuments({isListed: true});
+    let orders = await Order.countDocuments({orderStatus: 'Delivered'});
+    let revenue = await Order.aggregate([
+        {
+            $match: {
+                orderStatus: 'Delivered'
+            }
+        },
+        {
+            $unwind: '$orderedItems'
+        },
+        {
+            $group: {
+                _id: null,
+                revenue : {
+                    $sum: '$orderedItems.totalPrice'
+                }
+            }
+
+        }
+
+    ]);
+
+    console.log(products)
+    console.log(revenue)
+    console.log(orders)
+    
 
     res
         .status(200)
         .render('admin/adminDashboard');
+})
+
+
+const loadSalesReport = asyncHandler( async (req, res) => {
+    res.render('admin/salesreport')
 })
 
 
@@ -68,7 +101,7 @@ const checkAuthentic = asyncHandler(async (req, res) => {
 
 
 const loadCustomers = asyncHandler(async (req, res) => {
-    let page = parseInt(req.query.page) -1 || 0;
+    let page = parseInt(req.query.page) - 1 || 0;
     let limit = parseInt(req.query.limit) || 7;
     page < 0 ? (page = 0) : page = page
 
@@ -87,7 +120,7 @@ const loadCustomers = asyncHandler(async (req, res) => {
 })
 
 const loadOrders = asyncHandler(async (req, res) => {
-    let page = parseInt(req.query.page) -1 || 0;
+    let page = parseInt(req.query.page) - 1 || 0;
     let limit = parseInt(req.query.limit) || 7;
     page < 0 ? (page = 0) : page = page
 
@@ -140,7 +173,7 @@ const loadSingleOrderDetails = asyncHandler(async (req, res) => {
 
 
 const loadCoupons = asyncHandler(async (req, res) => {
-    let page = parseInt(req.query.page) -1 || 0;
+    let page = parseInt(req.query.page) - 1 || 0;
     let limit = parseInt(req.query.limit) || 7;
     page < 0 ? (page = 0) : page = page
 
@@ -148,7 +181,7 @@ const loadCoupons = asyncHandler(async (req, res) => {
 
 
     let coupon = await Coupon.find({}).skip(limit * page).limit(limit);
-    
+
 
     console.log(coupon)
     res.render('admin/couponManagement', { coupon, total, page });
@@ -157,22 +190,22 @@ const loadCoupons = asyncHandler(async (req, res) => {
 
 
 const loadReturns = asyncHandler(async (req, res) => {
-    let page = parseInt(req.query.page) -1 || 0;
+    let page = parseInt(req.query.page) - 1 || 0;
     let limit = parseInt(req.query.limit) || 7;
     page < 0 ? (page = 0) : page = page
 
     let total = await Return.countDocuments({});
 
 
-    let returns = await Return.find({})
-            .populate('productId')
-            .populate('user')
-            .populate('order')
-            .skip(limit * page)
-            .limit(limit)
-    console.log(returns)
-   
-    res.render('admin/returnRequest', {returns, total, page});
+    let returns = await Return.find({}) 
+        .populate('productId', 'images title')
+        .populate('user','name  email')
+        .populate('order')
+        .skip(limit * page)
+        .limit(limit)
+         console.log(returns)
+
+    res.render('admin/returnRequest', { returns, total, page });
 })
 
 
@@ -236,13 +269,13 @@ const changeOrderStatus = asyncHandler(async (req, res, next) => {
             new: true
         });
     if (status == 'Cancelled') {
-        if(['PayPal', 'RazorPay', 'Wallet'].includes(order.paymentMethod)) {
+        if (['PayPal', 'RazorPay', 'Wallet'].includes(order.paymentMethod)) {
             let wallet = await Wallet.updateOne({
                 user: userId
             }, {
                 $inc: {
                     balance: order.orderAmount
-    
+
                 },
                 $push: {
                     transactions: {
@@ -255,7 +288,7 @@ const changeOrderStatus = asyncHandler(async (req, res, next) => {
             })
 
         }
-        
+
     }
 
     console.log(order);
@@ -392,22 +425,25 @@ const listAndUnlistCoupon = asyncHandler(async (req, res) => {
 
 
 const loadOffers = asyncHandler(async (req, res) => {
-    let page = parseInt(req.query.page) -1 || 0;
+    let page = parseInt(req.query.page) - 1 || 0;
     let limit = parseInt(req.query.limit) || 7;
     page < 0 ? (page = 0) : page = page
 
     let total = await Offer.countDocuments({});
 
 
-    let offers = Offer.find({}).skip(page * limit).limit(limit)
-    let categories = await Category.find({ isListed: true }).select('title subCategories');
-    console.log('categories', categories);
-    res.render('admin/offerManagement', { categories, offers, page, total })
+    let offers = await Offer.find({})
+        .populate('productIds', 'title images')
+        .skip(page * limit)
+        .limit(limit)
+    
+    console.log('categories',JSON.stringify(offers));
+    res.render('admin/offerManagement', {  offers, page, total })
 
 })
 
 const loadBanners = asyncHandler(async (req, res) => {
-    let page = parseInt(req.query.page) -1 || 0;
+    let page = parseInt(req.query.page) - 1 || 0;
     let limit = parseInt(req.query.limit) || 7;
     page < 0 ? (page = 0) : page = page
 
@@ -525,10 +561,209 @@ const listAndUnlistBanner = asyncHandler(async (req, res) => {
 
 })
 
+const getOfferData = asyncHandler(async (req, res) => {
+    let { offerType } = req.body;
+    if (offerType == 'product') {
+        let product = await Product.find({ isListed: true });
+
+        if (product) {
+            return res.status(200)
+                .json({
+                    success: true,
+                    error: false,
+                    productData: product,
+                    message: 'Products fetched successfully'
+                })
+        }
+    } else {
+        let category = await Category.findOne({ title: 'Category' });
+
+        let categoryData = category?.subCategories
+        console.log(categoryData)
+        if (categoryData) {
+            return res.status(200)
+                .json({
+                    success: true,
+                    error: false,
+                    categoryData,
+                    message: 'Products fetched successfully'
+                })
+        }
+
+    }
+})
+
+const createOffer = asyncHandler(async (req, res) => {
+    console.log(req.body)
+    let { name, description, edate, offertype, discount, selecteditems } = req.body;
+    if (offertype == 'product') {
+        let offer = await Offer.create({
+            title: name,
+            description,
+            endDate: edate,
+            discount,
+            productIds: selecteditems
+        })
+    } else {
+        let offer = await Offer.create({
+            title: name,
+            description,
+            endDate: edate,
+            discount,
+            appliedCategory:selecteditems
+
+        })
+    }
+    res.status(201)
+        .redirect('/api/v1/admin/offers')
+})
+
+const listAndUnlistOffer = asyncHandler(async (req, res) => {
+    let { id } = req.body
+    let offer = await Offer.findOne({ _id: id })
+
+    if (offer.isListed == true) {
+        offer = await Offer.findOneAndUpdate({
+            _id: id,
+        },
+            {
+                $set: {
+                    isListed: false
+                }
+            },
+            {
+                new: true
+            }
+
+        )
+    } else {
+        offer = await Offer.findOneAndUpdate({
+            _id: id
+        },
+            {
+                $set: {
+                    isListed: true
+                }
+            },
+            {
+                new: true
+            }
+
+        )
+    }
+    return res.status(200)
+        .json({
+            success: true,
+            error: false,
+            data: offer,
+            message: 'Coupn updated successfully'
+        })
+})
+
+const editOffer = asyncHandler(async (req, res) => {
+    console.log(req.body)
+    const { name, id, description, discount,  edate } = req.body;
+    
+    const offer = await Offer.findOneAndUpdate({
+        _id: id,
+    },
+        {
+            $set: {
+                title: name,
+                description,
+                discount,
+                endDate: edate,
+               
+
+            }
+        },
+        {
+            new: true
+        }
+    )
+    res.redirect('/api/v1/admin/offers')
+    // return res.status(200)
+    //     .json({
+    //         success: true,
+    //         error: false,
+    //         data: coupon,
+    //         message: 'Coupon edited successfully'
+    //     })
+})
 
 
 
 
+
+
+
+const returnChangeStatus = asyncHandler( async (req, res) => {
+    console.log(req.body)
+    let {returnId, status} = req.body;
+    let returns = await Return.findOne({_id: returnId}) 
+    if(returns.returnStatus == 'Requested') {
+        return res.status(500)
+        .json({
+            success: false,
+            error: true,
+            message: 'Something went wrong'
+        })
+    }
+     
+    if(status == 'Accepted'){
+        let wallet = await Wallet.findOneAndUpdate({
+            user: new mongoose.Types.ObjectId(returns.user)
+        },
+        {
+            $inc: {
+                balance: returns.productPrice
+            },
+            $push: {
+                transactions:{
+
+               
+                    amount: returns.productPrice,
+                    mode: 'Debit',
+                    description: 'Product return accepted'
+                }
+            }
+                
+        },
+        {
+            new: true
+        }
+    )
+    
+    
+    console.log(wallet)
+
+    }
+    
+
+    let order = await Order.findOneAndUpdate({
+        _id: returns.order,
+        'orderedItems._id': returns.orderedItemId
+    },{
+        $set: {
+            'orderedItems.$.returnStatus': status
+        }
+    })
+   
+
+    returns.returnStatus = status;
+    returns  =  await returns.save();
+    console.log(returns)
+    console.log(order)
+
+
+    return res.json({
+        success: true,
+        errer: false,
+        message: 'Return status updated successfully'
+    })
+
+
+})
 
 
 
@@ -556,8 +791,14 @@ module.exports = {
     loadBanners,
     createBanner,
     editBanner,
-    listAndUnlistBanner
-
+    listAndUnlistBanner,
+    getOfferData,
+    createOffer,
+    editOffer,    
+    listAndUnlistOffer,
+    returnChangeStatus,
+    loadSalesReport
+    
 
 
 }

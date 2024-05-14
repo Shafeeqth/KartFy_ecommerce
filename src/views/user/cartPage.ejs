@@ -20,7 +20,7 @@
             	<div class="cart" id="Reload">
 	                <div class="container">
 	                	<div class="row" >
-	                		<div class="col-lg-9">
+	                		<div class="col-lg-8">
 	                			<table class="table table-cart table-mobile">
 									<thead>
 										<tr>
@@ -164,12 +164,12 @@
 			            			<a href="/api/v1/shop" class="btn btn-outline-dark-2"><span>ADD ITEMS TO CART</span><i class="icon-refresh"></i></a>
 		            			</div><!-- End .cart-bottom -->
 	                		</div><!-- End .col-lg-9 -->
-	                		<aside class="col-lg-3">
+	                		<aside class="col-lg-4">
 	                			<div class="summary summary-cart">
 	                				<h3 class="summary-title">Cart Total</h3><!-- End .summary-title -->
 
 	                				<table class="table table-summary">
-	                					<tbody>
+	                					<tbody >
 	                						<tr class="summary-subtotal">
 	                							<td>Subtotal:</td>
 												
@@ -214,14 +214,15 @@
 	                							<td style="position: relative;">
 													<div class="text-danger" id="pincodeError" style="position: absolute; top:0%; left:11%">
 													</div>
-													 <a> Estimate delivery cost<br><input id="deliveryCharge" onkeypress="findDeliveryCharge(event)" class="" style="all: unset; margin-left: 2%;" type="text"></a>
+													 <a> Estimate delivery cost<br><input id="deliveryCharge" onkeypress="findDeliveryCharge(event)" style="all: unset; right: 0; margin-left: 2%;" type="text"></a>
+													 <button type="button" onclick="findDeliveryCharge(event)" data-id="good" style="position: ; top: 52%; right: 16%; width: 5px; height: 30px; z-index: 10;" class="btn btn-primary mt-1">Check</button>
 													</td> <br>
 													
-													<button type="button" onclick="findDeliveryCharge(event)" data-id="good" style="position: absolute; top: 52%; right: 16%; width: 5px; height: 30px; z-index: 10;" class="btn btn-lg btn-primary">Check</button>
+													
 	                						</tr>
 											<div class="row d-none">
 												<div>
-													it is my delivery charge
+													it  delivery charge
 
 												</div>
 

@@ -87,11 +87,14 @@
                       <td><%=order.orderId%></td>
                       <td>
                         <b>
+                          <a href="api/v1/admin/products/product-detail?id=<%=item.product._id%>">
+
                           <img
                             src="/Data/uploads/<%=item.product.images[0]%>"
                             alt=""
                             style="width: 80px; height: 80px"
                           />
+                          </a>
                         </b>
                       </td>
                       <td><%= item.product.title%></td>

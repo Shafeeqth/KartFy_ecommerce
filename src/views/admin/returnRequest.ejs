@@ -21,6 +21,8 @@
   </head>
 
   <body>
+
+
     <%- include('../partials/sidenav.ejs') -%>
 
     <main class="main-wrap">
@@ -37,11 +39,11 @@
             <thead class="font-bold">
             <tr>
               <th class="text-center col-1">Order ID</th>
-              <th class="text-center col-4" scope="col">Products</th>
+              <th class="text-center col-3" scope="col">Products</th>
               
-              <th class="text-center col-1" scope="col">Total</th>
+              <th class="text-center col-2" scope="col">Details</th>
               <th class="text-center col-2" scope="col">Status</th>
-              <th class="text-center col-2" scope="col">Ordered Date</th>
+              <th class="text-center col-2" scope="col">Return Date</th>
               <th class="text-center col-2" scope="col" class="text-end">Action</th>
             </tr>
             </thead>
@@ -51,11 +53,11 @@
               <%returns.forEach(order=>{%>
             
             <tr style="width: 100%;" class="shadow" >
-              <td class="text-center col-1"><%=order.order.orderId%></td>
-              <td class="text-center col-3 " >
+              <td class="text-center col"><%=order.order.orderId%></td>
+              <td class=" justify-content-center col-3" >
               
                 <div style="float:left; flex-wrap: wrap;" class="m-2">
-                  <a href="api/v1/product-detail?id=<%=order.productId?._id%>">
+                  <a href="api/v1/admin/products/product-detail?id=<%=order.productId?._id%>">
                 <img
                 src="/Data/uploads/<%=order.productId?.images[0]%>"
                 alt=""
@@ -67,8 +69,18 @@
     
            
               </td>
+
+              <td class="col-2">
+                <input class="text-center text-success m-2" disabled
+                  style="width: ;  padding: 10px 5px; font-weight: bold; border: none; "
+                  value=" Price : ₹ <%= order.productPrice%>.00" type="text">
+                <br>
+                <input class="text-center text-success  m-2 " disabled
+                  style="width:; padding: 10px 5px; font-weight: bold; border: none; "
+                  value=" Quantity : <%= order.quantity%>"
+                  type="text">
+              </td>
               
-              <td class="text-center col-1">₹<%= order.orderAmount || order.orderAmout%>.00</td>
               <td class="text-center col-2">
               
               <%if(order.returnStatus== 'False'){%>
@@ -77,26 +89,81 @@
                 </span>
                  
                 <%}else if(order.returnStatus== 'Requested'){%>
-                  <button onclick="orderDetails('<%=order._id%>')" class=" btn btn-info rounded"><%= order.orderStatus%></button>
+                  <span class=" bg-danger text-white px-4 py-2 rounded-pill"><%= order.returnStatus%></span>
                 
                 <%}else{%>
-                  <span class=" px-4 py-2 rounded-pill" style="font-weight: 400; background-color: rgb(134, 32, 78); color: #e1d8d8;">
+                  <span class=" bg-primary text-white px-4 py-2 rounded-pill" style="font-weight: 400; background-color: rgb(134, 32, 78); color: #e1d8d8;">
                     <%= order.returnStatus%>
                     </span>
                   <%}%>
-              </td class="text-center col-2">
-              <% const formattedDate=order.createdAt.toLocaleString('en-US',
-              { weekday: 'short' , month: 'short' , day: 'numeric' ,
-              year: 'numeric' , hour: 'numeric' , minute: 'numeric' ,
-              second: 'numeric' , hour12: true }); %>
-              <td><%= formattedDate%></td>
-              <td class="text-center col-2 ">
-              
               </td >
-    
-            </tr>
+             
+             
+              <% const formattedDate=order.createdAt.toLocaleDateString('en-US',
+              { year: 'numeric', month: 'short', day:  'numeric'})%>
+              <td style="font-size: ; " class="text-center col-2"><%= formattedDate%></td>
+              <!-- <td class="text-center col-2 ">
+              
+              </td > -->
+              <td class="text-center mx-4 col-2">
+              
+                <%if(order.returnStatus== 'False'){%>
+                  <span class=" px-4 py-2 rounded-pill" style="font-weight: 400; background-color: rgb(46, 168, 56); color: #e1d8d8;">
+                  <%= order.returnStatus%>
+                  </span>
+                   
+                  <%}else if(order.returnStatus== 'Requested'){%>
+                    <button onclick="showMessage()" class=" btn btn-info rounded"><%= order.returnStatus%></button>
+                  
+                  <%}else{%>
+                    <span class=" px-4 py-2 rounded-pill" style="font-weight: 400; background-color: rgb(134, 32, 78); color: #e1d8d8;">
+                      <%= order.returnStatus%>
+                      </span>
+                    <%}%>
+                </td >
+               
+          
+
+            <table style="margin-top: -1%;visibility: hidden ;position: absolute; top: 50%; right: 1%; z-index: 10;" class="table bg-light" id="returnTable" >
+              
+              <th>
+                          <tr class="col-12 shadow" style="display: ; width: 100%;">
+              <td class="text-center  col-6">
+                <div style="background-color: rgb(234, 198, 205); height: 100Px; align-content: center;" class="rounded-pill">
+                  <p class="text-center" style="text-decoration: underline;"> Reason</p>
+                  <h5 style="" class="h-50">
+                    <%=order.reason%>
+                  </h5>
+                </div>
+               
+                <div class="row justify-content-center mt-1">
+                  <button onclick="updateStatus('<%=order._id%>','Rejected')" style="width: 15%;"  class="btn btn-danger  mx-5">Reject</button>
+                </div>
+              
+              </td>
+              <td class="text-center  col-6">
+                <div style="background-color:  rgb(234, 198, 205); height: 100Px; align-content: center;" class="rounded-pill">
+                  <p class="text-center" style="text-decoration: underline;"> Message</p>
+                  <h5 style="" class="h-50">
+                    <%=order.comments%>
+                  </h5>
+                </div>
+                <div class="row justify-content-center mt-1">
+                  <button onclick="updateStatus('<%=order._id%>','Accepted')" style="width: 15%;" class="text-center btn btn-success mx-5">Accept</button>
+                </div>
+ 
+              </td>
             
-            </tbody>
+            
+                </tr>
+              </th>
+  
+            </table>
+          </tr>
+
+
+            
+            
             <%})%>
             <%}else{%>
               <tr>
@@ -107,12 +174,14 @@
               </tr>
               
               <%}%>
-           
+            </tbody>
           
           </table>
+
           
           </div>
-          
+
+
           
           
           <!-- card-body end// -->
@@ -136,9 +205,72 @@
               </ul>
 
           </nav>
+
       </div>
+
         <!-- card end// -->
-      </section>
+      
+        </section>
+      <script>
+        function showMessage() {
+          let returnTable = document.getElementById('returnTable')
+          if(returnTable.style.visibility == 'hidden') {
+            returnTable.style.visibility = 'visible'
+          }else{
+            returnTable.style.visibility = 'hidden'
+          }
+        }
+
+        function updateStatus(returnId, status) {
+          console.log(returnId, status)
+          fetch('/api/v1/admin/returns/change-status',{
+            method: 'PATCH',
+            body: JSON.stringify({returnId, status}),
+            headers: {
+						'Content-Type': 'application/json',
+
+					}
+         
+
+          }).then(response => response.json())
+          .then(response =>{
+            console.log(response)
+            if(response.success) {            
+           
+            Swal.fire({
+                title: 'success',
+                width:'300px',
+                text: response.message,
+                icon: 'success',
+              //  toast:true,
+                
+                showConfirmButton:false,
+                timer:1500,
+            })
+            let returnTable = document.getElementById('returnTable')
+          returnTable.style.visibility == 'hidden';
+          location.reload(true)
+           
+            }else{
+              Swal.fire({
+                title: 'Oops!',
+                width:'300px',
+                text: response.message,
+                icon: 'error',
+              //  toast:true,
+                
+                showConfirmButton:false,
+                timer:1500,
+            })
+            location.reload(true)
+            }
+          
+          })
+          .catch(error => console.log(error))
+          
+        }
+      </script>
+     
       <!-- content-main end// -->
       <%- include('../partials/adminFooter.ejs') -%>
     </main>

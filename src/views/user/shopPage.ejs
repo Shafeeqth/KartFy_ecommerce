@@ -106,6 +106,8 @@
                                         <div class="product-body">
                                             <div class="product-cat">
                                                 <a href="#">
+                                                    <%=inventory.category%>
+
                                                  
                                                 </a>
                                             </div><!-- End .product-cat -->
@@ -830,8 +832,8 @@ document.addEventListener('DOMContentLoaded', function () {
      
 
       tableRows.forEach(function (product) {
-        let productTitle = document.querySelectorAll('.product .product-body .product-title a'); // Adjust the index based on your table structure
-        console.log(productTitle )
+        let productTitle = document.querySelectorAll('.product .product-body .product-title'); // Adjust the index based on your table structure
+        console.log(productTitle.nextElementSibling )
         if (productTitle) {
         //   let nameText = productTitle.textContent.toLowerCase();
         //   row.style.display = nameText.includes(searchTerm) ? '' : 'none';

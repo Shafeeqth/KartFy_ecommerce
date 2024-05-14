@@ -130,8 +130,18 @@ const returnShcema = mongoose.Schema({
         required: true,
 
     },
-    orderedItemId: {
-        type: mongoose.Schema.Types.ObjectId,
+    size: {
+        type: String,
+        required: true,
+
+    },
+    productPrice: {
+        type: String,
+        required: true,
+
+    },
+    quantity: {
+        type: String,
         required: true,
 
     },
@@ -154,6 +164,10 @@ const returnShcema = mongoose.Schema({
     comments: {
         type: String,
         required: false
+
+    },
+    orderedItemId:{
+        type: mongoose.Schema.Types.ObjectId,
 
     }
 },

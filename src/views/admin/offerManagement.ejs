@@ -24,10 +24,16 @@
     <%- include('../partials/sidenav.ejs') -%>
     <main class="main-wrap">
       <!-- Modal -->
-      <div
       
+
+
+
+
+
+
+      <div
         class="modal fade"
-        id="exampleModal"
+        id="exampleModal3"
         tabindex="-1"
         aria-labelledby="exampleModalLabel"
         aria-hidden="true"
@@ -47,97 +53,6 @@
             </div>
             <div class="modal-body">
               <form action="/api/v1/admin/offers/create-offer" method="post">
-                <label for="form-label">Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Enter coupon name"
-                  class="form-control my-2"
-                />
-                <label for="form-label">Description</label>
-                <input
-                  type="text"
-                  name="description"
-                  placeholder="Enter Description here"
-                  class="form-control my-2"
-                />
-
-                <label for="form-label">Dicount Percentage</label>
-                <input
-                  type="text"
-                  name="discount"
-                  placeholder="Enter in % "
-                  class="form-control my-2"
-                />
-
-                <%if(Array.isArray(categories) && categories.length > 0)  {%>
-                <label for="form-label">MIn Order Amount</label>
-                <select name="category" id="category" class="form-control">
-                  <%categories.forEach(category => {%>
-                  <option value="<%=category.title%>" selected="selected"><%=category.title%></option>
-                  
-                <%})%>
-                </select>
-                <%}%>
-                
-
-                
-
-                <label for="form-label">Expire date</label>
-                <input
-                  type="date"
-                  name="edate"
-                  placeholder="DD-MM-YYYY"
-                  class="form-control my-2"
-                />
-
-                
-                
-                <div class="modal-footer">
-                  <button
-                    type="button"
-                    class="btn btn-secondary"
-                    data-bs-dismiss="modal"
-                  >
-                    Close
-                  </button>
-                  <button type="submit" class="btn btn-primary">
-                    Submit
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-
-
-
-
-
-
-      <div
-        class="modal fade"
-        id="exampleModal3"
-        tabindex="-1"
-        aria-labelledby="exampleModalLabel"
-        aria-hidden="true"
-      >
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="exampleModalLabel">
-                Create product Offer
-              </h1>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div class="modal-body">
-              <form action="/api/v1/admin/offers/edit-offer" method="post">
                 <label for="form-label">Name</label>
                 <input style="visibility: hidden;" type="text" name="id" id="couponId">
                 <input
@@ -166,18 +81,20 @@
                 />
 
 
-                <label for="form-label">MIn Order Amount</label>
-                <input
-                  type="text"
-                  name="minOrder"
-                  id="minCost"
-                  placeholder="Enter Min Amount"
-                  class="form-control my-2"
-                />
+                
+
+                <label for="form-label">Choose offer type</label>
+                <select class="form-select my-2" id="offertype"
+                name="offertype">
+                <option selected> Offer type</option>
+                <option value="category">Category </option>
+                <option value="product">Product</option>
+
+               </select>
 
                 
 
-                <label for="form-label">Expire date</label>
+                <label for="form-label">End date</label>
                 <input
                   type="date"
                   name="edate"
@@ -186,25 +103,29 @@
                   class="form-control my-2"
                 />
 
-                <label for="form-label">Limit of use</label>
-                <input
-                  type="text"
-                  id="limit"
-                  name="limit"
-                  placeholder="Enter how many user can use"
-                  class="form-control my-2"
-                />
+                <div class="form-group my-3">
+                  <div class="input-group my-3">
+                      <div class="input-group-prepend">
+                          <label class="form-label  input-group-text" for="inputGroupSelect01">Selected Items</label>
+                      </div>
+                      <select class="form-select" multiple id="selecteditems"
+                          name="selecteditems[]">
+
+
+                      </select>
+                  </div>
+              </div>
 
                 
-                <div class="modal-footer">
+                <div class="modal-footer justify-content-between ">
                   <button
                     type="button"
-                    class="btn btn-secondary"
+                    class="btn btn-secondary mx-5"
                     data-bs-dismiss="modal"
                   >
                     Close
                   </button>
-                  <button type="submit" class="btn btn-primary">
+                  <button type="submit" class="btn btn-primary mx-5">
                     Submit
                   </button>
                 </div>
@@ -213,6 +134,58 @@
           </div>
         </div>
       </div>
+
+
+      <!--   product modal  -->
+      <div class="modal fade" id="productModal" tabindex="-1"
+      aria-labelledby="productModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="productModalLabel">
+                      Select a Product</h5>
+                  <button type="button" class="btn-close"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"></button>
+              </div>
+              <div class="modal-body" id="modalProductList">
+                  <!-- product will be dynamically inserted here -->
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary"
+                      data-bs-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-primary"
+                      id="selectProductBtn">Select</button>
+              </div>
+          </div>
+      </div>
+  </div>
+
+
+  <!-- category modal -->
+  <div class="modal fade" id="categoryModal" tabindex="-1"
+      aria-labelledby="categoryModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="categoryModalLabel">
+                      Select Categories</h5>
+                  <button type="button" class="btn-close"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"></button>
+              </div>
+              <div class="modal-body" id="modalCategoryList">
+                  <!-- Categories will be dynamically inserted here -->
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary"
+                      data-bs-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-primary"
+                      id="selectCategoryBtn">Select</button>
+              </div>
+          </div>
+      </div>
+  </div>
 
 
 
@@ -239,77 +212,82 @@
               ></button>
             </div>
             <div class="modal-body">
-              <form action="/api/v1/admin/offers/edit-offer" method="post">
-                <label for="form-label">Name</label>
-                <input style="visibility: hidden;" type="text" name="id" id="couponId">
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  placeholder="Enter coupon name"
-                  class="form-control my-2"
-                />
-                <label for="form-label">Description</label>
-                <input
-                  type="text"
-                  id="description"
-                  name="description"
-                  placeholder="Enter Description here"
-                  class="form-control my-2"
-                />
-
-                <label for="form-label">Dicount Percentage</label>
-                <input
-                  type="text"
-                  id="discount"
-                  name="discount"
-                  placeholder="Enter in % "
-                  class="form-control my-2"
-                />
-
-
-                <label for="form-label">MIn Order Amount</label>
-                <input
-                  type="text"
-                  name="minOrder"
-                  id="minCost"
-                  placeholder="Enter Min Amount"
-                  class="form-control my-2"
-                />
-
-                
-
-                <label for="form-label">Expire date</label>
-                <input
-                  type="date"
-                  name="edate"
-                  id="edate"
-                  placeholder="DD-MM-YYYY"
-                  class="form-control my-2"
-                />
-
-                <label for="form-label">Limit of use</label>
-                <input
-                  type="text"
-                  id="limit"
-                  name="limit"
-                  placeholder="Enter how many user can use"
-                  class="form-control my-2"
-                />
-
-                
-                <div class="modal-footer">
-                  <button
-                    type="button"
-                    class="btn btn-secondary"
-                    data-bs-dismiss="modal"
-                  >
-                    Close
-                  </button>
-                  <button type="submit" class="btn btn-primary">
-                    Submit
-                  </button>
-                </div>
+              <form action="/api/v1/admin/offers/edit-offer" method="post">                  <label for="form-label">Name</label>
+                  <input style="visibility: hidden;" type="text" name="id" id="couponId1">
+                  <input
+                    type="text"
+                    id="name1"
+                    name="name"
+                    placeholder="Enter coupon name"
+                    class="form-control my-2"
+                  />
+                  <label for="form-label">Description</label>
+                  <input
+                    type="text"
+                    id="description1"
+                    name="description"
+                    placeholder="Enter Description here"
+                    class="form-control my-2"
+                  />
+  
+                  <label for="form-label">Dicount Percentage</label>
+                  <input
+                    type="text"
+                    id="discount1"
+                    name="discount"
+                    placeholder="Enter in % "
+                    class="form-control my-2"
+                  />
+  
+  
+                  
+  
+                  <!-- <label for="form-label">Choose offer type</label>
+                  <select class="form-select my-2" id="offertype1"
+                  name="offertype">
+                  <option selected> Offer type</option>
+                  <option value="category">Category </option>
+                  <option value="product">Product</option>
+  
+                 </select> -->
+  
+                  
+  
+                  <label for="form-label">End date</label>
+                  <input
+                    type="date"
+                    name="edate"
+                    id="edate1"
+                    placeholder="DD-MM-YYYY"
+                    class="form-control my-2"
+                  />
+  
+                  <!-- <div class="form-group my-3">
+                    <div class="input-group my-3">
+                        <div class="input-group-prepend">
+                            <label class="form-label  input-group-text" for="inputGroupSelect01">Selected Items</label>
+                        </div>
+                        <select class="form-select" multiple id="selecteditems"
+                            name="selecteditems[]">
+  
+  
+                        </select>
+                    </div>
+                </div> -->
+  
+                  
+                  <div class="modal-footer justify-content-between ">
+                    <button
+                      type="button"
+                      class="btn btn-secondary mx-5"
+                      data-bs-dismiss="modal"
+                    >
+                      Close
+                    </button>
+                    <button type="submit" class="btn btn-primary mx-5">
+                      Submit
+                    </button>
+                  </div>
               </form>
             </div>
           </div>
@@ -318,16 +296,7 @@
       <section class="content-main">
         <div class="content-header">
           <h2 class="content-title">Manage Offer</h2>
-          <div>
-            <button
-              href="#"
-              class="btn btn-dark"
-              data-bs-toggle="modal"
-              data-bs-target="#exampleModal"
-            >
-              <i class="material-icons md-plus"></i> Create Offer
-            </button>
-          </div>
+         
           <div>
             <button
               href="#"
@@ -351,7 +320,8 @@
 
                     <th>Activation date</th>
                     <th>Expire date</th>
-                    <th>Discount amount</th>
+                    <th>Discount </th>
+                    <th class="text-center">Images</th>
                     <th class="text-end">Action</th>
                   </tr>
                 </thead>
@@ -359,52 +329,62 @@
                   <% if(Array.isArray(offers) && offers.length> 0) {%> <%
                   offers.map((c)=> {%>
                   <tr>
-                    <td width="20%">
-                      <a href="#" class="itemside">
-                        <div class="left">
-                          <img
-                            src="/img/profile.jpg"
-                            class="img-sm"
-                            alt="Userpic"
-                          />
-                        </div>
-                        <div class="info pl-3">
-                          <h6
-                            class="mb-0 title"
-                            style="text-transform: capitalize"
-                          >
-                            <%= c.title %>
-                          </h6>
-                          <small class="text-muted">Seller ID: #439</small>
-                        </div>
-                      </a>
-                    </td>
-                    <td><%= c.couponCode%></td>
+                    <td class="col-1"><%= c.title%></td>
+                    <td class="col-2"><%= c.description%></td>
                     <% const formattedDate =
                     c.createdAt?.toLocaleString('en-US', { weekday: 'short',
                     month: 'short', day: 'numeric', year: 'numeric',  }); %>
-                    <td><%= formattedDate%></td>
+                    <td class="col-1"><%= formattedDate%></td>
                     <% const fDate =
-                    c.expiryDate?.toLocaleString('en-US', { weekday: 'short',
+                    c.endDate?.toLocaleString('en-US', { weekday: 'short',
                     month: 'short', day: 'numeric', year: 'numeric', }); %>
-                    <td><%= fDate%></td>
-                    <td><%= c.discount%>%</td>
+                    <td class="col-1"><%= fDate%></td>
+                    <td class="col-1"><%= c.discount%>%</td>
+                    <td class="col">
+                      <a href="#" class="itemside">
+                        <%if(c.productIds.length != 0){%>
+                          <%c.productIds.forEach(product => {%>
+                            <!-- <a href="api/v1/admin/products/product-detail?id=<%=product._id%>"></a> -->
+                            <div class="float-left p-2">                
+                              <img src="/Data/uploads/<%=product.images[0]%>"
+                            class="img-sm m-2"
+                            alt="pic"
+                            
+                          />
+                          <small style="font-size: 10px; margin: 0; padding: 0;" class=""><%=product.title%></small>
+                        </div>
 
-                    <td class="text-end">
+                        <%})%>  
+                      <%}else{%>
+                        <ul style="list-style: none;">
+                          <%c.appliedCategory.forEach(category => {%>
+
+                          <li><%=category%></li>
+                          <%})%>
+                        </ul>
+
+                        <%}%>        
+                         
+                         
+                       
+                      </a>
+                    </td>
+
+                    <td class="text-center col-2" >
                       <button
                         id="button"
-                        class="btn btn-sm btn-dark rounded font-sm mt-15"
+                        class="btn btn-md btn-offset-primary rounded font-sm mt-15"
                         data-user-id=""
                         data-status=""
                         onclick="listOrUnlist('<%= c._id%>')"
                       >
-                        <%= c.isListed ? "List" : "Unlist" %>
+                        <%= c.isListed ? "Unlist" : "List" %>
                       </button>
                       <button
                         id="button"
-                        class="btn btn-sm btn-dark rounded font-sm mt-15"
+                        class="btn btn-md btn-primary rounded font-sm mt-15"
                         data-user-id=""
-                        onclick="return editCoupon('<%= c._id%>', '<%= c.title%>', '<%= c.description%>', '<%= c.expiryDate%>', '<%= c.discount%>','<%= c.limit%>', '<%=c.minCost%>')"
+                        onclick="return editCoupon('<%= c._id%>', '<%= c.title%>', '<%= c.description%>', '<%= c.endDate%>', '<%= c.discount%>' )"
                         data-status=""
                         data-bs-toggle="modal"
                         data-bs-target="#exampleModal2"
@@ -429,13 +409,13 @@
         <!-- card end// -->
         <div class="pagination-area mt-15 mb-50">
           <nav aria-label="Page navigation example">
-            <ul class="pagination">
+            <ul class="pagination justify-content-center">
               <%if(page != 0) {%>
               <a class="page-link" href="?page=<%= page - 1%>"
                 ><i class="material-icons md-chevron_left"></i
               ></a>
               <%}%> <% for (let i = 0; i < total; i++) { %> <% if (i ===
-              0 || i === couponLength - 1 || (i >= page - 2 && i <= page + 2)) {
+              0 || i === total - 1 || (i >= page - 2 && i <= page + 2)) {
               %>
               <li class="page-item <%= page == i ? 'active' : '' %>">
                 <a class="page-link" href="?page=<%= i %>"><%= i + 1 %></a>
@@ -456,7 +436,140 @@
       <!-- content-main end// -->
       <%- include('../partials/adminFooter.ejs') -%>
     </main>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> 
+    <script >
+      document.addEventListener( 'DOMContentLoaded', () => {
+        document.getElementById('offertype').addEventListener('change', function () {
+          const offerType = this.value
+          console.log(offerType);
+          if(offerType) {
+            axios.put('/api/v1/admin/offers/get-offer-data', {offerType} )
+            .then(response => {
+              console.log(response.data.productData)
+              if(response.data.productData) {
+                let products = response.data.productData;
+                let modalProductList = document.getElementById('modalProductList');
+                console.log(modalProductList, 'modla pordu')
+                modalProductList.innerHTML = '';
 
+                products.forEach(product => { 
+                  console.log(product)
+
+                  let productItem = document.createElement('div');
+                  productItem.className = 'product-item d-flex align-items-center justify-content-between p-2';
+                  productItem.innerHTML = `
+                          <div class="form-check">
+                            <input class="form-check-input product-checkbox" type="checkbox" name="productSelect" id="product-${product._id}" value="${product._id}">
+                              <label class="form-check-label" for="product-${product._id}">
+                                ${product.title} - Price: ${product.price}
+                                </label>
+                                  </div>
+                                  <img class="img-lg" src="/Data/uploads/${product.images[0]}" alt="${product.name}" style="width: 50px; height: 50px;">`;
+                        console.log('porductList', productItem)
+                      modalProductList.appendChild(productItem);
+
+                });
+                $('#productModal').modal('show');
+                 
+
+
+              }else{
+                let category = response.data.categoryData
+                console.log(category)
+                const modalCategoryList = document.getElementById('modalCategoryList');
+                modalCategoryList.innerHTML = ''
+
+              category.forEach(category => {
+                const categoryElement = document.createElement('div');
+                categoryElement.className = 'form-check';
+                categoryElement.innerHTML = `
+                <input class= "form-check-input category-checkbox" type="checkbox" id="category-${category._ic}" name="category" value="${category._id}">
+                <label calss="form-check-label" for="category-${category._id}">${category.title}</label>`
+                modalCategoryList.appendChild(categoryElement);
+              })
+                new bootstrap.Modal(document.getElementById('categoryModal')).show()             
+              }
+            }).catch(error => console.log(error))
+
+
+
+
+          }
+        })
+
+        document.getElementById('selectProductBtn').addEventListener('click', function() {
+          let modalInstance = bootstrap.Modal.getInstance(document.getElementById('productModal'));
+          modalInstance.hide();
+
+        } )
+        document.getElementById('selectCategoryBtn').addEventListener('click', function() {
+          let modalInstance = bootstrap.Modal.getInstance(document.getElementById('categoryModal'));
+          modalInstance.hide();
+
+        } )
+
+
+
+        document.addEventListener('change', function(e) {
+        
+          if (e.target.matches('.product-checkbox')) {
+         
+          const selectedProducts = document.querySelectorAll('input[name="productSelect"]:checked');
+          const selectedProductNames = document.getElementById('selecteditems');
+            console.log(selectedProductNames)
+            console.log(selectedProducts)
+
+          if(selectedProductNames) {
+            selectedProductNames.innerHTML = '';
+
+            selectedProducts.forEach(input => {
+              const productDetails = input.nextElementSibling.textContent.trim().split('-').map(item => item.trim()) ;
+              const prdouctName = productDetails[0];
+              const productId = input.value;
+              const option = document.createElement('option');
+              option.value = productId;
+              option.text = prdouctName;
+              option.selected = true
+              selectedProductNames.appendChild(option);
+            })
+          }
+        }
+      })
+      document.addEventListener('change', function (e) {
+                if (e.target.matches('.category-checkbox')) {
+
+                    const selectedProducts = document.querySelectorAll('input[name="category"]:checked');
+                    console.log('selectedProducts', selectedProducts);
+                    const selectedProductNameSelect = document.getElementById('selecteditems');
+                    if (selectedProductNameSelect) {
+
+                        selectedProductNameSelect.innerHTML = '';
+                        selectedProducts.forEach(input => {
+                            const categoryDetail = input.nextElementSibling.textContent
+                            console.log("categoryDetail", categoryDetail);
+                            const catName = categoryDetail
+                            const catId = input.value;
+                            console.log("catId", catId);
+
+                            const option = document.createElement('option');
+                            option.value = catName;
+                            option.text = catName;
+                            option.selected = true;
+                            selectedProductNameSelect.appendChild(option);
+                        });
+                    }
+                }
+            });
+
+    
+
+
+
+      })
+
+     
+    </script>
+   
     <script src="/assets/js/vendors/jquery-3.6.0.min.js"></script>
     <script src="/assets/js/vendors/bootstrap.bundle.min.js"></script>
     <script src="/assets/js/vendors/select2.min.js"></script>
@@ -470,6 +583,8 @@
 </html>
 
 <script>
+
+
   function listOrUnlist(id) {
     const data = { id: id };
     
@@ -486,12 +601,12 @@
       if (decision.isConfirmed) {
         $.ajax({
           method: "put",
-          url: "/api/v1/admin/coupons/list-unlist-coupon",
+          url: "/api/v1/admin/offers/list-unlist-offer",
           data: JSON.stringify(data),
           contentType: "application/json",
           success: (response) => {
             if (response.success === true) {
-              $("#Reload").load("/api/v1/admin/coupons #Reload", null, () => {
+              $("#Reload").load("/api/v1/admin/offers #Reload", null, () => {
                 Swal.fire({
                   title: `success`,
                   icon: "success",
@@ -508,7 +623,7 @@
   }
 </script>
 <script>
-  function editCoupon(id, name, description, edate, discount, limit, minCost) {
+  function editCoupon(id, name, description, edate, discount, selecteditems) {
     console.log("function is called");
     console.log(edate);
 
@@ -518,114 +633,30 @@
     let day = String(date.getDate()).padStart(2, '0');
     edate = `${year}-${month}-${day}`
     console.log(`${year}-${month}-${day}`)
+        console.log(selecteditems)
 
-    document.getElementById("couponId").value = id;
-    document.getElementById("name").value = name;
-    document.getElementById("minCost").value = minCost;
-    document.getElementById("edate").value = edate;
-    document.getElementById("description").value = description;
-    document.getElementById("discount").value = discount;
-    document.getElementById("limit").value = limit;
+
+    document.getElementById("couponId1").value = id;
+    document.getElementById("name1").value = name;
+  
+    document.getElementById("edate1").value = edate;
+    document.getElementById("description1").value = description;
+    document.getElementById("discount1").value = discount;
+
     return;
   }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<!-- Add this script after your form -->
-<!-- <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const form = document.querySelector("#exampleModal form");
 
-        form.addEventListener("submit", function (event) {
-            // Prevent the form from submitting by default
-            event.preventDefault();
-
-            // Remove previous error messages
-            clearErrorMessages();
-
-            // Perform validation
-            const name = form.elements.name.value.trim();
-            const adate = form.elements.adate.value.trim();
-            const edate = form.elements.edate.value.trim();
-            const limit = form.elements.limit.value.trim();
-            const damount = form.elements.damount.value.trim();
-
-            if (name === "") {
-                displayErrorMessage("name", "Please enter a coupon name.");
-                return;
-            }
-
-            if (adate === "") {
-                displayErrorMessage("adate", "Please enter an activation date.");
-                return;
-            }
-
-            if (edate === "") {
-                displayErrorMessage("edate", "Please enter an expiration date.");
-                return;
-            }
-
-            if (limit === "") {
-                displayErrorMessage("limit", "Please enter a limit of use.");
-                return;
-            }
-
-            if (damount === "") {
-                displayErrorMessage("damount", "Please enter a discount amount.");
-                return;
-            }
-
-            // Validate date format (dd-mm-yyyy)
-            const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
-            if (!dateRegex.test(adate) ) {
-                displayErrorMessage("adate", "Invalid date format. Please use dd-mm-yyyy.");
-                return;
-            } 
-            if( !dateRegex.test(edate)) {
-                displayErrorMessage("adate", "Invalid date format. Please use dd-mm-yyyy.");
-                return
-            }
-
-            // Validate discount amount is a number
-            if (isNaN(parseFloat(damount))) {
-                displayErrorMessage("damount", "Discount amount must be a valid number.");
-                return;
-            }
-
-            // If all validations pass, you can submit the form
-            form.submit();
-        });
-
-        function displayErrorMessage(fieldName, message) {
-            const field = form.elements[fieldName];
-            const errorDiv = document.createElement("div");
-            errorDiv.className = "error-message";
-            errorDiv.style.color = "red"; // Set color to red
-            errorDiv.textContent = message;
-            field.parentNode.insertBefore(errorDiv, field);
-
-            // Remove error message after 3000 milliseconds (3 seconds)
-            setTimeout(() => {
-                errorDiv.remove();
-            }, 3000);
-        }
-
-        function clearErrorMessages() {
-            const errorMessages = form.querySelectorAll(".error-message");
-            errorMessages.forEach((errorMessage) => {
-                errorMessage.remove();
-            });
-        }
-    });
-</script> -->
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     // Attach validation to the first form
-    attachFormValidation("#exampleModal form");
+    // attachFormValidation("#exampleModal form");
 
     // Attach validation to the second form
-    attachFormValidation("#exampleModal2 form");
+    attachFormValidation("#exampleModal3 form");
 
     function attachFormValidation(formSelector) {
       const form = document.querySelector(formSelector);
@@ -641,10 +672,11 @@
         const name = form.elements.name.value.trim();
         const edate = form.elements.edate.value;
         const description = form.elements.description.value.trim();
-        const limit = form.elements.limit.value.trim();
+      
         const discount = form.elements.discount.value.trim();
-        const minOrder = form.elements.minOrder.value.trim();
-
+        const selecteditems = form.elements.selecteditems
+        // return console.log(selecteditems.selectedOptions)
+      
         if (name.length <=2 ) {
           displayErrorMessage(form, "name", "Please enter a valid coupon name.");
           return;
@@ -670,8 +702,8 @@
           return;
         }
         
-        if (isNaN(Number(minOrder) ) || minOrder.length < 1 || minOrder < 1 ) {
-          displayErrorMessage(form, "minOrder", "Please enter a valid amount.");
+        if (selecteditems.selectedOptions.length == 0 ) {
+          displayErrorMessage(form, "selecteditems", "Please Select anyThing to apply offer.");
           return;
         }
         
@@ -680,18 +712,26 @@
 
 
         if (edate.length < 1 || !dateRegex.test(edate)) {
+          
           displayErrorMessage(
             form,
             "edate",
             "Invalid date format. Please use dd-mm-yyyy."
           );
           return;
+
+          if(edate < new Date.now()) {
+            displayErrorMessage(
+            form,
+            "edate",
+            "End date must be greater than current date."
+          );
+          return;
+
+          }
         }
 
-        if (isNaN(Number(limit) ) || limit < 1 || limit > 1000) {
-          displayErrorMessage(form, "limit", "Please enter a limit of use.");
-          return;
-        }
+
 
 
 
