@@ -54,7 +54,70 @@ const isUserAutharized = asyncHandler(async (req, res, next) => {
     next()
 
 
+    // let id = req.session.user._id
 
+    // let user = await User.aggregate([
+    //     {
+    //         $match:
+    //         {
+    //             _id: new mongoose.Types.ObjectId(id),
+    //             isBlocked: false
+    //         }
+    //     },
+    //     {
+    //         $project: {
+    //             _id: 1,
+    //             name: 1
+    //         }
+    //     },
+        
+
+    //     {
+    //         $lookup: {
+    //             from: 'carts',
+    //             localField: '_id',
+    //             foreignField: 'user',
+    //             as: 'cart',
+    //             pipeline: [{
+    //                 $unwind: '$products'
+    //                 },{
+    //                     $project: {
+    //                         products: 1
+    //                     }
+    //                 }
+    //             ]
+    //         }
+    //     },
+    //     {
+    //         $unwind: '$cart'
+    //     },
+    //     {
+    //         $unwind: '$cart.products'
+    //     },
+    //     {
+    //         $unwind: '$cart.products'
+    //     },       
+    //     {
+    //         $group: {
+    //             _id: null,
+    //             cartCount : {
+    //                 $sum: '$cart.products.quantity'
+    //             },
+               
+               
+               
+
+               
+               
+    //         }
+    //     }
+
+    // ])
+    // res.locals.userName = await User.findOne({_id: id}, {_id: 0, name: 1})
+    // console.log(res.locals.userName )
+    // res.locals.cartCount = user[0].cartCount
+    // res.locals.wishlistCount = await Wishlist.countDocuments({user: id})
+    // console.log(JSON.stringify(user), 'user')
 
 })
 
@@ -66,10 +129,9 @@ const isUserAutharized = asyncHandler(async (req, res, next) => {
 /*================================================== Cart =============================================================== */
 
 const addToCart = asyncHandler(async (req, res, next) => {
-    console.log(req.body)
+
 
     let { id, addToCartFromWishlist, size } = req.body.data
-    console.log(id, addToCartFromWishlist, size)
     let user = req.session.user?._id;
    
     
@@ -380,9 +442,9 @@ const removeFromWishlist = asyncHandler(async (req, res, next) => {
     console.log(id)
     return Wishlist.deleteOne({ _id: id })
         .then((result) => {
-            req.session.user.wishlistUser.length = 0 ?
-                req.session.user.wishlistUser.length :
-                req.session.user.wishlistUser.length -= 1;
+            // req.session.user.wishlistUser.length = 0 ?
+            //     req.session.user.wishlistUser.length :
+            //     req.session.user.wishlistUser.length -= 1;
             return res.json({ success: true });
         })
         .catch((error) => {

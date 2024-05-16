@@ -123,7 +123,8 @@ app.use('/google', googleRouter);
 
 //   // render the error page
 //   res.status(err.status || 500);
-//   res.render('404');
+//   let user = req.session.user?? null
+//   res.render('user/404',{user});
 // });
 
 

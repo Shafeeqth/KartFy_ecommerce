@@ -47,11 +47,10 @@ const loadShop = asyncHandler(async (req, res) => {
     if(category)categor.push({'product.category.Category': {$in:category}})
     if(brand)categor.push({'product.category.Brands':{$in: brand}})
     let matchValue = {};
-    console.log(categor)
+   
+    let sort = req.query.sort?.trim() || ''
 
-    let sort = req.query.sort || ''
-
-    let search = req.query.search || ''
+    let search =req.query.search ?String( req.query.search).trim() : ''
 
     if(gender ||category|| brand) {
         matchValue = {
@@ -67,7 +66,7 @@ const loadShop = asyncHandler(async (req, res) => {
     else if(sort == 'date') sort = { 'product.createdAt': -1}
     else if(sort == 'rating' || sort == '') sort = { 'product.avgRating': -1}
 
-    console.log(page, limit, category, size, brand, sort, search);
+    
     
 
     
@@ -121,149 +120,10 @@ const loadShop = asyncHandler(async (req, res) => {
         }
         
     ])
-    console.log('ivn',inventory)
-   
-        
-
-    //     {
-    //         $match: {
-    //             isListed: true
-    //         }
-    //     },
-    //     {
-    //         $lookup: {
-    //             from: 'inventories',
-    //             localField: '_id',
-    //             foreignField: 'product',
-    //             as: 'inventory'
-    //         }
-    //     },
-    //     {
-    //         $unwind: '$inventory'
-    //     }, 
-        
-    //     {
-    //         $group: {
-    //             _id: '$_id',
-    //             title: { $first: '$title'},
-    //             category: { $first: '$category'},
-    //             mrpPrice: { $first: '$mrpPrice'},
-    //             price: {$first: '$price'},
-    //             description: {$first: '$description'},
-    //             color: {$first: '$color'},
-    //             images: {$first: '$images'},
-    //             soldCount: {$first: '$soldCount'},
-    //             productReviews: {$first: '$productReviews'},
-    //             totalStock: {$sum : '$inventory.sizeVariant'}
-
-    //         }
-    //     }
-
-    // ])
-
-        
-    //     {
-    //         $lookup: {
-    //             from: 'product',
-    //             foreignField: '_id',
-    //             localField: 'product',
-    //             as: 'product'
-    //         },
-
-    //     },
-            
-    //     {
-    //         $match : {
-    //             'product.isListed': true
-    //         },
-    //     },
-        
-    //     {
-    //         $unwind: '$sizeVariant'
-    //     },
-    //     {
-    //         $unwind: '$sizeVariant.sizeVariant'
-    //     },
-    //     // {$group: {
-    //     //     _id: '$_id',
-    //     //     totalStock: {$sum: '$sizeVariant.stock'}
-
-    //     // }},
-
-    //     {
-    //         $project: {
-    //             title: 1,
-    //             category: '$category.Brands',
-    //             mrpPrice: 1,
-    //             price: 1,
-    //             description: 1,
-    //             color: 1,
-    //             images: 1,
-    //             soldCount:1,
-    //             productReviews: 1,
-    //             sizeVariant: 1
-               
-
-
-    //         }
-    //     }
-        
-
-    // ])
-    // console.log(inventory)
-
+    
 
     let count = await Product.countDocuments()
-    // if (req.query.sort) {
-    //     let sort = req.query.sort == 'low-to-High' ?
-    //         { 'product.price': 1 } : req.query.sort == 'high to Low' ?
-    //             { 'product.price': -1 } : req.query.sort == 'date' ?
-    //                 { 'product.createdAt': -1 } : null
-
-    //     let products = await Inventory.aggregate([
-            
-    //         {
-    //             $lookup: {
-    //                 from: "products",
-    //                 localField: "product",
-    //                 foreignField: "_id",
-    //                 as: "product",
-    //                 pipeline: [
-                       
-    //                     {
-    //                         $match: {
-    //                             isListed: true
-    //                         }
-    //                     },
-    //                     {
-    //                         $project: {
-    //                             product: 1,
-    //                             category: 'product.category.Brands',
-                                
-
-    //                         }
-    //                     }
-                       
-
-
-    //                 ]
-    //             }
-    //         },
-            
-
-    //     ])
-    //     // console.log(inventory)
-
-
-    //     return res.render('user/shopPage', { user, products, count });
-
-    // }
-
-
-
-    // let products = await Product.find({ isListed: true, })
-
-
+    
     res.render('user/shopPage', { user, inventory, count , categories});
 
 
@@ -309,9 +169,7 @@ const loadCheckout = asyncHandler(async (req, res) => {
         address = address ?? []
         let coupons = await Coupon.find({isListed: true})
         let wallet = await Wallet.findOne({user:user._id}).select('balance');
-        console.log(wallet, 'wallet')
         coupons = coupons ?? []
-        console.log(cartData, address, coupons)
         res.render('user/checkoutPage', { user, cartData, address, coupons, wallet });
 
     }
@@ -374,11 +232,9 @@ const loadProductDetail = asyncHandler(async (req, res) => {
         }
        
         ])
-        console.log(JSON.stringify(product))
 
     // console.log(product.product.productReviews)
     const sizeVariant = JSON.stringify(product[0].sizeVariant)
-    console.log(sizeVariant)
 
     res.status(200).render('user/productDetail', { user, product :product[0],sizeVariant });
 
@@ -393,12 +249,17 @@ const loadProfile = asyncHandler(async (req, res, next) => {
     if (user) {
         let wallet = await Wallet.findOne({user: user._id }).populate('user')
         wallet.transactions.sort((a, b) => b.date - a.date)
-        console.log('wallet', wallet)
         let userProfile = await User.aggregate([
             {
                 $match: {
                     email: user.email
                 }
+            },
+            {
+                $project: {
+                    _id: 1
+                }
+               
             },
             {
                 $lookup: {
@@ -414,16 +275,10 @@ const loadProfile = asyncHandler(async (req, res, next) => {
 
 
         ])
-
-
-
-
-        console.log('user1', userProfile)
-
         res.render("user/userProfile", { user, userProfile, wallet })
-    } else {
-
     }
+       
+    
 
 
 })
@@ -442,15 +297,8 @@ const editAddress = asyncHandler(async (req, res) => {
         req.session.user.editAddressId = id
 
         let address = await Address.findById({ _id: id })
-        console.log("address========================================",address)
-        res.render('user/editAddress', { user, address })
-    } else {
-
-
     }
-
-
-
+   
 })
 
 const loadOrderSuccess = asyncHandler(async (req, res) => {
@@ -462,7 +310,6 @@ const loadOrderSuccess = asyncHandler(async (req, res) => {
     })
         .populate('user')
         .populate('address')
-    console.log(currentOrder)
 
     res.render('user/orderSuccess', { user, currentOrder })
 

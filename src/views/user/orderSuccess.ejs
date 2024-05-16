@@ -73,7 +73,7 @@
                                     <li>Subtotal <span>₹ <%=currentOrder.orderAmout%>.00</span></li>
                                     <!-- <li>Discount <span>₹ </span></li> -->
                                     <li>Shipping cost <span>₹ <%=currentOrder.deliveryCharge%>.00</span></li>
-                                    <li>Total <span>₹<%=currentOrder.orderAmout + currentOrder.deliveryCharge %>.00</span></li>
+                                    <li>Total <span>₹<%=currentOrder.orderAmount + currentOrder.deliveryCharge ?? 0  %>.00</span></li>
                                 </ul>
                             </div>
                             <a href="/api/v1/shop" class="btn btn-primary ">Continue Shoping</a>

@@ -36,9 +36,6 @@ const checkValidCoupon = asyncHandler(async (req, res) => {
     }
     let coupon = await Coupon.findOne({ couponCode: cart.coupon.code });
     let today = new Date()
-    console.log('td', today)
-
-    console.log('exp', coupon.expiryDate)
 
     if (coupon.minCost > cart.cartTotal) {
         return res.status(400)
@@ -74,9 +71,6 @@ const proceedtToCheckout = asyncHandler(async (req, res) => {
     let cart = await Cart.findOne({ user: user._id });
 
     let inventory = await Inventory.find({});
-    console.log('inventory', inventory);
-    console.log('cart', cart);
-    // return 
 
     let product;
     let productVariant;
@@ -101,7 +95,6 @@ const proceedtToCheckout = asyncHandler(async (req, res) => {
     };
     let listcart = await Cart.findOne({ user: user._id }).populate('products.product');
     const unListedProducts = listcart.products.filter(cartProduct => cartProduct.product.isListed == false).map(item => item._id);
-    console.log('un', unListedProducts)
 
     if (!unListedProducts.length == 0) {
         return res.status(400)
@@ -134,6 +127,7 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
     let { address, paymentMethod } = req.body;
     console.log(req.body);
 
+
     let userAddress = await Address.findById({ _id: address });
 
 
@@ -149,6 +143,7 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
 
 
     })
+    if( !cart.totalPrice > 5000){
     let sourcePincode = '676525';
     // if(cart.deliveryCharge > 0) {
     //    let [sourceCordinate , destinationCordinate] = getCordinates(sourcePincode, userAddress.pincode);
@@ -159,14 +154,11 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
     //    let deliveryCharge = calculateDeliveryCharge(distance)
     //    cart.deliveryCharge = deliveryCharge;
     // }
-
-
-    console.log('products,', JSON.stringify(cart))
-    console.log('orderedItems,', JSON.stringify(orderedItems))
+    }
 
 
     cart.products.forEach(async (item) => {
-
+     
         let newProduct = await Inventory.findOneAndUpdate({
             product: item.product._id,
             'sizeVariant.size': item.size
@@ -178,10 +170,9 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
         },
             { new: true }
         );
-        console.log('newProduct', newProduct)
-
 
     })
+  
 
     let orderAmount = cart.products.map(item => item.product.price * item.quantity).reduce((acc, item) => acc + item);
 
@@ -218,8 +209,8 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
             orderId,
             coupon: cart.coupon ? cart.coupon: undefined,
             orderedItems,
-            orderAmount,
-            deliveryCharge: cart.deliveryCharge,
+            orderAmount: orderAmount +( +cart.deliveryCharge ? +cart.deliveryCharge : 0),
+            deliveryCharge: cart.deliveryCharge ?? 0,
             orderStatus: 'Placed',
         });
         await Cart.deleteOne({
@@ -252,9 +243,9 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
                 orderId,
                 coupon: cart.coupon ? cart.coupon: undefined,
                 orderedItems,
-                orderAmount,
+                orderAmount: orderAmount +( +cart.deliveryCharge ? +cart.deliveryCharge : 0),
                 totalSaved: cart.coupon?.discount ? cart.coupon?.discount : 0,
-                deliveryCharge: cart.deliveryCharge,
+                deliveryCharge: cart.deliveryCharge ?? 0,
                 orderStatus: 'Placed'
             });
             await Cart.deleteOne({
@@ -289,9 +280,9 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
             orderId,
             orderedItems,
             coupon: cart.coupon ? cart.coupon: undefined,
-            orderAmount,
-            deliveryCharge: cart.deliveryCharge,
-            orderStatus: 'Placed'
+            orderAmount: orderAmount +( +cart.deliveryCharge ? +cart.deliveryCharge : 0),
+            deliveryCharge: cart.deliveryCharge ?? 0,
+            orderStatus: 'Pending'
         });
 
 
@@ -380,7 +371,7 @@ const orderCancel = asyncHandler(async (req, res, next) => {
                 new: true
             }
         )
-        console.log('new wallet', wallet);
+
     }
 
 
@@ -389,12 +380,6 @@ const orderCancel = asyncHandler(async (req, res, next) => {
     order.orderStatus = 'Cancelled';
 
     order = await order.save();
-
-
-    console.log(order, 'order')
-
-
-
 
     return res.json({
         success: true,
@@ -431,7 +416,6 @@ console.log(req.body)
             new: true
         }
     )
-    console.log(updatedReviewOrder, 'updatedReview')
     let product = await Product.findOne({ _id: productId });
     let ratingCount = await Review.countDocuments({product:productId})
     let currentRatingAvg = +product.avgRating;
@@ -520,9 +504,9 @@ const loadMyOrders = asyncHandler(async (req, res) => {
     let limit = parseInt(req.query.limit) || 7;
     page < 0 ? (page = 0) : page = page
     if (!user) return res.redirect('/api/v1/')
-    let total = await Order.countDocuments({});
+    let total = await Order.countDocuments({user: user._id});
 
-    (page > Math.trunc(total / limit) - 1) ? (page = Math.trunc(total / limit) - 1) : page = page
+    // (page > Math.trunc(total / limit) - 1) ? (page = Math.trunc(total / limit) - 1) : page = page
 
     let order = await Order.find({
         user: user._id
@@ -574,9 +558,6 @@ const downloadOrderInvoice = asyncHandler(async (req, res) => {
         order: orderDetails,
         user: userDetails,
     }
-    console.log(JSON.stringify(data))
-    // return 
-
 
     let filePath = path.resolve(__dirname, '../views/user/invoice.ejs');
 
@@ -595,10 +576,6 @@ const downloadOrderInvoice = asyncHandler(async (req, res) => {
         'attachment; filename= order invoice.pdf'
     );
     res.send(pdfBytes);
-    console.log(html,  data)
-
-
-
 
 })
 
@@ -738,7 +715,6 @@ const retryOrderPay = asyncHandler(async (req, res) => {
     let orderId = req.body.orderId;
     let order = await Order.findOne({ _id: orderId });
     createRazorpayOrder(req, res, order);
-    console.log(order)
 })
 
 const retryPaymentSuccess = asyncHandler(async (req, res) => {

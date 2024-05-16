@@ -16,7 +16,9 @@ const categoryController = require('../controller/adminCategoryController');
 //Get admin dashboard 
 router.get('/', adminMiddleware.isLoged, adminController.loadDashboard ); 
 
-router.get('/sales-report', adminController.loadSalesReport)
+router.post('/get-fiter-data', adminMiddleware.isLoged, adminController.getFilterData)
+router.get('/sales-report', adminMiddleware.isLoged, adminController.loadSalesReport)
+router.post('/sales-report/download-excel', adminMiddleware.isLoged, adminController.salesReportDownLoadExcel)
 
 //submit admin login
 router
@@ -53,8 +55,8 @@ router.get('/products', adminMiddleware.isLoged, productController.loadProducts 
 //load add product page
 router
 .route('/products/add-product')
-.get( productController.loadAddProduct)
-.post( upload.array('images'), productController.addProduct);
+.get(  adminMiddleware.isLoged,productController.loadAddProduct)
+.post( upload.array('images'), adminMiddleware.isLoged, productController.addProduct);
 
 //load edit page
 router.route('/products/edit-product')
@@ -81,7 +83,7 @@ router.put('/products/list-product', adminMiddleware.isLoged,  productController
 
 //View cagetories
 router.get('/category', adminMiddleware.isLoged, categoryController.loadCategories);
-router.get('/categories/sub-categories', categoryController.loadSubCategories)
+router.get('/categories/sub-categories', adminMiddleware.isLoged, categoryController.loadSubCategories)
 
 //add category 
 router
@@ -124,10 +126,7 @@ router.get('/orders', adminMiddleware.isLoged,  adminController.loadOrders );
 router.get('/orders/single-order-details', adminMiddleware.isLoged,  adminController.loadSingleOrderDetails)
 
 //change order status
-router.put('/orders/single-order-details/change-orderStatus', adminController.changeOrderStatus );
- 
-//view a specific order
-router.delete('/orders/delete_order/:id', );
+router.put('/orders/single-order-details/change-orderStatus', adminMiddleware.isLoged, adminController.changeOrderStatus );
 
 
 /*================================Routes related to Banner Management ================================*/
@@ -136,14 +135,14 @@ router.delete('/orders/delete_order/:id', );
 router.get('/banners', adminMiddleware.isLoged, adminController.loadBanners);
 
 //view a purticular request
-router.post('/banners/create-banner',upload.single('image'), adminController.createBanner);
+router.post('/banners/create-banner', adminMiddleware.isLoged, upload.single('image'), adminController.createBanner);
 //view a purticular request
 
-router.post('/banners/edit-banner',upload.single('image'), adminController.editBanner);
+router.post('/banners/edit-banner', adminMiddleware.isLoged, upload.single('image'), adminController.editBanner);
 
 
 //reject return request
-router.put('/banners/list-unlist-banner', adminController.listAndUnlistBanner);
+router.put('/banners/list-unlist-banner', adminMiddleware.isLoged, adminController.listAndUnlistBanner);
 
 
 
@@ -161,27 +160,23 @@ router.get('/returns', );
 router.get('/returns', adminMiddleware.isLoged, adminController.loadReturns);
 
 //view a purticular request
-router.patch('/returns/change-status', adminController.returnChangeStatus);
-
-//reject return request
-router.put('/retuns/reject_return/:id');
-
+router.patch('/returns/change-status', adminMiddleware.isLoged, adminController.returnChangeStatus);
 
 
 /*===============================Routes related to Offer Management ========================================*/
 
 //view offers
-router.get('/offers', adminController.loadOffers);
+router.get('/offers', adminMiddleware.isLoged,  adminController.loadOffers);
 
 //Edit offer
-router.put('/offers/get-offer-data', adminController.getOfferData);
+router.put('/offers/get-offer-data', adminMiddleware.isLoged, adminController.getOfferData);
 
 //delete offer
-router.post('/offers/create-offer', adminController.createOffer);
-router.post('/offers/edit-offer', adminController.editOffer);
+router.post('/offers/create-offer', adminMiddleware.isLoged, adminController.createOffer);
+router.post('/offers/edit-offer', adminMiddleware.isLoged, adminController.editOffer);
 
 //List offer
-router.put('/offers/list-unlist-offer', adminController.listAndUnlistOffer);
+router.put('/offers/list-unlist-offer', adminMiddleware.isLoged, adminController.listAndUnlistOffer);
 
 
 
@@ -190,19 +185,16 @@ router.put('/offers/list-unlist-offer', adminController.listAndUnlistOffer);
 /* =============================Routes related to Coupons Management ========================================*/
 
 //view coupons
-router.get('/coupons', adminController.loadCoupons);
+router.get('/coupons', adminMiddleware.isLoged, adminController.loadCoupons);
 
 
-router.post('/coupons/create-coupon', adminController.createCoupon)
+router.post('/coupons/create-coupon', adminMiddleware.isLoged, adminController.createCoupon)
 
 //edit coupon
-router.post('/coupons/edit-coupon', adminController.editCoupon);
-
-//delete coupon
-router.delete('/coupons/delete_coupon/:id');
+router.post('/coupons/edit-coupon', adminMiddleware.isLoged, adminController.editCoupon);
 
 //List coupon
-router.put('/coupons/list-unlist-coupon', adminController.listAndUnlistCoupon);
+router.put('/coupons/list-unlist-coupon', adminMiddleware.isLoged, adminController.listAndUnlistCoupon);
 
 
 

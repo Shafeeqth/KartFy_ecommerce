@@ -13,15 +13,17 @@ const Category = require('../models/categoryModel');
 const Banner = require('../models/bannerModel');
 const path = require('node:path');
 const sharp = require('sharp');
-const { Product } = require('../models/productModels')
+const { Product, Inventory } = require('../models/productModels')
 const Wallet = require('../models/walletModel');
-const { pipeline } = require('node:stream');
+const excelJs =  require('exceljs');
 
 
 
 const loadDashboard = asyncHandler(async (req, res) => {
-    let products = await Product.countDocuments({isListed: true});
-    let orders = await Order.countDocuments({orderStatus: 'Delivered'});
+    let now  = new Date();
+    let users = await User.countDocuments({})
+    let products = await Product.countDocuments({ isListed: true });
+    let orders = await Order.countDocuments({ orderStatus: 'Delivered' });
     let revenue = await Order.aggregate([
         {
             $match: {
@@ -34,7 +36,7 @@ const loadDashboard = asyncHandler(async (req, res) => {
         {
             $group: {
                 _id: null,
-                revenue : {
+                revenue: {
                     $sum: '$orderedItems.totalPrice'
                 }
             }
@@ -43,19 +45,297 @@ const loadDashboard = asyncHandler(async (req, res) => {
 
     ]);
 
-    console.log(products)
-    console.log(revenue)
-    console.log(orders)
-    
+   
+    let topTenCetagory = await findTopTen('Category')
+    let topTenBrand = await findTopTen('Brands')
+    // let topTenCetagory = await findTopTen('Category')
 
-    res
-        .status(200)
-        .render('admin/adminDashboard');
+    async function findTopTen(filter) {
+
+        let result = await Order.aggregate([
+
+            {
+                $match: {
+                    orderStatus: 'Delivered'
+                }
+            },
+            {
+                $unwind: '$orderedItems'
+            },
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: 'orderedItems.product',
+                    foreignField: '_id',
+                    as: 'product'
+
+
+                }
+            },
+            {
+                $unwind: '$orderedItems.product'
+            },
+            {
+                $unwind: '$product'
+
+            },
+            {
+                $group: {
+                    _id: `$product.category.${filter}`,
+                    sum: {
+                        $sum: 1
+                    }
+                }
+            }, {
+                $sort: {
+                    sum: -1
+                }
+            },
+            {
+                $limit: 5
+            },
+            {
+                $project: {
+                    _id: 0,
+                    item: '$_id',
+                    sum: 1
+                }
+            }
+
+        ])
+
+        return result.map(item => {
+            return {
+                item: item.item[0],
+                count: item.sum
+            }
+        })
+    }
+
+    let topSellingProduct = await Order.aggregate([
+
+        {
+            $match: {
+                orderStatus: 'Delivered'
+            }
+        },
+        {
+            $unwind: '$orderedItems'
+        },
+        {
+            $group: {
+                _id: '$orderedItems.product',
+                count: {
+                    $sum: 1
+                }
+            }
+        },
+        {
+            $sort: {
+                count: -1
+            }
+        },
+        {
+            $limit: 10
+        },
+        {
+            $lookup: {
+                from: 'products',
+                localField: '_id',
+                foreignField: '_id',
+                as: 'product',
+                
+            }
+        },
+        {
+            $unwind: '$product'
+        }
+    ])
+
+    let monthlyDataAggre = await Order.aggregate([
+       
+        {
+            $match: {
+                orderStatus: 'Delivered'
+            }
+        },
+        {
+            $group: {
+                _id: {
+                    $dateToString: {
+                        format: '%m',
+                        date: '$createdAt'
+                    }
+                },
+                totalAmount: {
+                    $sum: '$orderAmount'
+                }
+            }
+        },
+ 
+    ])
+    let monthlyData = Array.from({length: 12}).fill(0);
+    monthlyDataAggre.forEach(item => {
+        let monthIndex = parseInt(item._id, 10);
+        if(monthIndex >= 0 && monthIndex < 12) {
+            monthlyData[monthIndex] = item.totalAmount
+        }
+    })
+   monthlyRevenue = monthlyDataAggre.find(item => item._id ==  now.getMonth()+1).totalAmount 
+
+    res.status(200)
+        .render('admin/adminDashboard', { userCount: users, orderCount: orders, product: products, revenue: revenue[0].revenue, monthlyRevenue, monthlyData, name: topSellingProduct, brand: topTenBrand, topTenCetagory: topTenCetagory });
 })
 
+const getFilterData = asyncHandler( async (req, res) => {
+    console.log(req.body);
+    const data = requiredMonth = req.body.data;
+    const startDay = new Date(requiredMonth + '-01T00:00:00Z');
+    const endDay = new Date(requiredMonth + '-31T23:59:59Z');
 
-const loadSalesReport = asyncHandler( async (req, res) => {
-    res.render('admin/salesreport')
+    const monthData = await Order.aggregate([
+        {
+            $match: {
+                orderStatus: 'Delivered',
+                createdAt: {
+                    $gte: startDay,
+                    $lt: endDay
+                }
+            }
+        },
+        {
+            $unwind: '$orderedItems'
+        },
+        {
+            $group: {
+                _id: {
+                    $dateToString: {
+                        format: '%d',
+                        date: '$createdAt'
+                    }
+                },
+                totalAmount: {
+                    $sum: '$orderAmount'
+                }
+            }
+        },
+])
+const newData = Array({length: 30}).fill(0);
+
+monthData.forEach(item => {
+    monthIndex = parseInt(item._id, 10) -1;
+    if(monthIndex >= 0 && monthIndex < 30) {
+        newData[monthIndex] = item.totalAmount;
+    }
+});
+ res.status(200)
+ .json({
+    success: true,
+    newData,
+    data,
+    error: false,
+    message: 'filter data fetched successfully'
+
+ })
+})
+
+const loadSalesReport = asyncHandler(async (req, res) => {
+    let query = {orderStatus: 'Delivered'};
+    if(req.query.startDate) {
+        const {startDate, endDate} = req.query;
+        const sDate = new Date(startDate);
+        const eDate = new Date(endDate);
+        query = {
+            orderStatus: 'Delivered',
+            createdAt: {
+                $gte: sDate,
+                $lt: eDate
+            }
+        }
+    }
+    const report = await Order.find(query).populate('orderedItems.product')
+    res.render('admin/salesreport', {report})
+})
+
+const salesReportDownLoadExcel = asyncHandler( async (req, res) => {
+    let query = {orderStatus: 'Delivered'};
+    if(req.query.startDate) {
+        const {startDate, endDate} = req.body;
+        const sDate = new Date(startDate);
+        const eDate = new Date(endDate);
+        query = {
+            orderStatus: 'Delivered',
+            createdAt: {
+                $gte: sDate,
+                $lt: eDate
+            }
+        }
+    }
+    let report = await Order.aggregate([
+        {
+            $match: query
+        },
+        {
+            $unwind: '$orderedItems'
+        
+        },
+        {
+            $lookup: {
+                from: 'products',
+                localField: 'orderedItems.product',
+                foreignField: '_id',
+                as: 'products'
+            }
+        },
+        {
+            $unwind: '$products'
+        },
+        {
+            $group: {
+                _id: '$orderId',
+                item:{ $first: '$$ROOT'}
+            }
+        },
+        // {
+        //     $project: {
+        //         orderId: 1,
+
+        //     }
+        // }
+
+        
+       
+    ])
+    console.log(report)
+
+       
+
+    const workBook = new excelJs.Workbook();
+    const workSheet = workBook.addWorksheet('Report');
+    const destinationPath = path.join(__dirname,'../../public/excelSheets');
+    workSheet.columns = [
+        {header: "S no.", key: "s_no", width: 10},
+        {header: "OrderId", key: "o_id", width: 10},
+        {header: "Proudct Details", key: "product_details", width: 30},
+        {header: "Order price", key: "order_price", width: 10},
+        {header: "Payment Method", key: "payment_method", width: 10},
+        {header: "Date", key: "date", width: 10},
+
+
+    ]
+    report = report.map(item => {
+
+    })
+
+   
+    
+    // let counter = 1;
+    // report.forEach(item => {
+    //     item
+    // })
+
+    
+
 })
 
 
@@ -64,7 +344,6 @@ const loadLogin = asyncHandler(async (req, res) => {
         res.redirect('/api/v1/admin')
     }
     if (req.query.LogoutMessage) {
-        console.log(req.query.LogoutMessage)
         res
             .render('admin/adminLogin', {
                 LogoutMessage: req.params.LogoutMessage
@@ -127,8 +406,6 @@ const loadOrders = asyncHandler(async (req, res) => {
     let total = await Order.countDocuments({});
 
 
-    // (page > Math.trunc(total / limit) -1) ? ( page =  Math.trunc(total / limit) -1) : page = page
-
 
     let order = await Order.find({})
         .populate('user')
@@ -137,7 +414,7 @@ const loadOrders = asyncHandler(async (req, res) => {
         .sort({ createdAt: -1 })
         .skip(page * limit)
         .limit(limit)
-    console.log(order)
+
     res
         .render('admin/order-details', {
             order,
@@ -156,9 +433,6 @@ const loadSingleOrderDetails = asyncHandler(async (req, res) => {
         .populate('user')
         .populate('address')
         .populate('orderedItems.product');
-    js = JSON.parse(JSON.stringify(order))
-
-    console.log(js);
     res
         .render('admin/singleOrderDetials',
             {
@@ -182,8 +456,6 @@ const loadCoupons = asyncHandler(async (req, res) => {
 
     let coupon = await Coupon.find({}).skip(limit * page).limit(limit);
 
-
-    console.log(coupon)
     res.render('admin/couponManagement', { coupon, total, page });
 })
 
@@ -197,13 +469,13 @@ const loadReturns = asyncHandler(async (req, res) => {
     let total = await Return.countDocuments({});
 
 
-    let returns = await Return.find({}) 
+    let returns = await Return.find({})
         .populate('productId', 'images title')
-        .populate('user','name  email')
+        .populate('user', 'name  email')
         .populate('order')
         .skip(limit * page)
         .limit(limit)
-         console.log(returns)
+    console.log(returns)
 
     res.render('admin/returnRequest', { returns, total, page });
 })
@@ -247,14 +519,7 @@ const blockOrUnblockUser = asyncHandler(async (req, res, next) => {
 
 
 
-
-
-
-
-
-
 const changeOrderStatus = asyncHandler(async (req, res, next) => {
-
 
     let { orderId, productId, index, status, userId, orderAmount } = req.body;
     let order = await Order.findOneAndUpdate({
@@ -291,7 +556,6 @@ const changeOrderStatus = asyncHandler(async (req, res, next) => {
 
     }
 
-    console.log(order);
     return res.json({
         success: true,
         result: order,
@@ -306,14 +570,11 @@ const changeOrderStatus = asyncHandler(async (req, res, next) => {
 const createCoupon = asyncHandler(async (req, res) => {
 
     let { name: title, description, discount, minOrder: minCost, edate: expiryDate, limit } = req.body;
-    console.log('title', title, description, discount, minCost, expiryDate, limit)
     let firstCode = title.split(' ')[0];
     let middleCode = generateRandomString(4);
     let lastCode = discount;
     let couponCode = firstCode + middleCode + lastCode;
-    console.log(firstCode, middleCode, lastCode)
-    console.log('coupn', couponCode);
-
+  
     await Coupon.create({
         title,
         description,
@@ -371,13 +632,7 @@ const editCoupon = asyncHandler(async (req, res) => {
         }
     )
     res.redirect('/api/v1/admin/coupons')
-    // return res.status(200)
-    //     .json({
-    //         success: true,
-    //         error: false,
-    //         data: coupon,
-    //         message: 'Coupon edited successfully'
-    //     })
+
 })
 
 
@@ -436,9 +691,8 @@ const loadOffers = asyncHandler(async (req, res) => {
         .populate('productIds', 'title images')
         .skip(page * limit)
         .limit(limit)
-    
-    console.log('categories',JSON.stringify(offers));
-    res.render('admin/offerManagement', {  offers, page, total })
+
+    res.render('admin/offerManagement', { offers, page, total })
 
 })
 
@@ -469,28 +723,13 @@ const createBanner = asyncHandler(async (req, res) => {
         image: req.file.originalname
     })
     return res.status(201)
-        .redirect('/api/v1/admin/banners')
-    // .json({
-    //     success: true,
-    //     error: false,
-    //     message: 'Banner created successfylly'
-    // })
-    // .then((result) => {
-    //     console.log(result);
-    // })
-    // .catch((error) => {
-    //     console.log(error);
-    // })
-    console.log(req.file)
-
+  
 })
 
 
 const editBanner = asyncHandler(async (req, res) => {
     let { name, description, url, id } = req.body;
-    console.log(req.body)
-    console.log(req.file)
-    // return     
+
 
     if (req.file) {
         let cropPath = path.join(__dirname, '../../public/Data/banners/sharped');
@@ -528,12 +767,6 @@ const editBanner = asyncHandler(async (req, res) => {
     }
     return res.status(200)
         .redirect('/api/v1/admin/banners')
-    // .json({
-    //     success: true,
-    //     error: false,
-    //     data: newBanner,
-    //     message: 'Banner updated successfully'
-    // })
 
 })
 
@@ -610,7 +843,7 @@ const createOffer = asyncHandler(async (req, res) => {
             description,
             endDate: edate,
             discount,
-            appliedCategory:selecteditems
+            appliedCategory: selecteditems
 
         })
     }
@@ -661,9 +894,9 @@ const listAndUnlistOffer = asyncHandler(async (req, res) => {
 })
 
 const editOffer = asyncHandler(async (req, res) => {
-    console.log(req.body)
-    const { name, id, description, discount,  edate } = req.body;
-    
+ 
+    const { name, id, description, discount, edate } = req.body;
+
     const offer = await Offer.findOneAndUpdate({
         _id: id,
     },
@@ -673,7 +906,7 @@ const editOffer = asyncHandler(async (req, res) => {
                 description,
                 discount,
                 endDate: edate,
-               
+
 
             }
         },
@@ -682,79 +915,77 @@ const editOffer = asyncHandler(async (req, res) => {
         }
     )
     res.redirect('/api/v1/admin/offers')
-    // return res.status(200)
-    //     .json({
-    //         success: true,
-    //         error: false,
-    //         data: coupon,
-    //         message: 'Coupon edited successfully'
-    //     })
+  
 })
 
 
 
 
-
-
-
-const returnChangeStatus = asyncHandler( async (req, res) => {
+const returnChangeStatus = asyncHandler(async (req, res) => {
     console.log(req.body)
-    let {returnId, status} = req.body;
-    let returns = await Return.findOne({_id: returnId}) 
-    if(returns.returnStatus == 'Requested') {
+    let { returnId, status } = req.body;
+    let returns = await Return.findOne({ _id: returnId })
+    if (!returns.returnStatus == 'Requested') {
         return res.status(500)
-        .json({
-            success: false,
-            error: true,
-            message: 'Something went wrong'
-        })
+            .json({
+                success: false,
+                error: true,
+                message: 'Something went wrong'
+            })
     }
-     
-    if(status == 'Accepted'){
+
+    if (status == 'Accepted') {
         let wallet = await Wallet.findOneAndUpdate({
             user: new mongoose.Types.ObjectId(returns.user)
         },
-        {
-            $inc: {
-                balance: returns.productPrice
-            },
-            $push: {
-                transactions:{
+            {
+                $inc: {
+                    balance: returns.productPrice
+                },
+                $push: {
+                    transactions: {
 
-               
-                    amount: returns.productPrice,
-                    mode: 'Debit',
-                    description: 'Product return accepted'
+
+                        amount: returns.productPrice,
+                        mode: 'Debit',
+                        description: 'Product return accepted'
+                    }
                 }
+
+            },
+            {
+                new: true
             }
-                
+
+        )
+
+        await Inventory.findOneAndUpdate({
+            product: returns.product,
+            'sizeVariant.size': returns.size 
         },
-        {
-            new: true
+    {
+        $inc: {
+            'sizeVariant.$.stock': returns.quantity,
+            totalStock: returns.quantity
+
         }
-    )
-    
-    
-    console.log(wallet)
+    })
+
 
     }
-    
+
 
     let order = await Order.findOneAndUpdate({
         _id: returns.order,
         'orderedItems._id': returns.orderedItemId
-    },{
+    }, {
         $set: {
             'orderedItems.$.returnStatus': status
         }
     })
-   
 
     returns.returnStatus = status;
-    returns  =  await returns.save();
-    console.log(returns)
-    console.log(order)
-
+    returns = await returns.save();
 
     return res.json({
         success: true,
@@ -764,9 +995,6 @@ const returnChangeStatus = asyncHandler( async (req, res) => {
 
 
 })
-
-
-
 
 
 
@@ -794,11 +1022,13 @@ module.exports = {
     listAndUnlistBanner,
     getOfferData,
     createOffer,
-    editOffer,    
+    editOffer,
     listAndUnlistOffer,
     returnChangeStatus,
-    loadSalesReport
-    
+    loadSalesReport,
+    getFilterData,
+    salesReportDownLoadExcel,
+
 
 
 }

@@ -49,9 +49,6 @@ const loadResetPassword = asyncHandler(async (req, res) => {
 
 const createUser = asyncHandler(async (req, res, next) => {
 
-
-    console.log(req.body)
-
     const emailCheck = await User.findOne({
         email: req.body.email
     });
@@ -82,9 +79,6 @@ const createUser = asyncHandler(async (req, res, next) => {
 
         const hash = await bcrypt.hash(req.body.password, 10);
         value.password = hash;
-
-        console.log(value)
-
 
         const Otp = Math.floor(6000 + Math.random() * 4000);
 

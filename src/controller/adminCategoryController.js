@@ -57,17 +57,11 @@ const loadAddSubCategory = asyncHandler(async (req, res) => {
 })
 
 const loadEditSubCategory = asyncHandler(async (req, res) => {
-    console.log('laod edit subcategory')
     let { id, subId } = req.query;
-    console.log(req.query)
 
     let category = await Category.findOne({ _id: id });
     let subCategory = category.subCategories.find(item => item._id.toString() == subId)
 
-
-
-
-    console.log(subCategory, 'sub category')
     res.render('admin/editSubCategory', { title: 'Edit subCategory', subCategory, id })
 })
 
@@ -81,7 +75,7 @@ const loadSubCategories = asyncHandler(async (req, res) => {
     let id = req.query.id;
     req.session.categoryId = id;
     let category = await Category.findOne({ _id: id });
-    console.log(category);
+
 
     res.render('admin/subCategories', { category, title: 'Sub Cateries', })
 
@@ -90,15 +84,7 @@ const loadSubCategories = asyncHandler(async (req, res) => {
 const addCategory = asyncHandler(async (req, res, next) => {
 
     let { title, description } = req.body;
-    console.log(req.body)
-    // let { error, value } = helper.cagetoryValidation.validate({
-    //     title, description
-    // });
-    // console.log(error || value)
-
-    // if (!error) {
-
-        
+       
             let alreadyCategory = await Category.findOne({
                 title: {
                     $regex: title, $options: 'i'
@@ -124,7 +110,6 @@ const addCategory = asyncHandler(async (req, res, next) => {
                 });
                 return category.save()
                     .then((saved) => {
-                        console.log('this is saved ', saved)
                         if (saved) {
                             res
                                 .json({
@@ -153,9 +138,6 @@ const addCategory = asyncHandler(async (req, res, next) => {
 
 const listUnlistCategory = (req, res, next) => {
     const { id } = req.body
-    console.log(id)
-
-
     return Category.findOne({ _id: id })
         .then((category) => {
             if (category.isListed) {
@@ -199,13 +181,10 @@ const listUnlistCategory = (req, res, next) => {
 }
 
 const submitEditCategory = asyncHandler(async (req, res, next) => {
-    console.log(req.body, 'body')
+
 
     let { title, description, id } = req.body;
-    console.log(title, description, id)
-
-
-    
+ 
         let category = await Category.findOne({
 
             $and:
@@ -244,17 +223,11 @@ const submitEditCategory = asyncHandler(async (req, res, next) => {
 const editSubCategory = asyncHandler(async (req, res, next) => {
     console.log(req.body, 'body')
 
-    let { title, description, catId, subId } = req.body;
-    console.log( title, description, catId, subId)
-
-
-    
+    let { title, description, catId, subId } = req.body;    
         let category = await Category.findOne({
             _id: catId
 
         });
-
-        console.log(category)
 
         if (!category) res.status(400)
             .json({
@@ -313,10 +286,6 @@ const addSubCategory = asyncHandler(async (req, res, next) => {
     
     let { title, description } = req.body;
     let id = req.session.categoryId;
-    console.log('title: ', title, 'description: ', description);
-    console.log(id, 'categoryId')
-   
-
     let matchCategory = await Category.findOne({
         _id: id,
         "subCategories.title": {
@@ -362,20 +331,6 @@ const addSubCategory = asyncHandler(async (req, res, next) => {
 
 
 })
-
-// const editSubCategory = asyncHandler(async (req, res, next) => {
-//     let {subId, catId, } = req.body;
-//     console.log(req.body);
-//     let category = await Category.findOne({_id: catId});
-    
-//     let subCategoryExist = category.subCategories.find(item => item._id.toString() == subId);
-//     console.log(subCategoryExist, 'subcategory exsit')
-
-    
-// })
-
-
-
 
 
 module.exports = {

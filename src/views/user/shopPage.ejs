@@ -17,7 +17,7 @@
                         <form action="#" onsubmit="event.preventDefault()">
                             <div class="input-group">
                                 <input type="search" class="form-control rounded-pill" id="search-input"
-                                    placeholder="Search for the product" aria-label="Email Adress">
+                                    placeholder="Search for the product" aria-label="Email Adress" required>
                                 <div class="input-group-append">
                                     <button onclick="updateSearch()" class="btn btn-primary rounded-pill border-end-0"
                                     id="search-button"
@@ -810,43 +810,61 @@
     </main><!-- End .main -->
     <script>
 
-document.addEventListener('load' , () => {
+document.addEventListener('DOMContentLoaded' , () => {
+    let search = document.getElementById("search-input")
+      
+          let currentUrl = new URL(window.location.href);
+          let existingSearch = currentUrl.searchParams.get('search');
+          if(existingSearch) {
+            search.value = existingSearch;
+          }
    
 })
 
 
-document.addEventListener('DOMContentLoaded', function () {
-    let searchValue = document.getElementById("search-input")
-          let currentUrl = new URL(window.location.href);
-          let existingSearch = currentUrl.searchParams.get('search');
+// document.addEventListener('DOMContentLoaded', function () {
+//     let searchValue = document.getElementById("search-input")
+//           let currentUrl = new URL(window.location.href);
+//           let existingSearch = currentUrl.searchParams.get('search');
 
-    if(existingSearch)  searchValue.value = existingSearch;
+//     if(existingSearch)  searchValue.value = existingSearch;
   
     
-    let searchInput=document.getElementById('search-input');
+//     let searchInput=document.getElementById('search-input');
 
-    searchInput.addEventListener('keyup', function () {
-      let searchTerm = searchInput.value.toLowerCase();
-      let tableRows = document.querySelectorAll('.container .products .row #product ');
-    //   console.log(tableRows)
+//     searchInput.addEventListener('keyup', function () {
+//       let searchTerm = searchInput.value.toLowerCase();
+//       let tableRows = document.querySelectorAll('.container .products .row #product ');
+//     //   console.log(tableRows)
      
 
-      tableRows.forEach(function (product) {
-        let productTitle = document.querySelectorAll('.product .product-body .product-title'); // Adjust the index based on your table structure
-        console.log(productTitle.nextElementSibling )
-        if (productTitle) {
-        //   let nameText = productTitle.textContent.toLowerCase();
-        //   row.style.display = nameText.includes(searchTerm) ? '' : 'none';
-        }
-      });
-    });
-  });
-
+//       tableRows.forEach(function (product) {
+//         let productTitle = document.querySelectorAll('.product .product-body .product-title'); // Adjust the index based on your table structure
+//         console.log(productTitle.nextElementSibling )
+//         if (productTitle) {
+//         //   let nameText = productTitle.textContent.toLowerCase();
+//         //   row.style.display = nameText.includes(searchTerm) ? '' : 'none';
+//         }
+//       });
+//     });
+//   });
+ 
   function updateSearch() {
-          let searchValue = document.getElementById("search-input").value;
+         let search = document.getElementById("search-input")
+          let searchValue = search.value.trim();
           let currentUrl = new URL(window.location.href);
           let existingSearch = currentUrl.searchParams.get('search');
-          if (existingSearch) {
+        //   if(searchValue.length == 0) {
+        //     search.style.border = '1px red solid'
+        //     setTimeout(() => {
+        //         search.style.border = ''
+                
+        //     }, 2000);
+        //     return
+
+        //   }
+          
+          if (existingSearch || existingSearch == '' ) {
             currentUrl.searchParams.set('search', searchValue);
           } else {
             currentUrl.searchParams.append('search', searchValue);

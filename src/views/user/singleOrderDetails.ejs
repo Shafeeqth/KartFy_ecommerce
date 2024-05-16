@@ -56,12 +56,12 @@
 
 
 									<p>
-										Payment Id: <%=order.paymentId%><br>
-											Total Amount: <%=order.orderAmout%><br>
+										Payment Id: <%=order.paymentId ? order.paymentId : 'None' %> <br>
+											Total Amount: <%=order.orderAmount%><br>
 												Saved discount: <%=order.totalSaved%><br>
 													Payment Status: <%=order.paymentStatus%><br>
 														Delivery Charge: <%=order.deliveryCharge%><br>
-															Grand total: <%=order.total%><br>
+															Grand total: <%= +order.orderAmount + +order.totalSaved ?? 0 + +order.deliveryCharge ?? 0%><br>
 
 
 

@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>KartFy Dashboard</title>
+    <title>Nest Dashboard</title>
     <meta http-equiv="x-ua-compatible" content="ie=edge" />
     <meta name="description" content="" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -47,7 +47,7 @@
                 ></span>
                 <div class="text">
                   <h6 class="mb-1 card-title">Revenue</h6>
-                  <span>₹</span>
+                  <span>₹<%= revenue%></span>
                   <span class="text-sm"> Shipping fees are not included </span>
                 </div>
               </article>
@@ -61,7 +61,7 @@
                 ></span>
                 <div class="text">
                   <h6 class="mb-1 card-title">Orders</h6>
-                  <span>  </span>
+                  <span> <%= orderCount%> </span>
                   <span class="text-sm"> Excluding orders in transit </span>
                 </div>
               </article>
@@ -75,7 +75,7 @@
                 ></span>
                 <div class="text">
                   <h6 class="mb-1 card-title">Products</h6>
-                  <span>  </span>
+                  <span> <%= product%> </span>
                 </div>
               </article>
             </div>
@@ -88,7 +88,7 @@
                 ></span>
                 <div class="text">
                   <h6 class="mb-1 card-title">Monthly Earning</h6>
-                  <span>₹</span>
+                  <span>₹<%= monthlyRevenue%></span>
                 </div>
               </article>
             </div>
@@ -98,15 +98,16 @@
         <div
           class="row"
           id="gragh"
-          data-monthlyData=""
+          data-monthlyData="<%= JSON.stringify(monthlyData) %>"
         >
           <div class="container">
             <div class="filters">
               <label for="startDate">select month</label>
               <input
+                type="month"
                 class="btn"
                 style="border: 1px solid black"
-                type="month"
+               
                 id="filter"
                 placeholder="select month"
               />
@@ -123,8 +124,8 @@
             <div class="bg-white">
               <canvas
                 id="monthlySalesChart"
-                width="300"
-                height="150"
+                width="300px"
+                height="150px"
                 style="margin: 80px; background-color: white"
               ></canvas>
             </div>
@@ -136,57 +137,60 @@
           <h1 class="mb-4">Top 10 Best Selling Products</h1>
 
           <div class="row">
-            
+            <%name.forEach((el, i) => {%>
 
             <div class="col-md-4 mb-4">
               <div class="card" style="width: 18rem">
                 <img
-                  src="/img/productImage/sharp/"
+                  src="/Data/uploads/<%= el.product.images[0]%>"
                   style="width: 300px; height: 300px"
                   class="card-img-top"
                   alt="Product 1"
                 />
                 <div class="card-body">
-                  <h5 class="card-title"></h5>
+                  <h5 class="card-title"><%= el.product.title%></h5>
                   <p class="card-text">
-                    Price:
+                    Price: <%= el.product.price%>
                   </p>
-                  <p class="card-text">Brand: </p>
+                  <p class="card-text">Brand: <%= el.product.category.Brands %></p>
                 </div>
               </div>
             </div>
 
-            
-          <h1 class="mb-4">Top 10 Best Selling Brands</h1>
+            <%})%>
+          <h1 class="mb-4">Top 5 Best Selling Brands</h1>
 
           <div class="row">
-           
+            <%console.log(brand, 'heloo')%>
+            <%brand.forEach((el, i) => {%>
 
                 <div class="row">
                     <div class="col-md-4 mb-4">
                       <div class="card">
                         <div class="card-body">
-                          <h5 class="card-title">></h5>
+                          <h5 class="card-title"><%= el.item%></h5>
                         </div>
                       </div>
                     </div>
                 
 
-           
-          <h1 class="mb-4">Top 10 Best Selling Cetagory</h1>
+            <%})%>
+          <h1 class="mb-4">Top 5 Best Selling Cetagory</h1>
 
           <div class="row">
-
+            <%console.log(brand, 'heloo')%>
+            <% topTenCetagory.forEach((el, i) => {%>
 
                 <div class="row">
                     <div class="col-md-4 mb-4">
                       <div class="card">
                         <div class="card-body">
-                          <h5 class="card-title"></h5>
+                          <h5 class="card-title"><%= el.item %></h5>
                         </div>
                       </div>
                 </div>
-         
+            <%})%>
+
             <!-- Repeat the above card structure for other products -->
           </div>
         </div>
@@ -194,16 +198,16 @@
       <!-- content-main end// -->
       <%- include('../partials/adminFooter.ejs') -%>
     </main>
-    <script src="/assets/js/vendors/jquery-3.6.0.min.js"></script>
-    <script src="/assets/js/vendors/bootstrap.bundle.min.js"></script>
-    <script src="/assets/js/vendors/select2.min.js"></script>
-    <script src="/assets/js/vendors/perfect-scrollbar.js"></script>
-    <script src="/assets/js/vendors/jquery.fullscreen.min.js"></script>
-    <script src="/assets/js/vendors/chart.js"></script>
+    <script src="assets/js/vendors/jquery-3.6.0.min.js"></script>
+    <script src="assets/js/vendors/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/vendors/select2.min.js"></script>
+    <script src="assets/js/vendors/perfect-scrollbar.js"></script>
+    <script src="assets/js/vendors/jquery.fullscreen.min.js"></script>
+    <script src="assets/js/vendors/chart.js"></script>
     <!-- Main Script -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
-    <script src="/assets/js/main.js?v=1.1" type="text/javascript"></script>
-    <script src="/assets/js/custom-chart.js" type="text/javascript"></script>
+    <script src="assets/js/main.js?v=1.1" type="text/javascript"></script>
+    <script src="assets/js/custom-chart.js" type="text/javascript"></script>
   </body>
 </html>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -214,7 +218,7 @@
     const filter = document.getElementById("filter").value;
     console.log(filter);
     if (filter) {
-      const response = await axios.post("/admin/order-filter", {
+      const response = await axios.post("/api/v1/admin/get-fiter-data", {
         data: filter,
       });
       console.log("heloo", response.data);

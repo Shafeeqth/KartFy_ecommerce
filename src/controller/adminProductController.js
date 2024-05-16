@@ -59,20 +59,6 @@ const loadProductDetails = asyncHandler(async (req, res) => {
 
 
     ])
-   
-    console.log(product)
-
-    // let category = await Category.findOne({ _id: product.category }).sort({createdAt: 1})
-
-    // console.log(category)
-    // console.log(category.title)
-    // let { title } = category
-    // product.category = title
-
-
-
-
-    // console.log(product)
 
     res.render('admin/adminProductDetails', { product })
 
@@ -82,7 +68,6 @@ const loadAddProduct = asyncHandler(async (req, res) => {
     let category = await Category.find({
         isListed: true
     }).select('title -_id subCategories')
-    console.log('category', category)
 
     res.render('admin/addProduct', { category });
 
@@ -97,7 +82,6 @@ const loadEditProduct = asyncHandler(async (req, res) => {
     }).select('title -_id subCategories')
 
     let product = await Product.findOne({ _id: id });
-    console.log("product", product);
     res.render("admin/editProduct", { product ,category});
 
 
@@ -151,9 +135,7 @@ const addProductStock = asyncHandler(async (req, res, next) => {
                     stock: parseInt(quantity),
                 }]
             });
-            console.log("Created successfully");
-            res
-                .status(201)
+            res.status(201)
                 .json({
                     success: true,
                     error: null,
@@ -231,8 +213,6 @@ const editProduct = asyncHandler(async (req, res, next) => {
             })
     })
    
-    console.log(Array.from(imageIndexes), 'array indexes')
-
     Array.from(imageIndexes)?.forEach(async (item, index) => {
         await Product.updateOne({
             _id: id
@@ -267,7 +247,6 @@ const editProduct = asyncHandler(async (req, res, next) => {
     }
 
 );
-console.log(product);
     
     return res.status(201)
         .json({

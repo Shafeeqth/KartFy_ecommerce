@@ -137,8 +137,12 @@
 				  
 				  <td class="text-center col-1">₹<%= order.orderAmount || order.orderAmout%>.00</td>
 				  <td class="text-center col-2">
+					<%if(order.paymentStatus == 'Failed' ){%>
+						<span class=" px-4 py-2 rounded-pill" style="font-weight: 400; background-color: rgb(204, 67, 67); color: #e1d8d8;">
+							Payment <%= order.paymentStatus%>
+						  </span>
 					
-					<%if(order.orderStatus== 'Delivered'){%>
+					<%}else if(order.orderStatus== 'Delivered'){%>
 					  <span class=" px-4 py-2 rounded-pill" style="font-weight: 400; background-color: rgb(46, 168, 56); color: #e1d8d8;">
 						<%= order.orderStatus%>
 					  </span>

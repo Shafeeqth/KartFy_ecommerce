@@ -17,10 +17,17 @@
             <div class="card-body">
               <h5 class="card-title text-center mb-4">Sales Report</h5>
 
-              <form action="/api/v1/admin/sales-report" method="get">
+              <form onsubmit="return applyFilter()" action="/api/v1/admin/sales-report" method="get" >
                 <div class="form-group">
+                  <div
+                  class="text-danger"
+                  id="startError"
+                  style="position: absolute; top: 21%; left: 23%"
+                >
+                  </div>
                   <label for="startDate">Start Date</label>
                   <input
+                  required
                     type="date"
                     class="form-control"
                     name="startDate"
@@ -28,8 +35,15 @@
                   />
                 </div>
                 <div class="form-group">
+                  <div
+                  class="text-danger"
+                  id="endError"
+                  style="position: absolute; top: 46%; left: 23%"
+                >
+                  </div>
                   <label for="endDate">End Date</label>
                   <input
+                  required
                     type="date"
                     name="endDate"
                     class="form-control"
@@ -38,18 +52,30 @@
                 </div>
                 <button
                   type="submit"
-                  onclick="applyFilter()"
+                
                   class="btn btn-dark btn-block"
                 >
                   Apply Filter
                 </button>
-                <button
+                <div class="row justify-content-between mx-2 mt-2">
+                  <button
                   type="button"
+                  style="width: 40%;"
                   onclick="download()"
-                  class="btn btn-dark btn-block"
+                  class="btn btn-outline-dark "
                 >
-                  Download
+                  Download PDF
                 </button>
+                <button
+                type="button"
+                style="width: 40%;"
+                onclick="downloadExcel()"
+                class="btn btn-outline-primary "
+              >
+                Download Excel
+              </button>
+                </div>
+               
               </form>
             </div>
           </div>
@@ -61,7 +87,7 @@
       id="salesReport"
       style="
         border: 2px solid black;
-        max-width: 800px;
+        max-width: 80%;
         margin: 0 auto;
         padding: 0 15px;
       "
@@ -74,22 +100,43 @@
           SALE REPORT
         </div>
       </div>
-      <table class="table" style="border: 2px">
+      <table class="table table-bordered" >
         <thead>
           <tr>
-            <th scope="col">index</th>
-            <th scope="col">product</th>
-            <th scope="col">payment method</th>
-            <th scope="col">status</th>
+            <th class=" text-center" scope="col-1">Sl No.</th>
+            <th class=" text-center" scope="col-1">OrderId</th>
+            <th class=" text-center" scope="col-3">Product details</th>
+            <th class=" text-center" scope="col-1">Order Price </th>
+            <th class=" text-center" scope="col-1">Payment method</th>
+            <th class=" text-center" scope="col-1">Date</th>
           </tr>
         </thead>
         <tbody>
           <% report.forEach((el, i) => {%>
           <tr>
-            <th scope="row"><%= i + 1%></th>
-            <td style="offset: 2px"><%= el.user.name%></td>
+            <td style="width: 5px;"><%=i+1%></td>
+            <td scope="row"><%= el.orderId%></td>
+            <td class="mx-2" >
+            <% el.orderedItems?.forEach((item, i) => {%>
+            
+              <div class="row">
+                <span class="" style="font-size: larger;align-items: center; padding-right: 1%;">&#8226;</span>
+
+              <p><%=item.product.title%></p>
+
+         
+           <span class="mx-4 text-dark font-weight-bold">Size: </span><span > <%=item.size%></span> 
+           <span class="mx-3 text-dark font-weight-bold">Quantity: </span><span> <%=item.quantity%></span> 
+
+          </div>
+          <% })%>
+        </td>
+        <td>₹<%= el.orderAmount%>.00</td>
+            
             <td><%= el.paymentMethod%></td>
-            <td><%= el.totalAmount%></td>
+            <td><%=  el.createdAt.toLocaleDateString('en-US',
+              { year: 'numeric', month: 'short', day:  'numeric',
+              }) %>%></td>
           </tr>
           <%})%>
         </tbody>
@@ -103,6 +150,57 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script>
+      function downloadExcel () {
+        var startDate = document.getElementById("sDate").value;
+        var endDate = document.getElementById("eDate").value;
+        fetch('/api/v1/admin/sales-report/download-excel', {
+          method: 'POST',
+          body: JSON.stringify({startDate, endDate}),
+          headers: {
+              'Content-Type': 'application/json',
+
+            }
+
+        })
+
+      }
+      function applyFilter() {
+        // Add your filtering logic here based on the selected start and end dates
+        var startDate = document.getElementById("sDate").value;
+        var endDate = document.getElementById("eDate").value;
+        console.log(startDate, endDate)
+       
+        const dateRegex =/^(?:19|20)\d\d-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])$/;
+        
+        let startError = document.getElementById('startError');
+        let endError = document.getElementById('endError');
+
+
+
+        if( !dateRegex.test(startDate) || new Date(startDate) > new Date()){
+          startError.innerHTML = 'Invalid Start date , check again!'
+          setTimeout(() => {
+            startError.innerHTML = ''
+            
+          }, 2000);
+          return false
+        }
+        if(!dateRegex.test(endDate) || new Date(startDate) > new Date(endDate) ) {
+          endError.innerHTML = 'Invalid End date , check again!'
+        
+          setTimeout(() => {
+            endError.innerHTML = ''
+            
+          }, 2000);
+          return false
+        }
+
+        // You can use startDate and endDate for filtering the sales report
+        console.log("Start Date:", startDate);
+        console.log("End Date:", endDate);
+
+        // Add logic to update the sales report content based on the selected date range
+      }
       function download() {
         const element = document.getElementById("salesReport");
         html2canvas(element).then(function (canvas) {
@@ -115,22 +213,12 @@
 
           pdf.addImage(imgData, "PNG", 5, 5, imageWidth, imageHeight);
           // Adjust the dimensions as needed
-          pdf.save("invoice.pdf");
+          pdf.save("sales-report.pdf");
         });
       }
     </script>
     <script>
-      function applyFilter() {
-        // Add your filtering logic here based on the selected start and end dates
-        var startDate = document.getElementById("startDate").value;
-        var endDate = document.getElementById("endDate").value;
-
-        // You can use startDate and endDate for filtering the sales report
-        console.log("Start Date:", startDate);
-        console.log("End Date:", endDate);
-
-        // Add logic to update the sales report content based on the selected date range
-      }
+      
     </script>
   </body>
 </html>
