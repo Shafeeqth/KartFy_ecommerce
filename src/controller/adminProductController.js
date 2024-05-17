@@ -53,12 +53,22 @@ const loadProductDetails = asyncHandler(async (req, res) => {
         },
         {
             $unwind: '$inventory'
+        },
+        {
+            $addFields: {
+                totalStocks : {
+                    $sum: '$inventory.sizeVariant.stock'
+
+                }
+              
+            }
         }
 
 
 
 
     ])
+    console.log(product)
 
     res.render('admin/adminProductDetails', { product })
 
@@ -304,6 +314,30 @@ const listUnlistProduct = (req, res, next) => {
 
 }
 
+const editProductSizeCount = asyncHandler (async (req, res) => {
+    console.log(req.body)
+    let {count, itemId, productId, size} = req.body;
+
+    let inventory = await Inventory.findOneAndUpdate({
+        product: productId,
+        'sizeVariant._id': itemId
+    },
+    {
+        'sizeVariant.$.stock': count
+    },
+    {
+        new: true
+    }
+)
+    return res.status(200)
+        .json({
+            success: true,
+            error: false,
+            data: inventory,
+            message: 'Stock updated successfully'
+        })
+})
+
 
 
 
@@ -315,7 +349,9 @@ module.exports = {
     addProduct,
     editProduct,
     addProductStock,
-    listUnlistProduct
+    listUnlistProduct,
+    editProductSizeCount,
+
 
 
 }

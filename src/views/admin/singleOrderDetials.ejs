@@ -59,6 +59,27 @@
                   %>, <%= order.address.pincode %>
                 </p>
               </div>
+              <div class="col-md-6">
+                <!-- Add user details here, you can customize this section -->
+                <h5>Payment Details</h5>
+                <p>
+                  <strong>Mode:</strong>
+                  <%= order.paymentMethod %>
+               
+                  <br><strong>Payment Status:</strong>
+                  <%= order.paymentStatus %>
+             
+                  <br><strong>Payment Amount:</strong>
+                  ₹<%= order.orderAmount %>.00
+
+        
+                </p>
+                <!-- <p>
+                  <strong>Order Amount:</strong>
+                  <%= order.address.locality %>, <%= order.address.district %>, <%= order.address.state
+                  %>, <%= order.address.pincode %>
+                </p> -->
+              </div>
               <!-- <div class="col-md-6 text-end">
                 <select class="form-select">
                   <option>Show 20</option>
@@ -75,6 +96,7 @@
                       <th>Order ID</th>
                       <th scope="col">Image</th>
                       <th scope="col">Name</th>
+                      <th scope="col">Details</th>
                       <th scope="col">Total</th>
                       <th scope="col">Status</th>
                       <th scope="col">Ordered Date</th>
@@ -98,6 +120,9 @@
                         </b>
                       </td>
                       <td><%= item.product.title%></td>
+                      <td> <p style="margin: 0;"><strong>Size: </strong>  <%=item.size%></p>
+                        <p> <strong>Quantity:</strong>   <%=item.quantity%></p>
+                      </td>
                       <td>₹<%= item.product.mrpPrice%>.00</td>
                       <td>
                         <%if(order.orderStatus== 'Delivered'){%>
@@ -167,9 +192,12 @@
                           name="orderStatus"
                         >
                           <option>Change status</option>
+                          <%if(order.paymentStatus != 'Pending' || order.orderStatus != 'Pending'){%>
                           <option value="Shipped">Shipped</option>
                           <option value="Out For Delivery">Out For Delivery</option>
+                        
                           <option value="Delivered">Delivered</option>
+                          <%}%>
                           <option value="Cancelled">Cancel</option>
                         </select>
 

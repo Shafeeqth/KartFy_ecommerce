@@ -72,11 +72,11 @@
 
               <td class="col-2">
                 <input class="text-center text-success m-2" disabled
-                  style="width: ;  padding: 10px 5px; font-weight: bold; border: none; "
+                  style=" padding: 10px 5px; font-weight: bold; border: none; "
                   value=" Price : ₹ <%= order.productPrice%>.00" type="text">
                 <br>
                 <input class="text-center text-success  m-2 " disabled
-                  style="width:; padding: 10px 5px; font-weight: bold; border: none; "
+                  style="padding: 10px 5px; font-weight: bold; border: none; "
                   value=" Quantity : <%= order.quantity%>"
                   type="text">
               </td>
@@ -101,7 +101,7 @@
              
               <% const formattedDate=order.createdAt.toLocaleDateString('en-US',
               { year: 'numeric', month: 'short', day:  'numeric'})%>
-              <td style="font-size: ; " class="text-center col-2"><%= formattedDate%></td>
+              <td style="" class="text-center col-2"><%= formattedDate%></td>
               <!-- <td class="text-center col-2 ">
               
               </td > -->

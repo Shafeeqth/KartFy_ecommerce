@@ -22,11 +22,11 @@ const orderSchema = mongoose.Schema({
                 type: String,
                 required: true,
             },
-            totalPrice: {
-                type: Number,
-                required: true
+            // totalPrice: {
+            //     type: Number,
+            //     required: true
 
-            },
+            // },
             isReviewed: {
                 type: Boolean,
                 default: false,
@@ -66,7 +66,7 @@ const orderSchema = mongoose.Schema({
     orderStatus: {
         type: String,
         required: true,
-        enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled', 'Returned', 'Placed'],
+        enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled', 'Placed'],
         default: 'Pending'
     },
     orderId: {
@@ -81,15 +81,26 @@ const orderSchema = mongoose.Schema({
 
     },
     appliedOffer: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Offer',
-
-
+        type: {
+            offerId: {
+                type: mongoose.Schema.Types.ObjectId,
+        
+            },
+            discount:{
+                type: Number
+            }
+        },
     },
-    coupon: {
-        type: Object,
-        required: false       
-    
+    appliedCoupon: {
+        type: {
+            offerId: {
+                type: mongoose.Schema.Types.ObjectId,
+        
+            },
+            discount:{
+                type: Number
+            }
+        },
     },
     isCancelled: {
         type: Boolean,
@@ -115,6 +126,11 @@ const orderSchema = mongoose.Schema({
     {
         timestamps: true
     });
+
+orderSchema.pre('save', function(next) {
+    this.totalSaved = this.appliedCoupon?.discount ?? 0 + this.appliedOffer?.discount ?? 0
+    next()
+})
 
 const Order = mongoose.model('Order', orderSchema);
 

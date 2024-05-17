@@ -28,6 +28,47 @@ const loadHome = asyncHandler(async (req, res) => {
 
 
 const loadShop = asyncHandler(async (req, res) => {
+
+    let inventories = await Inventory.aggregate([
+        {
+            $lookup: {
+                from: 'products', // The collection name in MongoDB (plural of the model name)
+                localField: 'product',
+                foreignField: '_id',
+                as: 'productDetails'
+            }
+        },
+        {
+            $unwind: '$productDetails' // Unwind the array to include product details
+        },
+        {
+            $addFields: {
+                totalStock1: { 
+                    $sum: '$sizeVariant.stock' // Sum up all the stock values
+                }
+            }
+        },
+        // {
+        //     $project: {
+        //         product: 1,
+        //         sizeVariant: 1,
+        //         totalStock: 1,
+        //         'productDetails.title': 1,
+        //         'productDetails.category': 1,
+        //         'productDetails.mrpPrice': 1,
+        //         'productDetails.price': 1,
+        //         'productDetails.description': 1,
+        //         'productDetails.color': 1,
+        //         'productDetails.images': 1,
+        //         'productDetails.isListed': 1,
+        //         'productDetails.soldCount': 1,
+        //         'productDetails.avgRating': 1,
+        //         'productDetails.createdAt': 1,
+        //         'productDetails.updatedAt': 1
+        //     }
+        // }
+    ]);
+    return console.log(inventories)
     console.log(req.query)
     let user = req.session.user ? req.session.user : null;
     let page = parseInt(req.query.page) -1 || 0;
@@ -44,7 +85,7 @@ const loadShop = asyncHandler(async (req, res) => {
     let sort = req.query.sort?.trim() || ''
 
     let search =req.query.search ?String( req.query.search).trim() : ''
-
+     search ? (search = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')): (search = '')
     if(gender ||category|| brand) {
         matchValue = {
             $or: categor
@@ -263,12 +304,7 @@ const loadProfile = asyncHandler(async (req, res, next) => {
                     email: user.email
                 }
             },
-            {
-                $project: {
-                    _id: 1
-                }
-               
-            },
+           
             {
                 $lookup: {
                     from: 'addresses',
@@ -283,7 +319,8 @@ const loadProfile = asyncHandler(async (req, res, next) => {
 
 
         ])
-        res.render("user/userProfile", { user, userProfile, wallet })
+        console.log(userProfile)
+        res.render("user/userProfile", { user, userProfile: userProfile[0], wallet })
     }
        
     
@@ -313,13 +350,14 @@ const loadOrderSuccess = asyncHandler(async (req, res) => {
     
     let orderId = req.query['orderId'];
     let user = req.session?.user ?? null
+    res.locals.orderId = orderId ;
     let currentOrder = await Order.findById({
         _id: orderId
     })
         .populate('user')
         .populate('address')
 
-    res.render('user/orderSuccess', { user, currentOrder })
+    res.render('user/orderSuccess', { user, currentOrder,orderId })
 
 
 })

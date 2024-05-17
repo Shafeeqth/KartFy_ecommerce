@@ -76,6 +76,8 @@
                                     <li>Total <span>₹<%=currentOrder.orderAmount + currentOrder.deliveryCharge ?? 0  %>.00</span></li>
                                 </ul>
                             </div>
+                            <a href="/api/v1/my-orders/single-orderDetails?id=<%=orderId%>" class="btn btn-sm btn-outline-secondary ">View in detail</a>
+
                             <a href="/api/v1/shop" class="btn btn-primary ">Continue Shoping</a>
                            
                             

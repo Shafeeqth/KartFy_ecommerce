@@ -594,7 +594,7 @@ function previewImage1(event) {
             
             const image = form.elements.image ?? null
     
-            if (name.length <=2 ) {
+           if (!/^(?=.*\S)[a-zA-Z0-9 ]{3,30}$/.test(name)) {
               displayErrorMessage(form, "name", "Please enter a valid coupon name.");
               return;
             }

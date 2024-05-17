@@ -69,9 +69,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     userPassword.addEventListener('keyup', function (event) {
 
+        if(userConfirmPassword.value &&( userPassword.value != userConfirmPassword.value) ){
+            userPassword.style.border = '1px red solid';
+            passwordError.classList = 'text-danger'
+            passwordError.innerText = 'Password mismatch'
 
+            userConfirmPassword.style.border = '1px red solid';
+            confirmPasswordError.classList = 'text-danger'
+            confirmPasswordError.innerText = 'Password mismatch'
 
-        if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/.test(userPassword.value)) {
+        }
+
+        if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/.test(userPassword.value) ) {
             userPassword.style.border = '1px red solid';
             passwordError.classList = 'text-danger'
             passwordError.innerText = 'Week password'

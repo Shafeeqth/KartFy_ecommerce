@@ -15,7 +15,7 @@ const asyncHandler = require('../utilities/asyncHandler');
 const isLoged = asyncHandler(async (req, res, next) => {
     if (!req.session.admin) {
 
-        return res
+        return res.status(401)
             .redirect('/api/v1/admin/login')
     }
     next();
@@ -25,8 +25,7 @@ const isLoged = asyncHandler(async (req, res, next) => {
 
 const adminLogout = asyncHandler(async (req, res) => {
     req.session.admin = null;
-    return res
-        .redirect('/api/v1/admin/login?LogoutMessage=' + encodeURIComponent('Admin Logged out successfully'));
+    return res.redirect('/api/v1/admin/login?LogoutMessage=' + encodeURIComponent('Admin Logged out successfully'));
 })
 
 

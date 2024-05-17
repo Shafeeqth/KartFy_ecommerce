@@ -165,19 +165,19 @@ const addToCart = asyncHandler(async (req, res, next) => {
     if(userCart && userCart.isCouponApplied) {
         userCart.isCouponApplied = false,
    
-        await Coupon.findOneAndUpdate({
-            couponCode: userCart.coupon.code
-        },
-        {
-            $pull: {
-                appliedUsers: user
-            }
-        },
-        {
-            new: true
+    //     await Coupon.findOneAndUpdate({
+    //         couponCode: userCart.coupon.code
+    //     },
+    //     {
+    //         $pull: {
+    //             appliedUsers: user
+    //         }
+    //     },
+    //     {
+    //         new: true
 
-        }
-    )
+    //     }
+    // )
     userCart.totalPrice += userCart.coupon.discount;
     delete userCart.coupon;
     }
@@ -828,7 +828,7 @@ const addCoupon = asyncHandler(async (req, res) => {
 
     }
     coupon.limit -= 1;
-    coupon.appliedUsers.push(user._id)
+    // coupon.appliedUsers.push(user._id)
     await coupon.save()
 
 
@@ -879,16 +879,16 @@ const removeCoupon = asyncHandler(async (req, res) => {
 
     )
     console.log('===========================================coupon Code', cart.coupon.code)
-    await Coupon.findOneAndUpdate({
-        couponCode: cart.coupon.code
-    },
-        {
-            $pull: {
-                appliedUsers: user
+    // await Coupon.findOneAndUpdate({
+    //     couponCode: cart.coupon.code
+    // },
+    //     {
+    //         $pull: {
+    //             appliedUsers: user
 
-            }
-        }
-    )
+    //         }
+    //     }
+    // )
 
     return res.json({
         success: true,

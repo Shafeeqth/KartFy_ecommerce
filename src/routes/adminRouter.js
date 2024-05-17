@@ -71,6 +71,7 @@ router.post('/products/add-stock', adminMiddleware.isLoged, productController.ad
 
 //List product
 router.put('/products/list-product', adminMiddleware.isLoged,  productController.listUnlistProduct);
+router.patch('products/edit-product-stock', adminMiddleware.isLoged,  productController.editProductSizeCount);
 
 
 

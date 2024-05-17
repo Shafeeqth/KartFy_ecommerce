@@ -65,15 +65,15 @@ const cartSchema = mongoose.Schema({
     {
         timestamps: true
     });
-cartSchema.pre('save', async (next) => {
-    if(this.isCouponApplied === true) {
-        this.isCouponApplied = false;
-        this.cartTotal -= this.coupon.discount;
-        delete this.coupon
+// cartSchema.pre('save', async (next) => {
+//     if(this.isCouponApplied === true) {
+//         this.isCouponApplied = false;
+//         this.cartTotal -= this.coupon.discount;
+//         delete this.coupon
 
-    }
-    next();
-})
+//     }
+//     next();
+// })
 
 const Cart = mongoose.model('Cart', cartSchema);
 

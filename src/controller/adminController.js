@@ -360,7 +360,7 @@ const checkAuthentic = asyncHandler(async (req, res) => {
     if (email == req.body.email) {
 
         if (password == req.body.password) {
-            req.session.admin = req.body.email;
+            req.session.admin = req.body;
             res.redirect('/api/v1/admin')
 
         } else {
@@ -433,11 +433,8 @@ const loadSingleOrderDetails = asyncHandler(async (req, res) => {
         .populate('user')
         .populate('address')
         .populate('orderedItems.product');
-    res
-        .render('admin/singleOrderDetials',
-            {
-                order
-            })
+        console.log(order)
+    res.render('admin/singleOrderDetials', { order })
 
 
 })
@@ -520,20 +517,11 @@ const blockOrUnblockUser = asyncHandler(async (req, res, next) => {
 
 
 const changeOrderStatus = asyncHandler(async (req, res, next) => {
-
+    console.log(req.body)
     let { orderId, productId, index, status, userId, orderAmount } = req.body;
-    let order = await Order.findOneAndUpdate({
-        _id: orderId
-    },
-        {
-            $set: {
-                orderStatus: status
-            }
-        },
-        {
-            new: true
-        });
-    if (status == 'Cancelled') {
+    let order = await Order.findOne({_id: orderId});
+    order.orderStatus = status;
+    if (status == 'Cancelled' && order.paymentStatus == 'Paid' ) {
         if (['PayPal', 'RazorPay', 'Wallet'].includes(order.paymentMethod)) {
             let wallet = await Wallet.updateOne({
                 user: userId
@@ -544,9 +532,9 @@ const changeOrderStatus = asyncHandler(async (req, res, next) => {
                 },
                 $push: {
                     transactions: {
-                        mode: 'Debit',
+                        mode: 'Credit',
                         amount: order.orderAmount,
-                        description: 'Order canceled by admin amount debited ',
+                        description: 'Order canceled by admin amount credit ',
 
                     }
                 }
@@ -555,6 +543,21 @@ const changeOrderStatus = asyncHandler(async (req, res, next) => {
         }
 
     }
+    order.orderedItems.forEach(async item => {
+        await Inventory.updateOne({
+            product: item.product,
+            'sizeVariant.size': item.size
+        },
+        {
+            $inc: {
+                'sizeVariant.$.stock': item.quantity
+            }
+
+        }
+    )
+    })
+    await order.save();
+
 
     return res.json({
         success: true,
@@ -947,7 +950,7 @@ const returnChangeStatus = asyncHandler(async (req, res) => {
 
 
                         amount: returns.productPrice,
-                        mode: 'Debit',
+                        mode: 'Credit',
                         description: 'Product return accepted'
                     }
                 }
@@ -966,7 +969,7 @@ const returnChangeStatus = asyncHandler(async (req, res) => {
     {
         $inc: {
             'sizeVariant.$.stock': returns.quantity,
-            totalStock: returns.quantity
+           
 
         }
     })

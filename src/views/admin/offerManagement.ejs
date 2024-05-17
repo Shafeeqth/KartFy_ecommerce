@@ -677,14 +677,14 @@
         const selecteditems = form.elements.selecteditems
         // return console.log(selecteditems.selectedOptions)
       
-        if (name.length <=2 ) {
+        if (!/^(?=.*\S)[a-zA-Z0-9 ]{3,30}$/.test(name)) {
           displayErrorMessage(form, "name", "Please enter a valid coupon name.");
           return;
         }
 
        
 
-        if (description.length <= 10) {
+        if (!/^(?=.*\S)[a-zA-Z0-9 ]{10,30}$/.test(name)) {
           displayErrorMessage(
             form,
             "description",

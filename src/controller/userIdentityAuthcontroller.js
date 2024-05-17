@@ -148,7 +148,7 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
         return res.redirect('/api/v1/forgot-password?checkEmail=' + encodeURIComponent('Please check your email'));
 
     } 
-        req.flash('forgotError', 'Invalid email! try again.')
+        req.flash('forgotError', 'Email does not exist!.')
         res.status(303)
        .redirect('/api/v1/forgot-password');
 

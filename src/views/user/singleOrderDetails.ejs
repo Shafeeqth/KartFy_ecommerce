@@ -97,7 +97,7 @@
 										<% order.orderedItems.forEach((item, i)=> {%>
 											<tr class="m-0">
 
-												<td>
+												<td class="col-3">
 													<div class="mx-5 text-center ">
 														<a style="all: unset; cursor: pointer;"
 															href="/api/v1/product-detail?id=<%=item.product._id%>">
@@ -109,9 +109,9 @@
 														</a>
 													</div>
 												</td>
-												<td class=" ">
+												<td class="col-2 text-center ">
 													Size : <input class="text-center bg-light m-2 p-3" disabled
-														style="width: 29%; padding: 10px; font-weight: bold; border: none; "
+														style="width: 40%; padding: 10px; font-weight: bold; border: none; "
 														value=" <%= item.size%>" type="text"> <br>
 													Quantity : <input class="text-center bg-light" disabled
 														style="width: 20%; padding: 10px; font-weight: bold; border: none;"
@@ -119,15 +119,15 @@
 												</td>
 												<td>
 													<input class="text-center text-success m-2" disabled
-														style="width: 50%;  padding: 10px 5px; font-weight: bold; border: none; "
+														style="width: 80%;  padding: 10px 5px; font-weight: bold; border: none; "
 														value=" Price : ₹ <%= item.product.mrpPrice%>.00" type="text">
 													<br>
 													<input class="text-center text-success  m-2 " disabled
-														style="width: 50%; padding: 10px 5px; font-weight: bold; border: none; "
+														style="width: 80%; padding: 10px 5px; font-weight: bold; border: none; "
 														value=" Total : ₹ <%= item.product.mrpPrice * item.quantity%>.00"
 														type="text">
 												</td>
-												<td>
+												<td class="col-2">
 													<%if(order.orderStatus== 'Delivered' ){%>
 														<%if(item.returnStatus != 'False') {%>
 															<span class=" px-4 py-2 rounded-pill"
@@ -180,12 +180,12 @@
 																										</span>
 												</td>															<%}%>
 												<% const formattedDate=order.createdAt.toLocaleString('en-US', {
-													weekday: 'short' , month: 'short' , day: 'numeric' , year: 'numeric'
+												weekday: 'short' , month: 'short' , day: 'numeric' , year: 'numeric'
 													}); %>
-													<td>
+													<td class="col-1 text-center">
 														<%= formattedDate%>
 													</td>
-													<td class="text-center col-2 ">
+													<td class="text-end col-2 ">
 														<%if(order.orderStatus== 'Delivered' ){%>
 															<%if(item.returnStatus=='False' ){%>
 																<button

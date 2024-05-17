@@ -256,7 +256,7 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
             wallet.transactions.push({
                 amount: order.orderAmount,
                 description: 'Product ordered with wallet ',
-                mode: 'Credit'
+                mode: 'Debit'
             })
             await wallet.save()
             res.status(200)
@@ -360,8 +360,8 @@ const orderCancel = asyncHandler(async (req, res, next) => {
                 $push: {
                     transactions: {
                         amount: order.orderAmount,
-                        mode: 'Debit',
-                        description: 'Order cancel amount debited ',
+                        mode: 'Credit',
+                        description: 'Order cancel amount credited ',
 
                     }
                 }

@@ -1,571 +1,622 @@
-
 <link href="/assets/css/main.css?v=1.1" rel="stylesheet" type="text/css" />
-<link
-  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-  rel="stylesheet"
-  integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
-  crossorigin="anonymous"
-/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+	integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
 <style>
 	/* Custom styles for modals */
-.modal-header {
-  border-bottom: none;
-}
+	.modal-header {
+		border-bottom: none;
+	}
 
-.modal-body {
-  padding: 20px;
-}
+	.modal-body {
+		padding: 20px;
+	}
 
-.modal-footer {
-  border-top: none;
-  padding: 20px;
-}
+	.modal-footer {
+		border-top: none;
+		padding: 20px;
+	}
 
-.modal-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-}
+	.modal-title {
+		font-size: 1.5rem;
+		font-weight: bold;
+	}
 
-.btn-secondary {
-  background-color: #6c757d;
-  color: #fff;
-}
+	.btn-secondary {
+		background-color: #6c757d;
+		color: #fff;
+	}
 
-.btn-danger {
-  background-color: #dc3545;
-  color: #fff;
-}
+	.btn-danger {
+		background-color: #dc3545;
+		color: #fff;
+	}
 
-.btn-warning {
-  background-color: #ffc107;
-  color: #212529;
-}
+	.btn-warning {
+		background-color: #ffc107;
+		color: #212529;
+	}
 
-.modal-content {
-  border-radius: 10px;
-  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
-}
+	.modal-content {
+		border-radius: 10px;
+		box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+	}
 
-.modal-dialog {
-  max-width: 500px;
-}
+	.modal-dialog {
+		max-width: 500px;
+	}
 
-.form-control {
-  border-radius: 5px;
-}
+	.form-control {
+		border-radius: 5px;
+	}
 
-/* Add additional custom styles as needed */
-
+	/* Add additional custom styles as needed */
 </style>
 </head>
 <%- include('../partials/userHeader') -%>
 
-<body class="bg-info-subtle">
-<main class="">
-	<div class="page-header text-center" style="background-image: url('/assets/images/page-header-bg.jpg')">
-		<div class="container">
-			<h1 class="page-title">My Orders</h1>
-		</div><!-- End .container -->
-	</div><!-- End .page-header -->
-	<nav aria-label="breadcrumb" class="breadcrumb-nav mb-3">
-		<div class="container">
-			<ol class="breadcrumb">
-				<li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
-				<li class="breadcrumb-item"><a href="/api/v1/Profile">My Account</a></li>
-				<li class="breadcrumb-item active" aria-current="page">My Orders</li>
-			</ol>
-		</div><!-- End .container -->
-	</nav><!-- End .breadcrumb-nav -->
-  
+	<body class="bg-info-subtle">
+		<main class="">
+			<div class="page-header text-center" style="background-image: url('/assets/images/page-header-bg.jpg')">
+				<div class="container">
+					<h1 class="page-title">My Orders</h1>
+				</div><!-- End .container -->
+			</div><!-- End .page-header -->
+			<nav aria-label="breadcrumb" class="breadcrumb-nav mb-3">
+				<div class="container">
+					<ol class="breadcrumb">
+						<li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
+						<li class="breadcrumb-item"><a href="/api/v1/Profile">My Account</a></li>
+						<li class="breadcrumb-item active" aria-current="page">My Orders</li>
+					</ol>
+				</div><!-- End .container -->
+			</nav><!-- End .breadcrumb-nav -->
 
-  <section class="content-main bg-body-tertiary" style="margin-top: -3%;">
-	
-	<div class="content-header justify-content-center m-0 ">
-	  
-		
-	 
-	</div>
-	<div class="card mb-4">
-	  <div class="card-body" id="Reload">
-		<div class="row mb-4">
-			
-		 
-		  <!-- <div class="col-md-6 text-end">
+
+			<section class="content-main bg-body-tertiary" style="margin-top: -3%;">
+
+				<div class="content-header justify-content-center m-0 ">
+
+
+
+				</div>
+				<div class="card mb-4">
+					<div class="card-body" id="Reload">
+						<div class="row mb-4">
+
+
+							<!-- <div class="col-md-6 text-end">
 			<select class="form-select">
 			  <option>Show 20</option>
 			  <option>Show 30</option>
 			  <option>Show 40</option>
 			</select>
 		  </div> -->
-		</div>
-		<div class="table-responsive">
-		  <div id="reload">
-			<table class="table " id="ReloadTable">
-			  <thead class="font-bold">
-				<tr>
-				  <th class="text-center col-1">Order ID</th>
-				  <th class="text-center col-4" scope="col">Products</th>
-				  
-				  <th class="text-center col-1" scope="col">Total</th>
-				  <th class="text-center col-2" scope="col">Status</th>
-				  <th class="text-center col-2" scope="col">Ordered Date</th>
-				  <th class="text-center col-2" scope="col" class="text-end">Action</th>
-				</tr>
-			  </thead>
-			 
-			  <tbody>
-				<%if(Array.isArray(order)&& order.length > 0) {%>
-					<%order.forEach(order=>{%>
-				
-				<tr style="width: 100%; ;" class="shadow" ondblclick="orderDetails('<%=order._id%>')">
-				  <td class="text-center col-1"><%=order.orderId%></td>
-				  <td class="text-center col-3 " >
-					<% order.orderedItems.forEach((item, i)=> {%>
-						<div style="float:left; flex-wrap: wrap;" class="m-2">
-							<a href="api/v1/product-detail?id=<%=item.product._id%>">
-					  <img
-						src="/Data/uploads/<%=item.product.images[0]%>"
-						alt=""
-						class="img-md rounded mx-2 shadow"
-					  />
-					  <p  class="text-start text-dark" style=" font-size:smaller;"><%= item.product.title%></p>
-					</a>
+						</div>
+						<div class="table-responsive">
+							<div id="reload">
+								<table class="table " id="ReloadTable">
+									<thead class="font-bold">
+										<tr>
+											<th class="text-center col-1">Order ID</th>
+											<th class="text-center col-4" scope="col">Products</th>
+
+											<th class="text-center col-1" scope="col">Total</th>
+											<th class="text-center col-2" scope="col">Status</th>
+											<th class="text-center col-2" scope="col">Ordered Date</th>
+											<th class="text-center col-2" scope="col" class="text-end">Action</th>
+										</tr>
+									</thead>
+
+									<tbody>
+										<%if(Array.isArray(order)&& order.length> 0) {%>
+											<%order.forEach(order=>{%>
+
+												<tr style="width: 100%; ;" class="shadow"
+													ondblclick="orderDetails('<%=order._id%>')">
+													<td class="text-center col-1">
+														<%=order.orderId%>
+													</td>
+													<td class="text-center col-3 ">
+														<% order.orderedItems.forEach((item, i)=> {%>
+															<div style="float:left; flex-wrap: wrap;" class="m-2">
+																<a
+																	href="api/v1/product-detail?id=<%=item.product._id%>">
+																	<img src="/Data/uploads/<%=item.product.images[0]%>"
+																		alt="" class="img-md rounded mx-2 shadow" />
+																	<p class="text-start text-dark"
+																		style=" font-size:smaller;">
+																		<%= item.product.title%>
+																	</p>
+																</a>
+															</div>
+
+															<%})%>
+													</td>
+
+													<td class="text-center col-1">₹<%= order.orderAmount ||
+															order.orderAmout%>.00</td>
+													<td class="text-center col-2">
+														<%if(order.paymentStatus=='Failed' ){%>
+															<span class=" px-4 py-2 rounded-pill"
+																style="font-weight: 400; background-color: rgb(204, 67, 67); color: #e1d8d8;">
+																Payment <%= order.paymentStatus%>
+															</span>
+
+															<%}else if(order.orderStatus=='Delivered' ){%>
+																<span class=" px-4 py-2 rounded-pill"
+																	style="font-weight: 400; background-color: rgb(46, 168, 56); color: #e1d8d8;">
+																	<%= order.orderStatus%>
+																</span>
+
+																<%}else if(order.orderStatus=='Cancelled' ){%>
+																	<span class=" px-4 py-2 rounded-pill"
+																		style="font-weight: 400; background-color: rgb(177, 16, 16); color: #e1d8d8;">
+																		<%= order.orderStatus%>
+																	</span>
+
+																	<%}else if(order.orderStatus=='Out For Delivery'
+																		){%>
+																		<span class=" px-4 py-2 rounded-pill"
+																			style="font-weight: 400; background-color: rgb(18, 163, 163); color: #e1d8d8;">
+																			<%= order.orderStatus%>
+																		</span>
+
+																		<%}else if(order.orderStatus=='Pending' ){%>
+																			<span class=" px-4 py-2 rounded-pill"
+																				style="font-weight: 400; background-color: rgb(12, 95, 120); color: #e1d8d8;">
+																				<%= order.orderStatus%>
+																			</span>
+
+																			<%}else if(order.orderStatus=='Shipped' ){%>
+																				<span
+																					class=" px-4 py-2 rounded-pill bg-tertiary">
+
+																					<%= order.orderStatus%>
+																				</span>
+																				<%}else if(order.orderStatus=='Placed'
+																					){%>
+																					<span
+																						class=" px-4 py-2 rounded-pill bg-primary"
+																						style="font-weight: 400; background-color: rgb(101, 15, 32); color: #e1d8d8;">
+
+																						<%= order.orderStatus%>
+																					</span>
+																					<%}%>
+													</td class="text-center col-2">
+													<% const formattedDate=order.createdAt.toLocaleString('en-US', {
+														weekday: 'short' , month: 'short' , day: 'numeric' ,
+														year: 'numeric' , hour: 'numeric' , minute: 'numeric' ,
+														second: 'numeric' , hour12: true }); %>
+														<td>
+															<%= formattedDate%>
+														</td>
+														<td class="text-center col-2 ">
+															<%if((order.paymentStatus=='Failed' ||
+																order.paymentStatus=='Pending' && order.paymentMethod
+																!='COD' ) && order.orderStatus !='Cancelled' ) {%>
+																<button
+																	onclick="retryPayment('<%=order._id%>', '<%=order.paymentMethod%>')"
+																	class=" btn bg-warning rounded"><i
+																		class="fa-solid fa-indian-rupee-sign"></i>Retry
+																	Payment</button>
+																<%}else if(order.orderStatus=='Delivered' ){%>
+																	<button onclick="orderDetails('<%=order._id%>')"
+																		class=" btn btn-info rounded">View
+																		Details</button>
+
+																	<%}else if(order.orderStatus=='Cancelled' ){%>
+
+																		<button disabled
+																			class="btn btn-danger rounded">Order
+																			Cancelled</button>
+																		<!-- <a href="/api/v1/shop">Continue shopping</a> -->
+
+																		<%}else{%>
+																			<button data-orderId="<%= order._id%>" id=""
+																				class=" cancelOrderTrigger btn btn-danger rounded">Cancel
+																				Order</button>
+																			<%}%>
+														</td>
+
+												</tr>
+
+									</tbody>
+									<%})%>
+										<%}else{%>
+											<tr>
+												<dt colspan="5">
+													No orders found.
+
+												</dt>
+											</tr>
+
+											<%}%>
+
+
+								</table>
+
+							</div>
+
+							<div class="pagination-area p-2 ">
+								<nav aria-label="Page navigation example">
+									<ul class="pagination justify-content-center">
+
+										<a class="page-link p-3 text-primary bg-light" href="?page=<%=page+1-1%>"><i
+												class="material-icons md-chevron_left"></i></a>
+
+										<li class="page-item ">
+											<a class="page-link text-primary" href="?page=<%=page+1%>">
+												<%=page+1%>
+											</a>
+										</li>
+
+										<li class="page-item disabled">
+
+											<input disabled class="page-link" type="text" value="<%=total%>" name=""
+												id="">
+										</li>
+
+										<a class="page-link p-3 text-primary bg-light" href="?page=<%=page+1+1%>"><i
+												class="material-icons md-chevron_right"></i></a>
+
+									</ul>
+
+								</nav>
+							</div>
+						</div>
 					</div>
+				</div>
 
-					<%})%>
-				  </td>
-				  
-				  <td class="text-center col-1">₹<%= order.orderAmount || order.orderAmout%>.00</td>
-				  <td class="text-center col-2">
-					<%if(order.paymentStatus == 'Failed' ){%>
-						<span class=" px-4 py-2 rounded-pill" style="font-weight: 400; background-color: rgb(204, 67, 67); color: #e1d8d8;">
-							Payment <%= order.paymentStatus%>
-						  </span>
-					
-					<%}else if(order.orderStatus== 'Delivered'){%>
-					  <span class=" px-4 py-2 rounded-pill" style="font-weight: 400; background-color: rgb(46, 168, 56); color: #e1d8d8;">
-						<%= order.orderStatus%>
-					  </span>
-					   
-					  <%}else if(order.orderStatus== 'Cancelled'){%>
-						<span class=" px-4 py-2 rounded-pill" style="font-weight: 400; background-color: rgb(177, 16, 16); color: #e1d8d8;">
-							<%= order.orderStatus%>
-						</span>
+			</section>
+			<!-- Cancel Order Modal -->
+			<div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel"
+				aria-hidden="true">
+				<div class="modal-dialog modal-dialog-centered">
+					<div class="modal-content">
+						<div class="modal-header bg-dark text-light">
+							<h5 class="modal-title text-white" id="cancelOrderModalLabel">Cancel Order</h5>
+							<button type="button" class=" closeButton btn-close" data-bs-dismiss="modal"
+								aria-label="Close"></button>
+						</div>
+						<div class="modal-body  m-3">
+							<div class="mb-3">
+								<label for="cancelReason" class="form-label">Reason for cancellation</label>
+								<select class="form-select" id="cancelReason" required>
+									<option value="Product is not required anymore">Product is not required anymore
+									</option>
+									<option value="The purchase was fraudulent">The purchase was fraudulent</option>
+									<option value="Merchant shipped the wrong item">Merchant shipped the wrong item
+									</option>
+									<option value="The purchase was fraudulent">The purchase was fraudulent</option>
 
-					  <%}else if(order.orderStatus== 'Out For Delivery'){%>
-						<span class=" px-4 py-2 rounded-pill" style="font-weight: 400; background-color: rgb(18, 163, 163); color: #e1d8d8;">
-							<%= order.orderStatus%>
-						</span>
+									<!-- Add options for cancellation reasons -->
+								</select>
+							</div>
+							<div class="mb-3">
+								<label for="cancelComments" class="form-label">Additional Comments (Optional)</label>
+								<textarea class="form-control" id="cancelComments" rows="3"></textarea>
+							</div>
+						</div>
+						<div class="modal-footer " style="display: flex; justify-content: space-around;">
+							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+							<button type="button" class="closeButton btn btn-danger"
+								id="confirmCancelOrder">Confirm</button>
+						</div>
+					</div>
+				</div>
+			</div>
 
-					  <%}else if(order.orderStatus== 'Pending'){%>
-						<span class=" px-4 py-2 rounded-pill" style="font-weight: 400; background-color: rgb(12, 95, 120); color: #e1d8d8;">
-							<%= order.orderStatus%>
-						</span>
-						
-					  <%}else if(order.orderStatus== 'Shipped'){%>
-					<span class=" px-4 py-2 rounded-pill bg-tertiary" >
-					
-					  <%= order.orderStatus%>
-					</span>
-					<%}else if(order.orderStatus== 'Placed'){%>
-						<span class=" px-4 py-2 rounded-pill bg-primary" style="font-weight: 400; background-color: rgb(101, 15, 32); color: #e1d8d8;">
-						  
-						  <%= order.orderStatus%>
-						</span>
-						<%}%>
-				  </td class="text-center col-2">
-				  <% const formattedDate=order.createdAt.toLocaleString('en-US',
-				  { weekday: 'short' , month: 'short' , day: 'numeric' ,
-				  year: 'numeric' , hour: 'numeric' , minute: 'numeric' ,
-				  second: 'numeric' , hour12: true }); %>
-				  <td><%= formattedDate%></td>
-				  <td class="text-center col-2 ">
-					<%if(order.paymentStatus == 'Failed' || order.paymentStatus == 'Pending' && order.paymentMethod != 'COD' ) {%>
-						<button onclick="retryPayment('<%=order._id%>', '<%=order.paymentMethod%>')"  class=" btn bg-warning rounded"><i class="fa-solid fa-indian-rupee-sign"></i>Retry Payment</button>
-					<%}else if(order.orderStatus== 'Delivered'){%>
-						<button onclick="orderDetails('<%=order._id%>')" class=" btn btn-info rounded">View Details</button>
+			<div class="modal fade" id="returnOrderModal" tabindex="-1" aria-labelledby="returnOrderModalLabel"
+				aria-hidden="true">
+				<div class="modal-dialog modal-dialog-centered">
+					<div class="modal-content">
+						<div class="modal-header bg-dark text-light my-3">
+							<h5 class="modal-title text-white" id="returnOrderModalLabel">Return Order</h5>
+							<button type="button" class="closeButton btn-close" data-bs-dismiss="modal"
+								aria-label="Close"></button>
+						</div>
+						<div class="modal-body m-3">
+							<div class="mb-3">
+								<label for="returnReason" class="form-label">Reason for return</label>
+								<select class="form-select" id="returnReason" required>
+									<option value="Wrong product shipped">Wrong product shipped</option>
+									<option value="Damaged goods">Damaged goods</option>
+									<option value="Item does not match the description">Item does not match the
+										description</option>
+									<option value="Product no longer required">Product no longer required</option>
+								</select>
+							</div>
+							<div class="mb-3">
+								<label for="returnComments" class="form-label">Additional Comments (Optional)</label>
+								<textarea class="form-control" id="returnComments" rows="3"></textarea>
+							</div>
+						</div>
+						<div class="modal-footer " style="display: flex; justify-content: space-around;">
+							<button type="button" class="closeButton btn-close" data-bs-dismiss="modal"
+								aria-label="Close">close</button>
+							<button type="button" class="btn btn-warning" id="confirmReturnOrder">Confirm</button>
+						</div>
+					</div>
+				</div>
+			</div>
 
-						<%}else if(order.orderStatus== 'Cancelled'){%>
 
-							<button disabled class="btn btn-danger rounded" >Order Cancelled</button>
-							<!-- <a href="/api/v1/shop">Continue shopping</a> -->
 
-					<%}else{%>
-					<button data-orderId="<%= order._id%>" id="" class=" cancelOrderTrigger btn btn-danger rounded">Cancel Order</button>
-					<%}%>
-				  </td >
 
-				</tr>
-				
-			  </tbody>
-			  <%})%>
-				<%}else{%>
-					<tr>
-						<dt colspan="5" >
-							No orders found.
 
-						</dt>
-					</tr>
-					
-					<%}%>
-			 
-			
-			</table>
-			
-		  </div>
-		  
-		  <div class="pagination-area p-2 ">
-			<nav aria-label="Page navigation example">
-				<ul class="pagination justify-content-center">
+			<!-- ... Your existing code ... -->
 
-					<a class="page-link p-3 text-primary bg-light" href="?page=<%=page+1-1%>"><i class="material-icons md-chevron_left"></i></a>
+			<!-- ... Your existing code ... -->
 
-					<li class="page-item ">
-						<a class="page-link text-primary" href="?page=<%=page+1%>"><%=page+1%></a>
-					</li>
+			<!-- content-main end// -->
+			<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
-					<li class="page-item disabled">
-						
-						<input disabled class="page-link" type="text" value="<%=total%>" name="" id="">
-					</li>
+			<script>
 
-					<a class="page-link p-3 text-primary bg-light" href="?page=<%=page+1+1%>"><i class="material-icons md-chevron_right"></i></a>
-
-				</ul>
-
-			</nav>
-		</div>
-		</div>
-	  </div>
-	</div>
-	  
-  </section>
-  <!-- Cancel Order Modal -->
-<div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered">
-	  <div class="modal-content">
-		<div class="modal-header bg-dark text-light">
-		  <h5 class="modal-title text-white" id="cancelOrderModalLabel">Cancel Order</h5>
-		  <button  type="button" class=" closeButton btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-		</div>
-		<div class="modal-body  m-3">
-		  <div class="mb-3">
-			<label for="cancelReason" class="form-label">Reason for cancellation</label>
-			<select class="form-select" id="cancelReason" required>
-			  <option value="Product is not required anymore">Product is not required anymore</option>
-			  <option value="The purchase was fraudulent">The purchase was fraudulent</option>
-			  <option value="Merchant shipped the wrong item">Merchant shipped the wrong item</option>
-			  <option value="The purchase was fraudulent">The purchase was fraudulent</option>
-			  
-			  <!-- Add options for cancellation reasons -->
-			</select>
-		  </div>
-		  <div class="mb-3">
-			<label for="cancelComments" class="form-label">Additional Comments (Optional)</label>
-			<textarea class="form-control" id="cancelComments" rows="3"></textarea>
-		  </div>
-		</div>
-		<div class="modal-footer " style="display: flex; justify-content: space-around;">
-		  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-		  <button type="button" class="closeButton btn btn-danger" id="confirmCancelOrder">Confirm</button>
-		</div>
-	  </div>
-	</div>
-  </div>
-  
-  <div class="modal fade" id="returnOrderModal" tabindex="-1" aria-labelledby="returnOrderModalLabel" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered">
-	  <div class="modal-content">
-		<div class="modal-header bg-dark text-light my-3">
-		  <h5 class="modal-title text-white" id="returnOrderModalLabel">Return Order</h5>
-		  <button type="button" class="closeButton btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-		</div>
-		<div class="modal-body m-3">
-		  <div class="mb-3">
-			<label for="returnReason" class="form-label">Reason for return</label>
-			<select class="form-select" id="returnReason" required>
-				<option value="Wrong product shipped">Wrong product shipped</option>
-				<option value="Damaged goods">Damaged goods</option>
-				<option value="Item does not match the description">Item does not match the description</option>
-				<option value="Product no longer required">Product no longer required</option>
-			</select>
-		  </div>
-		  <div class="mb-3">
-			<label for="returnComments" class="form-label">Additional Comments (Optional)</label>
-			<textarea class="form-control" id="returnComments" rows="3"></textarea>
-		  </div>
-		</div>
-		<div class="modal-footer " style="display: flex; justify-content: space-around;">
-			<button type="button" class="closeButton btn-close" data-bs-dismiss="modal" aria-label="Close">close</button>
-		  <button type="button" class="btn btn-warning" id="confirmReturnOrder">Confirm</button>
-		</div>
-	  </div>
-	</div>
-  </div>
-  
-
-  
-  
-
-  <!-- ... Your existing code ... -->
-
-  <!-- ... Your existing code ... -->
-
-  <!-- content-main end// -->
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-
- <script>
-
-	function retryPayment(orderId, paymentMethod) {
-		console.log(orderId, )
-		fetch('/api/v1/retry-order-payment', {
-				method: 'PUT',
-				body: JSON.stringify({ orderId}),
-				headers: {
-					'Content-Type': 'application/json',
-
-				}
-
-			}).then(response => response.json())
-				.then(data => {
-					console.log(data)
-
-					
-					 if (data.success ) {
-						let options = {
-							"key": "" + data.key_id + "",
-							"amount": "" + data.amount + "",
-							"currency": "INR",
-							"name": "Test Transaction",
-							"description": "It is a test Transaction",
-							"image": "https://dummyimage.com//600x400/000/fff",
-							"handler": function (response) {
-								console.log(response, data)
-								verifyRazorPay(response, data);
-							},
-							"prefill": {
-								"contact": "" + data.contact + "",
-								"name": "" + data.name + "",
-								"email": "" + data.email + ""
-							},
-							"notes": {
-								"description": "" + "It si test Description",
-							},
-							"theme": {
-								"color": "#c7a520"
-							}
+				function retryPayment(orderId, paymentMethod) {
+					console.log(orderId,)
+					fetch('/api/v1/retry-order-payment', {
+						method: 'PUT',
+						body: JSON.stringify({ orderId }),
+						headers: {
+							'Content-Type': 'application/json',
 
 						}
 
-						let razorpayObject = new Razorpay(options);
-						razorpayObject.on('payment.failed', (response) => {
-							console.log(response);
-							handleRazorpayFailure(response, data);
-						})
-						razorpayObject.open();
-					}else if(data.error) {
-						Swal.fire({
-							title:'Insufficient balance!',
-							text: data.message,
-							width: '300px',
-							padding: '10px',
-							icon: 'error',
+					}).then(response => response.json())
+						.then(data => {
+							console.log(data)
 
 
-							showConfirmButton: false,
-							timer: 2000,
-						});
-
-
-					}
-
-					function verifyRazorPay(response, data) {
-						let paymentId = response.razorpay_payment_id;
-						let orderId = data.orderId;
-						fetch('orders/razorpay-retry-success', {
-							method: 'PUT',
-							body: JSON.stringify({ paymentId, orderId }),
-							headers: {
-								'Content-Type': 'application/json',
-
-							}
-
-						}).then(response => response.json())
-							.then(data => {
-								console.log(data)
-								Swal.fire({
-									titleText: 'Order placed successfylly',
-									width: '300px',
-									padding: '10px',
-									icon: 'success',
-
-
-									showConfirmButton: false,
-									timer: 1500,
-								});
-								setTimeout(() => {
-									location.href = `/api/v1/order-success?orderId=${data.data._id}`
-
-								}, 1600);
-
-
-							})
-
-						function handleRazorpayFailure(response, data) {
-
-							let orderId = data.orderId;
-							fetch('orders/razorpay-retry-failure', {
-								method: 'PUT',
-								body: JSON.stringify({ orderId }),
-								headers: {
-									'Content-Type': 'application/json',
+							if (data.success) {
+								let options = {
+									"key": "" + data.key_id + "",
+									"amount": "" + data.amount + "",
+									"currency": "INR",
+									"name": "Test Transaction",
+									"description": "It is a test Transaction",
+									"image": "https://dummyimage.com//600x400/000/fff",
+									"handler": function (response) {
+										console.log(response, data)
+										verifyRazorPay(response, data);
+									},
+									"prefill": {
+										"contact": "" + data.contact + "",
+										"name": "" + data.name + "",
+										"email": "" + data.email + ""
+									},
+									"notes": {
+										"description": "" + "It si test Description",
+									},
+									"theme": {
+										"color": "#c7a520"
+									}
 
 								}
 
-							}).then(response => response.json())
-								.then(data => {
-									console.log(data)
-									Swal.fire({
-										titleText: 'Something went wrong',
-										width: '300px',
-										padding: '10px',
-										icon: 'error',
-
-
-										showConfirmButton: false,
-										timer: 1500,
-									});
-									setTimeout(() => {
-										location.href = `api/v1/admin//my-orders/single-orderDetails?id=${data.data._id}`
-
-									}, 1600);
+								let razorpayObject = new Razorpay(options);
+								razorpayObject.on('payment.failed', (response) => {
+									console.log(response);
+									handleRazorpayFailure(response, data);
 								})
+								razorpayObject.open();
+							} else if (data.error) {
+								Swal.fire({
+									title: 'Insufficient balance!',
+									text: data.message,
+									width: '300px',
+									padding: '10px',
+									icon: 'error',
 
 
-						}
+									showConfirmButton: false,
+									timer: 2000,
+								});
+
+
+							}
+
+							function verifyRazorPay(response, data) {
+								let paymentId = response.razorpay_payment_id;
+								let orderId = data.orderId;
+								fetch('orders/razorpay-retry-success', {
+									method: 'PUT',
+									body: JSON.stringify({ paymentId, orderId }),
+									headers: {
+										'Content-Type': 'application/json',
+
+									}
+
+								}).then(response => response.json())
+									.then(data => {
+										console.log(data)
+										Swal.fire({
+											titleText: 'Order placed successfylly',
+											width: '300px',
+											padding: '10px',
+											icon: 'success',
+
+
+											showConfirmButton: false,
+											timer: 1500,
+										});
+										setTimeout(() => {
+											location.href = `/api/v1/order-success?orderId=${data.data._id}`
+
+										}, 1600);
+
+
+									})
+
+								function handleRazorpayFailure(response, data) {
+
+									let orderId = data.orderId;
+									fetch('orders/razorpay-retry-failure', {
+										method: 'PUT',
+										body: JSON.stringify({ orderId }),
+										headers: {
+											'Content-Type': 'application/json',
+
+										}
+
+									}).then(response => response.json())
+										.then(data => {
+											console.log(data)
+											Swal.fire({
+												titleText: 'Something went wrong',
+												width: '300px',
+												padding: '10px',
+												icon: 'error',
+
+
+												showConfirmButton: false,
+												timer: 1500,
+											});
+											setTimeout(() => {
+												location.href = `api/v1/admin//my-orders/single-orderDetails?id=${data.data._id}`
+
+											}, 1600);
+										})
+
+
+								}
+
+							}
+						})
+
+
+
+				}
+
+
+
+				function orderDetails(id) {
+					window.location.href = 'api/v1/admin/my-orders/single-orderDetails?id=' + id;
+				}
+
+				document.addEventListener('DOMContentLoaded', function () {
+					// Get modal elements
+					var cancelOrderModal = document.getElementById('cancelOrderModal');
+
+
+					// Get buttons to trigger modals
+					var cancelOrderButton = document.getElementById('confirmCancelOrder');
+
+
+					// Example trigger events
+					// Replace these with your own trigger logic
+					var cancelOrderTrigger = document.querySelectorAll('.cancelOrderTrigger');
+
+
+					document.querySelectorAll('.closeButton').forEach(item => {
+						item.addEventListener('click', () => {
+
+							cancelOrderModal.classList.remove('show');
+							document.body.classList.remove('modal-open');
+						})
+
+					})
+					// Function to open cancel order modal
+					function openCancelOrderModal() {
+						cancelOrderModal.classList.add('show');
+						cancelOrderModal.style.display = 'block';
+						document.body.classList.add('modal-open');
+
 
 					}
-				})
+					// Example trigger events
+					// Replace these with your own trigger logic
+					var cancelOrderTrigger = document.querySelectorAll('.cancelOrderTrigger');
 
 
-		
-	}
+					cancelOrderTrigger.forEach(item => {
+						item.addEventListener('click', () => {
+							openCancelOrderModal()
+
+							// Add event listener to cancel order button
+							cancelOrderButton.addEventListener('click', function () {
+								var reason = document.getElementById('cancelReason').value;
+								var comments = document.getElementById('cancelComments').value;
+								let id = item.getAttribute("data-orderId");
+
+								fetch('/api/v1/order-cancel', {
+									method: "PUT",
+									body: JSON.stringify({
+										reason,
+										comments,
+										id,
+									}),
+									headers: {
+										'Content-Type': 'application/json',
+
+									}
+
+								}).then(response => response.json())
+									.then(response => {
+										console.log(response);
+										if (response.success == true) {
+										Swal.fire({
+											titleText: 'Success',
+											width: '300px',
+											padding: '10px',
+											icon: 'success',
+
+
+											showConfirmButton: false,
+											timer: 1500,
+										});
+										setTimeout(() => {
+											window.location.reload(true)
+
+										}, 1600);
+										
+											
+										}
+									})
+							});
+
+
+						});
+
+					});
+
+					cancelOrderModal.classList.remove('show');
+					document.body.classList.remove('modal-open');
+				});
 
 
 
-	function orderDetails(id) {
-		window.location.href = 'api/v1/admin/my-orders/single-orderDetails?id='+id;
-	}
 
-	document.addEventListener('DOMContentLoaded', function () {
-  // Get modal elements
-  var cancelOrderModal = document.getElementById('cancelOrderModal');
+			</script>
+		</main>
 
+		<script src="/assets/js/vendors/jquery-3.6.0.min.js"></script>
+		<script src="/assets/js/vendors/bootstrap.bundle.min.js"></script>
+		<script src="/assets/js/vendors/select2.min.js"></script>
+		<script src="/assets/js/vendors/perfect-scrollbar.js"></script>
+		<script src="/assets/js/vendors/jquery.fullscreen.min.js"></script>
+		<!-- // sweat alert -->
+		<script src="/node_modules/sweetalert2/dist/sweetalert2.all.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+		<script src="/https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+			integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+			crossorigin="anonymous"></script>
 
-  // Get buttons to trigger modals
-  var cancelOrderButton = document.getElementById('confirmCancelOrder');
-
-
-  // Example trigger events
-  // Replace these with your own trigger logic
-  var cancelOrderTrigger = document.querySelectorAll('.cancelOrderTrigger');
-
-
-  document.querySelectorAll('.closeButton').forEach(item => {
-	item.addEventListener('click' ,() => {
-	
-	cancelOrderModal.classList.remove('show');
-    document.body.classList.remove('modal-open');
-  })
-  
-})
-  // Function to open cancel order modal
-  function openCancelOrderModal() {
-    cancelOrderModal.classList.add('show');
-    cancelOrderModal.style.display = 'block';
-    document.body.classList.add('modal-open');
+		<!-- Main Script -->
+		<script src="assets/js/main.js?v=1.1" type="text/javascript"></script>
+		<%- include('../partials/userFooter') -%>
+			<!-- Plugins JS File -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/bootstrap.bundle.min.js"></script>
+			<script src="assets/js/jquery.hoverIntent.min.js"></script>
+			<script src="assets/js/jquery.waypoints.min.js"></script>
+			<script src="assets/js/superfish.min.js"></script>
+			<script src="assets/js/owl.carousel.min.js"></script>
+			<!-- Main JS File -->
+			<script src="assets/js/main.js"></script>
+	</body>
 
 
-  }
-  // Example trigger events
-  // Replace these with your own trigger logic
-  var cancelOrderTrigger = document.querySelectorAll('.cancelOrderTrigger');
+	<!-- molla/dashboard.html  22 Nov 2019 10:03:13 GMT -->
 
-
-  cancelOrderTrigger.forEach(item => {
-	item.addEventListener('click', () => {
-		openCancelOrderModal()
-
-	// Add event listener to cancel order button
-	cancelOrderButton.addEventListener('click', function () {
-    var reason = document.getElementById('cancelReason').value;
-    var comments = document.getElementById('cancelComments').value;
-	let id = item.getAttribute("data-orderId");
-
-	fetch('/api/v1/order-cancel',{
-		method:"PUT",
-		body: JSON.stringify({
-			reason,
-			comments,
-			id,
-		}),
-        headers: {
-          'Content-Type': 'application/json',
-
-     }
-
-	}).then(response=> response.json())
-	.then(response => {
-		console.log(response);
-		if(response.success== true) {
-			window.location.reload(true)
-		}
-	})
-});
-
-
-});
- 
-});
-
-    cancelOrderModal.classList.remove('show');
-    document.body.classList.remove('modal-open');
-  });
-
-
-  
-
- </script>
-</main>
-
-<script src="/assets/js/vendors/jquery-3.6.0.min.js"></script>
-<script src="/assets/js/vendors/bootstrap.bundle.min.js"></script>
-<script src="/assets/js/vendors/select2.min.js"></script>
-<script src="/assets/js/vendors/perfect-scrollbar.js"></script>
-<script src="/assets/js/vendors/jquery.fullscreen.min.js"></script>
-<!-- // sweat alert -->
-<script src="/node_modules/sweetalert2/dist/sweetalert2.all.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script
-  src="/https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-  integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-  crossorigin="anonymous"
-></script>
-
-<!-- Main Script -->
-<script src="assets/js/main.js?v=1.1" type="text/javascript"></script>
-	<%- include('../partials/userFooter') -%>
-<!-- Plugins JS File -->
-<script src="assets/js/jquery.min.js"></script>
-<script src="assets/js/bootstrap.bundle.min.js"></script>
-<script src="assets/js/jquery.hoverIntent.min.js"></script>
-<script src="assets/js/jquery.waypoints.min.js"></script>
-<script src="assets/js/superfish.min.js"></script>
-<script src="assets/js/owl.carousel.min.js"></script>
-<!-- Main JS File -->
-<script src="assets/js/main.js"></script>
-</body>
-
-
-<!-- molla/dashboard.html  22 Nov 2019 10:03:13 GMT -->
-</html>
+	</html>

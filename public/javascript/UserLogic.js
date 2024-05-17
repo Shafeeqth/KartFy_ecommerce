@@ -57,9 +57,10 @@ function addToCartFromWishlist(id) {
                     showConfirmButton: false,
                     timer: 1500,
                 });
+                const removeAudio = document.getElementById('remove-audio')
+                if (removeAudio) removeAudio.play();
                 setTimeout(() => {
-                    const removeAudio = document.getElementById('remove-audio')
-                        if (removeAudio) removeAudio.play();
+                   
                     $('#Reload').load('/api/v1/wishlist #Reload', null, () => {
                         
 
