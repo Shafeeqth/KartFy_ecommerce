@@ -324,6 +324,11 @@ const addToCart = asyncHandler(async (req, res, next) => {
 
 })
 
+const checkoutValidator = asyncHandler(async (req, res, next) => {
+    req.session.allowCheckout = true,
+     res.redirect('/api/v1/checkout')
+})
+
 
 const removeFromCart = asyncHandler(async (req, res, next) => {
 
@@ -919,6 +924,7 @@ module.exports = {
     editAddress,
     changePassword,
     changeUserDetails,
+    checkoutValidator,
 
 
     findDeliveryCharge,

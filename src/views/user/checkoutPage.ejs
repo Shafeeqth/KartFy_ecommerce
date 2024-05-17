@@ -1,5 +1,17 @@
 <%- include('../partials/userHeader')%>
 	<script>
+		if(!sessionStorage.getItem('allowedToCheckout')) {
+			window.location.href = '/api/v1/cart'
+		}else {
+			sessionStorage.removeItem('allowedToCheckout');
+		}
+		// window.addEventListener('beforeunload', (e) => hideSpinner())
+		
+		
+
+			function hideSpinner() {
+				document.getElementById('spinner-overlay').style.display = 'none';
+			}
 		function placeOrder() {
 			checkCouponValid()
 
@@ -7,11 +19,6 @@
 			function showSpinnner() {
 				document.getElementById('spinner-overlay').style.display = 'flex';
 			}
-
-			function hideSpinner() {
-				document.getElementById('spinner-overlay').style.display = 'none';
-			}
-
 
 
 			let payment = document.getElementsByName('paymentMethod');
@@ -23,7 +30,6 @@
 
 			if (paymentMethod == 'PayPal') {
 				showSpinnner()
-				// hideSpinner()
 				return true
 			}
 
@@ -662,7 +668,7 @@
 
 											<tr class="summary-subtotal">
 												<td>Subtotal:</td>
-												<td>₹<%=cartData.cartTotal - (cartData?.coupon?.discount ?
+												<td>₹<%=cartData.cartTotal ?? 0 - (cartData?.coupon?.discount ?
 														cartData?.coupon?.discount: 0) %>.00</td>
 
 

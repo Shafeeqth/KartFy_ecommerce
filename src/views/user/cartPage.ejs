@@ -361,6 +361,7 @@
    
 </body>
 <script>
+	sessionStorage.setItem('allowedToCheckout', 'true')
 
 	function proceedToCheckout(event) {
 		event.preventDefault()
@@ -401,7 +402,7 @@
 
 				}
 				if(data.success) {
-					location.href = "/api/v1/checkout"
+					location.href = "/api/v1/start-checkout"
 
 				}
 			})

@@ -29,25 +29,18 @@ const loadHome = asyncHandler(async (req, res) => {
 
 const loadShop = asyncHandler(async (req, res) => {
     console.log(req.query)
-
-
-
     let user = req.session.user ? req.session.user : null;
-    
-
     let page = parseInt(req.query.page) -1 || 0;
     let limit = parseInt(req.query.limit) || 15;
     let category =  (Array.isArray(req.query.Category) ? req.query.Category : req.query.Category?.split(' '));
     let size = req.query.size || [];
     let gender = (Array.isArray(req.query.Gender) ? req.query.Gender : req.query.Gender?.split(' '));
     let brand = (Array.isArray(req.query.Brands) ? req.query.Brands : req.query.Brands?.split(' '));
-    console.log('gnede', gender, 'brand', brand, 'categ', category)
     let categor = [];
     if(gender)categor.push({'product.category.Gender':{$in: gender }});
     if(category)categor.push({'product.category.Category': {$in:category}})
     if(brand)categor.push({'product.category.Brands':{$in: brand}})
-    let matchValue = {};
-   
+    let matchValue = {}; 
     let sort = req.query.sort?.trim() || ''
 
     let search =req.query.search ?String( req.query.search).trim() : ''
@@ -148,7 +141,7 @@ const loadWishlist = asyncHandler(async (req, res) => {
 
 const loadCart = asyncHandler(async (req, res) => {
     
-
+  
     let user = req.session.user ? req.session.user : null;
     let cart = await Cart.findOne({ user }).populate('products.product');
     console.log((cart))
@@ -159,6 +152,20 @@ const loadCart = asyncHandler(async (req, res) => {
 })
 
 const loadCheckout = asyncHandler(async (req, res) => {
+    // if(! req.session.allowedToCheckout) {
+    //     return res.status(401)
+    //     .redirect('/api/v1/')
+
+    // }
+    const referrer = req.get('Referrer');
+    console.log(referrer)
+    if (!referrer || !referrer.includes('/cart')) {
+        console.log('comes here');
+        return res.status(401)
+        .redirect('/api/v1/')
+      
+    }
+
 
     let user = req.session.user ? req.session.user : null;
 
@@ -173,6 +180,7 @@ const loadCheckout = asyncHandler(async (req, res) => {
         res.render('user/checkoutPage', { user, cartData, address, coupons, wallet });
 
     }
+    
 
 
 
@@ -339,6 +347,8 @@ const loadWallet = asyncHandler( async (req, res) => {
 
 
 
+
+
 module.exports = {
     loadHome,
 
@@ -353,6 +363,7 @@ module.exports = {
     loadOrderSuccess,
    
     loadWallet
+    
     
 
 

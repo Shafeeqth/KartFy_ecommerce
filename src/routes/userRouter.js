@@ -79,7 +79,7 @@ router.delete('/remove-wishlist', userMiddleware.isUserAutharized, userMiddlewar
 /* ===================================Cart===================================================== */
 
 // Get user cart Page
-router.get('/cart',userMiddleware.isUserAutharized, userMiddleware.isUserAutharized, userController.loadCart);
+router.get('/cart',userMiddleware.isUserAutharized, userController.loadCart);
 
 // Add product to cart 
 router.post('/add-cart',  userMiddleware.addToCart);
@@ -91,7 +91,7 @@ router.put('/update-cart', userMiddleware.isUserAutharized, userMiddleware.updat
 // Remove from cart
 router.delete('/remove-cart', userMiddleware.isUserAutharized, userMiddleware.removeFromCart);
 
-router.post('/find-delivery-charge', userMiddleware.findDeliveryCharge)
+router.post('/find-delivery-charge', userMiddleware.isUserAutharized, userMiddleware.findDeliveryCharge)
 
 
 
@@ -107,16 +107,16 @@ router.get('/product-detail', userController.loadProductDetail );
 
 
 /* ===============================Checkout======================================================= */
-
+router.get('/start-checkout', userMiddleware.checkoutValidator)
 // load checkout page
 router.get('/checkout',  userMiddleware.isUserAutharized, userController.loadCheckout);
 
 //add address of users
-router.post('/apply-coupon', userMiddleware.addCoupon);
+router.post('/apply-coupon', userMiddleware.isUserAutharized, userMiddleware.addCoupon);
 
 
 //add address of users
-router.put('/remove-coupon', userMiddleware.removeCoupon);
+router.put('/remove-coupon', userMiddleware.isUserAutharized, userMiddleware.removeCoupon);
 
 
 
@@ -126,17 +126,17 @@ router.put('/remove-coupon', userMiddleware.removeCoupon);
 /* ================================orders ======================================================= */
 
 
-router.get('/check-valid-coupon', userOrderController.checkValidCoupon)
+router.get('/check-valid-coupon', userMiddleware.isUserAutharized, userOrderController.checkValidCoupon)
 
 // Get orders
-router.get('proceed-to-checkout', userOrderController.proceedtToCheckout)
+router.get('proceed-to-checkout', userMiddleware.isUserAutharized, userOrderController.proceedtToCheckout)
 
 router.get('/my-orders',userMiddleware.isUserAutharized, userOrderController.loadMyOrders);
 
 //Load order details
 router.get('/my-orders/single-orderDetails', userMiddleware.isUserAutharized, userOrderController.loadSingleOrderDetails);
 
-router.post('/my-orders/single-orderDetails/order-invoice-download', userOrderController.downloadOrderInvoice)
+router.post('/my-orders/single-orderDetails/order-invoice-download', userMiddleware.isUserAutharized, userOrderController.downloadOrderInvoice)
 
 // confirm order
 router.post('/order-place', userMiddleware.isUserAutharized, userOrderController.orderConfirm);
@@ -148,35 +148,35 @@ router.get('/order-success', userMiddleware.isUserAutharized, userController.loa
 router.put('/order-cancel', userMiddleware.isUserAutharized, userOrderController.orderCancel);
 
 // load review of product
-router.post('/product-review', userOrderController.orderProductReview  );
+router.post('/product-review', userMiddleware.isUserAutharized, userOrderController.orderProductReview  );
 
 //sumbit return page
-router.post('orders/order-return', userOrderController.orderReturn  );
+router.post('orders/order-return', userMiddleware.isUserAutharized, userOrderController.orderReturn  );
 
 
 /*==================================E-payment================================================= */
 
 //RazorPay success
-router.put('/orders/razorpay-success', userOrderController.razorpaySuccess)
+router.put('/orders/razorpay-success', userMiddleware.isUserAutharized, userOrderController.razorpaySuccess)
 
 
 //RazorPay failure
-router.put('/orders/razorpay-failure', userOrderController.razorpayFailure)
+router.put('/orders/razorpay-failure', userMiddleware.isUserAutharized, userOrderController.razorpayFailure)
 
 
 //RazorPay success
-router.get('/orders/paypal-success', userOrderController.paypalSuccess)
+router.get('/orders/paypal-success', userMiddleware.isUserAutharized, userOrderController.paypalSuccess)
 
 
 //RazorPay failure
-router.get('/orders/paypal-failure', userOrderController.paypalFailure)
+router.get('/orders/paypal-failure', userMiddleware.isUserAutharized, userOrderController.paypalFailure)
 
 
-router.put('/retry-order-payment', userOrderController.retryOrderPay);
+router.put('/retry-order-payment', userMiddleware.isUserAutharized, userOrderController.retryOrderPay);
 
-router.put('/orders/razorpay-retry-failure', userOrderController.retryPaymentFailure)
+router.put('/orders/razorpay-retry-failure', userMiddleware.isUserAutharized, userOrderController.retryPaymentFailure)
 
-router.put('/orders/razorpay-retry-success', userOrderController.retryPaymentSuccess)
+router.put('/orders/razorpay-retry-success', userMiddleware.isUserAutharized, userOrderController.retryPaymentSuccess)
 
 
 
@@ -206,7 +206,7 @@ router.put('/profile/change-password', userMiddleware.isUserAutharized, userMidd
 
 router.put('/profile/change-user-details', userMiddleware.isUserAutharized, userMiddleware.changeUserDetails)
 
-router.get('/profile/wallet', userController.loadWallet)
+router.get('/profile/wallet', userMiddleware.isUserAutharized, userController.loadWallet)
 
 
 module.exports = router;
