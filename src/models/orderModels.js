@@ -200,7 +200,7 @@ const reviewShcema = mongoose.Schema({
         ref: 'Product',
 
     },rating:{
-        type: String,
+        type: Number,
         required: true,
 
     },user:{
@@ -215,11 +215,7 @@ const reviewShcema = mongoose.Schema({
         type: String,
         required: false,
     },
-    reviewedAt: {
-        type: Date,
-        default: Date.now(),
-    }
-
+    
 },
 {
     timestamps: true

@@ -18,10 +18,10 @@ const Banner = require('../models/bannerModel');
 
 const loadHome = asyncHandler(async (req, res) => {
     let user = req.session.user ? req.session.user : null;
-    let banners = await Banner.find({isListed: true})
+    let banners = await Banner.find({ isListed: true })
     console.log(banners)
 
-    res.status(200).render('user/homePage', { user ,banners});
+    res.status(200).render('user/homePage', { user, banners });
 
 
 })
@@ -29,118 +29,72 @@ const loadHome = asyncHandler(async (req, res) => {
 
 const loadShop = asyncHandler(async (req, res) => {
 
-    let inventories = await Inventory.aggregate([
-        {
-            $lookup: {
-                from: 'products', // The collection name in MongoDB (plural of the model name)
-                localField: 'product',
-                foreignField: '_id',
-                as: 'productDetails'
-            }
-        },
-        {
-            $unwind: '$productDetails' // Unwind the array to include product details
-        },
-        {
-            $addFields: {
-                totalStock1: { 
-                    $sum: '$sizeVariant.stock' // Sum up all the stock values
-                }
-            }
-        },
-        // {
-        //     $project: {
-        //         product: 1,
-        //         sizeVariant: 1,
-        //         totalStock: 1,
-        //         'productDetails.title': 1,
-        //         'productDetails.category': 1,
-        //         'productDetails.mrpPrice': 1,
-        //         'productDetails.price': 1,
-        //         'productDetails.description': 1,
-        //         'productDetails.color': 1,
-        //         'productDetails.images': 1,
-        //         'productDetails.isListed': 1,
-        //         'productDetails.soldCount': 1,
-        //         'productDetails.avgRating': 1,
-        //         'productDetails.createdAt': 1,
-        //         'productDetails.updatedAt': 1
-        //     }
-        // }
-    ]);
-    return console.log(inventories)
+
     console.log(req.query)
     let user = req.session.user ? req.session.user : null;
-    let page = parseInt(req.query.page) -1 || 0;
+    let page = parseInt(req.query.page) - 1 || 0;
     let limit = parseInt(req.query.limit) || 15;
-    let category =  (Array.isArray(req.query.Category) ? req.query.Category : req.query.Category?.split(' '));
+    let category = (Array.isArray(req.query.Category) ? req.query.Category : req.query.Category?.split(' '));
     let size = req.query.size || [];
     let gender = (Array.isArray(req.query.Gender) ? req.query.Gender : req.query.Gender?.split(' '));
     let brand = (Array.isArray(req.query.Brands) ? req.query.Brands : req.query.Brands?.split(' '));
     let categor = [];
-    if(gender)categor.push({'product.category.Gender':{$in: gender }});
-    if(category)categor.push({'product.category.Category': {$in:category}})
-    if(brand)categor.push({'product.category.Brands':{$in: brand}})
-    let matchValue = {}; 
+    if (gender) categor.push({ 'products.category.Gender': { $in: gender } });
+    if (category) categor.push({ 'products.category.Category': { $in: category } })
+    if (brand) categor.push({ 'products.category.Brands': { $in: brand } })
+    let matchValue = {};
     let sort = req.query.sort?.trim() || ''
 
-    let search =req.query.search ?String( req.query.search).trim() : ''
-     search ? (search = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')): (search = '')
-    if(gender ||category|| brand) {
+    let search = req.query.search ? String(req.query.search).trim() : ''
+    search ? (search = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) : (search = '')
+    if (gender || category || brand) {
         matchValue = {
             $or: categor
         }
-        
     }
+    if (sort == 'high to Low') {
+        sort = { 'products.price': -1 }
+    } else if (sort == 'low-to-High') sort = { 'products.price': 1 }
+    else if (sort == 'date') sort = { 'products.createdAt': -1 }
+    else if (sort == 'rating' || sort == '') sort = { 'products.avgRating': -1 }
 
 
-    if(sort == 'high to Low') {
-        sort = { 'product.price': -1}
-    }else if(sort == 'low-to-High') sort = { 'product.price': 1}
-    else if(sort == 'date') sort = { 'product.createdAt': -1}
-    else if(sort == 'rating' || sort == '') sort = { 'product.avgRating': -1}
-
-    
-    
-
-    
-
-    let categories = await Category.find({isListed: true})
- 
-
-    
+    let categories = await Category.find({ isListed: true })
 
     let inventory = await Inventory.aggregate([
         {
             $lookup: {
-                from: 'products', 
+                from: 'products',
                 localField: 'product',
                 foreignField: '_id',
-                as: 'product'
+                as: 'products',
+                pipeline: [
+                    {
+                        $match: {
+                            isListed: true
+                        }
+                    }
+                ]
             }
         },
         {
-            $match: {
-                'product.isListed': true
+            $lookup: {
+                from: 'reviews',
+                localField: 'product',
+                foreignField: 'product',
+                as: 'reviews'
             }
         },
         {
-            $unwind: '$product'
+            $unwind: '$products'
         },
         {
             $match: matchValue
         },
         {
             $match: {
-                'product.title': { $regex: search, $options: "i" },
+                'products.title': { $regex: search, $options: "i" },
 
-            }
-        },
-        {
-            $addFields: {
-                category: {
-                    $first: "$product.category.Gender"
-                }
             }
         },
         {
@@ -151,14 +105,52 @@ const loadShop = asyncHandler(async (req, res) => {
         },
         {
             $limit: limit
+        },
+        {
+            $addFields: {
+                totalStock: {
+                    $sum: '$sizeVariant.stock'
+                },
+                reviewAvg: {
+                    $avg: '$reviews.rating'
+
+                },
+                category: {
+                    $first: "$products.category.Gender"
+                }
+
+
+            }
+        },
+        {
+            $project: {
+                reviewCount: { $size: '$reviews' },
+                reviewAvg: 1,
+                sizeVariant: 1,
+                totalStock: 1,
+                category: 1,
+                'products._id': 1,
+                'products.title': 1,
+                'products.category': 1,
+                'products.mrpPrice': 1,
+                'products.price': 1,
+                'products.description': 1,
+                'products.color': 1,
+                'products.images': 1,
+                'products.isListed': 1,
+                'products.soldCount': 1,
+                'products.avgRating': 1,
+                'products.createdAt': 1,
+                'products.updatedAt': 1
+            }
         }
-        
-    ])
-    
+    ]);
+    console.log(inventory)
+
 
     let count = await Product.countDocuments()
-    
-    res.render('user/shopPage', { user, inventory, count , categories});
+
+    res.render('user/shopPage', { user, inventory, count, categories });
 
 
 
@@ -172,7 +164,7 @@ const loadWishlist = asyncHandler(async (req, res) => {
     let wishlist = await Wishlist.find({ user: user._id }).populate('product');
     console.log('wishlist', wishlist);
 
-        res.render('user/wishlistPage', { user, wishlist });
+    res.render('user/wishlistPage', { user, wishlist });
 
 
 
@@ -181,8 +173,8 @@ const loadWishlist = asyncHandler(async (req, res) => {
 })
 
 const loadCart = asyncHandler(async (req, res) => {
-    
-  
+
+
     let user = req.session.user ? req.session.user : null;
     let cart = await Cart.findOne({ user }).populate('products.product');
     console.log((cart))
@@ -198,37 +190,37 @@ const loadCheckout = asyncHandler(async (req, res) => {
     //     .redirect('/api/v1/')
 
     // }
-    const referrer = req.get('Referrer');
-    console.log(referrer)
-    if (!referrer || !referrer.includes('/cart')) {
-        console.log('comes here');
-        return res.status(401)
-        .redirect('/api/v1/')
-      
-    }
+    // const referrer = req.get('Referrer');
+    // console.log(referrer)
+    // if (!referrer || !referrer.includes('/cart')) {
+    //     console.log('comes here');
+    //     return res.status(401)
+    //     .redirect('/api/v1/')
+
+    // }
 
 
     let user = req.session.user ? req.session.user : null;
 
     if (user) {
-        let cartData = await Cart.findOne({ user }).populate('products.product') 
+        let cartData = await Cart.findOne({ user }).populate('products.product')
         cartData = cartData ?? []
         let address = await Address.find({ user });
         address = address ?? []
-        let coupons = await Coupon.find({isListed: true})
-        let wallet = await Wallet.findOne({user:user._id}).select('balance');
+        let coupons = await Coupon.find({ isListed: true })
+        let wallet = await Wallet.findOne({ user: user._id }).select('balance');
         coupons = coupons ?? []
         res.render('user/checkoutPage', { user, cartData, address, coupons, wallet });
 
     }
-    
+
 
 
 
 })
 
 const loadProductDetail = asyncHandler(async (req, res) => {
-    
+
     let productId = req.query['id'];
     console.log(productId)
 
@@ -242,50 +234,141 @@ const loadProductDetail = asyncHandler(async (req, res) => {
         },
         {
             $lookup: {
-                from: 'reviews',
+                from: 'products',
                 localField: 'product',
+                foreignField: '_id',
+                as: 'product'
+            }
+
+        },       
+        {
+            $lookup: {
+                from: 'reviews',
+                localField: 'product._id',
                 foreignField: 'product',
-                 as: 'reviews',
-                 pipeline: [
+                as: 'reviews',
+                pipeline: [
                     {
                         $lookup: {
                             from: 'users',
                             localField: 'user',
                             foreignField: '_id',
-                             as: 'user',
-                             pipeline: [{
-                                
+                            as: 'user',
+                            pipeline: [{
+
                                 $project: {
                                     name: 1
                                 }
-                        }]
-                
+                            }]
+
                         }
-            
+
                     },
-                 ]
-    
+                ]
+
+            }
+        },
+       
+        {
+            $lookup: {
+                from: 'offers',
+                localField: 'product._id',
+                foreignField: 'productIds',
+                as: 'productOffer',
+                pipeline: [
+                    {
+                        $match: {
+                            isListed: true
+                        }
+                    }
+                ]
             }
         },
         {
-        $lookup: {
-             from: 'products',
-             localField: 'product',
-             foreignField: '_id',
-             as: 'product'
-             }
-        
+            $lookup: {
+                from: 'offers',
+                localField: 'product.category.Category',
+                foreignField: 'appliedCategory',
+                as: 'categoryOffer',
+                pipeline: [
+                    {
+                        $match: {
+                            isListed: true
+                        }
+                    }
+                ]
+            }
+
+
         },
         {
             $unwind: '$product'
+        },
+        {
+            $addFields: {
+                shouldUnwindCategory: {
+                    $cond: [{
+                        $eq: [{
+                            $size: '$categoryOffer' },0]
+                    },
+                    false,
+                    true
+                ]
+                },
+                shouldUnwindProduct: {
+                    $cond: [{
+                        $eq: [{
+                            $size: '$productOffer'},0]
+                    },
+                    false,
+                    true
+                ]
+                }
+            }
+
+        },
+        {
+            $unwind: {
+                path: '$productOffer',
+                preserveNullAndEmptyArrays: true
+            },
+        },
+        {
+            $unwind: {
+                path: '$categoryOffer',
+                preserveNullAndEmptyArrays: true,
+            }
+
+        },
+        {
+            $addFields: {
+                reviewAvg: {
+                    $avg: '$reviews.rating'
+                },
+                totalStock: {
+                    $sum: '$sizeVariant.stock'
+
+                },
+                categoryPrice: {
+                    $subtract: ['$product.price',
+                        {
+                            $multiply:['$product.price', 
+                                {
+                                    $divide: ['$categoryOffer.discount', 100]
+                                }
+                            ]
+                        }
+                    ]
+
+                }
+            }
         }
-       
-        ])
 
-    // console.log(product.product.productReviews)
-    const sizeVariant = JSON.stringify(product[0].sizeVariant)
+    ])
 
-    res.status(200).render('user/productDetail', { user, product :product[0],sizeVariant });
+
+    console.log( product)
+    res.status(200).render('user/productDetail', { user, product: product[0] });
 
 
 
@@ -296,7 +379,7 @@ const loadProfile = asyncHandler(async (req, res, next) => {
 
     let user = req.session.user ? req.session.user : null;
     if (user) {
-        let wallet = await Wallet.findOne({user: user._id }).populate('user')
+        let wallet = await Wallet.findOne({ user: user._id }).populate('user')
         wallet.transactions.sort((a, b) => b.date - a.date)
         let userProfile = await User.aggregate([
             {
@@ -304,7 +387,7 @@ const loadProfile = asyncHandler(async (req, res, next) => {
                     email: user.email
                 }
             },
-           
+
             {
                 $lookup: {
                     from: 'addresses',
@@ -322,8 +405,8 @@ const loadProfile = asyncHandler(async (req, res, next) => {
         console.log(userProfile)
         res.render("user/userProfile", { user, userProfile: userProfile[0], wallet })
     }
-       
-    
+
+
 
 
 })
@@ -343,21 +426,21 @@ const editAddress = asyncHandler(async (req, res) => {
 
         let address = await Address.findById({ _id: id })
     }
-   
+
 })
 
 const loadOrderSuccess = asyncHandler(async (req, res) => {
-    
+
     let orderId = req.query['orderId'];
     let user = req.session?.user ?? null
-    res.locals.orderId = orderId ;
+    res.locals.orderId = orderId;
     let currentOrder = await Order.findById({
         _id: orderId
     })
         .populate('user')
         .populate('address')
 
-    res.render('user/orderSuccess', { user, currentOrder,orderId })
+    res.render('user/orderSuccess', { user, currentOrder, orderId })
 
 
 })
@@ -365,11 +448,11 @@ const loadOrderSuccess = asyncHandler(async (req, res) => {
 
 
 
-const loadWallet = asyncHandler( async (req, res) => {
+const loadWallet = asyncHandler(async (req, res) => {
     let user = req.session.user ?? null;
-    
-    
-    res.render('user/userWallet', {user, wallet} )
+
+
+    res.render('user/userWallet', { user, wallet })
 })
 
 
@@ -399,10 +482,10 @@ module.exports = {
     loadAddAddress,
     editAddress,
     loadOrderSuccess,
-   
+
     loadWallet
-    
-    
+
+
 
 
 

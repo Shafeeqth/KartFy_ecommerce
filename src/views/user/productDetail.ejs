@@ -99,15 +99,20 @@
 
                                     <div class="ratings-container">
                                         <div class="ratings">
-                                            <div class="ratings-val" style="width: <%=(product.product.avgRating / 5) * 100%>%;"></div><!-- End .ratings-val -->
+                                            <div class="ratings-val" style="width: <%=product.reviewAvg ? ((product.reviewAvg / 5) * 100): 0%>%;"></div><!-- End .ratings-val -->
                                         </div><!-- End .ratings -->
                                         <a class="ratings-text" href="#product-review-link" id="review-link"><%=product.reviews?.length || 0%></a>
                                     </div><!-- End .rating-container -->
 
                                     <div class="product-price">
-                                        
+                                        <%if(product.product.price >= product.product.mrpPrice){%>
+                                            <span class="new-price">₹ <%= product.product.price %>.00</span>
+                                            <%}else{%>
+
                                         <span class="new-price">₹ <%= product.product.price %>.00</span>
                                         <span class="old-price">₹ <%= product.product.mrpPrice %>.00</span>
+                                        <span class="text-success mx-2"><%= Math.ceil(((product.product.mrpPrice - product.product.price)/(product.product.mrpPrice) ) * 100 ) %>% OFF</span>
+                                        <%}%>
                                     </div><!-- End .product-price -->
                                   
 
@@ -117,7 +122,7 @@
                                     <div class="details-filter-row details-row-size my-4">
                                         <label for="size">Size:</label>
                                         <div class="select-custom">
-                                            <select name="size<%=product.product._id%>" id="size<%=product.product._id%>" onchange="productStock(event,'<%=sizeVariant%>')" class="form-control">
+                                            <select name="size<%=product.product._id%>" id="size<%=product.product._id%>" onchange="productStock(event,'')" class="form-control">
                                                 
                                                 <option selected value="Small">Small</option>
                                                 <option value="Medium">Medium</option>
@@ -193,8 +198,8 @@
                                 <a class="nav-link" id="product-review-link" data-toggle="tab" href="#product-review-tab" role="tab" aria-controls="product-review-tab" aria-selected="false">Reviews (<%=product.reviews?.length || 0%>)</a>
                             </li>
                         </ul>
-                        <div class="tab-content">
-                            <div class="tab-pane fade show active" id="product-desc-tab" role="tabpanel" aria-labelledby="product-desc-link">
+                        <div class="tab-content ">
+                            <div class="tab-pane fade show active m-3" id="product-desc-tab" role="tabpanel" aria-labelledby="product-desc-link">
                                 <div class="product-desc-content">
                                     <h3>Product Information</h3>
                                     <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Donec odio. Quisque volutpat mattis eros. Nullam malesuada erat ut turpis. Suspendisse urna viverra non, semper suscipit, posuere a, pede. Donec nec justo eget felis facilisis fermentum. Aliquam porttitor mauris sit amet orci. Aenean dignissim pellentesque felis. Phasellus ultrices nulla quis nibh. Quisque a lectus. Donec consectetuer ligula vulputate sem tristique cursus. </p>
@@ -207,7 +212,7 @@
                                     <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Donec odio. Quisque volutpat mattis eros. Nullam malesuada erat ut turpis. Suspendisse urna viverra non, semper suscipit, posuere a, pede. Donec nec justo eget felis facilisis fermentum. Aliquam porttitor mauris sit amet orci. Aenean dignissim pellentesque felis. Phasellus ultrices nulla quis nibh. Quisque a lectus. Donec consectetuer ligula vulputate sem tristique cursus. </p>
                                 </div><!-- End .product-desc-content -->
                             </div><!-- .End .tab-pane -->
-                            <div class="tab-pane fade" id="product-info-tab" role="tabpanel" aria-labelledby="product-info-link">
+                            <div class="tab-pane fade  m-3" id="product-info-tab" role="tabpanel" aria-labelledby="product-info-link">
                                 <div class="product-desc-content">
                                     <h3>Information</h3>
                                     <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Donec odio. Quisque volutpat mattis eros. Nullam malesuada erat ut turpis. Suspendisse urna viverra non, semper suscipit, posuere a, pede. Donec nec justo eget felis facilisis fermentum. Aliquam porttitor mauris sit amet orci. </p>
@@ -226,15 +231,15 @@
                                     <p>one size</p>
                                 </div><!-- End .product-desc-content -->
                             </div><!-- .End .tab-pane -->
-                            <div class="tab-pane fade" id="product-shipping-tab" role="tabpanel" aria-labelledby="product-shipping-link">
+                            <div class="tab-pane fade  m-3" id="product-shipping-tab" role="tabpanel" aria-labelledby="product-shipping-link">
                                 <div class="product-desc-content">
                                     <h3>Delivery & returns</h3>
                                     <p>We deliver to over 100 countries around the world. For full details of the delivery options we offer, please view our <a href="#">Delivery information</a><br>
                                     We hope you’ll love every purchase, but if you ever need to return an item you can do so within a month of receipt. For full details of how to make a return, please view our <a href="#">Returns information</a></p>
                                 </div><!-- End .product-desc-content -->
                             </div><!-- .End .tab-pane -->
-                            <div class="tab-pane fade" id="product-review-tab" role="tabpanel" aria-labelledby="product-review-link">
-                                <div class="reviews">
+                            <div class="tab-pane fade  m-3" id="product-review-tab" role="tabpanel" aria-labelledby="product-review-link">
+                                <div class="reviews ">
                                     <h3>Reviews (<%=product.reviews?.length || 0%>)</h3>
                                    <% if(Array.isArray(product.reviews) && product.reviews.length > 0) {%>
                                     <%product.reviews.forEach(review => {%>

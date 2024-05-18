@@ -22,10 +22,7 @@ const cartSchema = mongoose.Schema({
             type: String,
             required: true
         },
-        totalPrice: {
-            type: Number,
-
-        }
+       
 
     }],
     isCouponApplied: {
@@ -34,12 +31,13 @@ const cartSchema = mongoose.Schema({
     },
     coupon: {
         type: {
-            name: {
+            code: {
                 type: String,
                 required: true
             },
-            code: {
-                type: String,
+            couponId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Coupon',
                 required: true
             }
             ,
@@ -57,10 +55,7 @@ const cartSchema = mongoose.Schema({
         required: false,
         default: 0
     },
-    cartTotal: {
-        type: Number,
-        required: true,
-    }
+    
 },
     {
         timestamps: true

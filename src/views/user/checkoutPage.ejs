@@ -253,8 +253,8 @@
 		</style>
 
 
-		<div class="page-content">
-			<div class="checkout" id="Reload">
+		<div class="page-content" id="Reload">
+			<div class="checkout" >
 				<div class="container">
 
 
@@ -403,9 +403,10 @@
 
 													<tbody>
 														<%let grandTotal=0;%>
+														
 															<%if(Array.isArray(cartData.products) &&
 																cartData.products.length> 0) {%>
-
+																	
 																<%cartData.products.forEach(cart=> {%>
 																	<%total=0%>
 
@@ -434,12 +435,11 @@
 																			<td class="price-col">₹
 																				<%=cart.product.price%>.00
 																			</td>
-																			<!-- <%total=+cart.product.price *
-																				cart.quantity%>%> -->
+																			
 																			<td class="quantity-col">
 																				<div class="cart-product-quantity row">
-																					<input disabled type="text"
-																						class="form-control"
+																					<input style="padding: 0; text-align: center;" disabled type="text"
+																						class="form-control "
 																						value="<%=cart.size%>">
 																					<input disabled type="text"
 																						class="form-control"
@@ -447,10 +447,10 @@
 																				</div>
 																				<!-- End .cart-product-quantity -->
 																			</td>
+																			<%  total += +cart.product.price * +cart.quantity%>
 
 
-																			<td class="total-col">₹<%= cart.totalPrice%>
-																					.00
+																			<td class="total-col">₹<%= total%>.00
 																			</td>
 																			<!-- <td class="remove-col"><button
 																						onclick="removeFromCart('<%=cart.id%>','<%=cart.product.title%>')"
@@ -458,6 +458,7 @@
 																							class="icon-close"></i></button>
 																				</td> -->
 																		</tr>
+																		<%grandTotal += total;%>
 
 																		<%})%>
 
@@ -668,8 +669,7 @@
 
 											<tr class="summary-subtotal">
 												<td>Subtotal:</td>
-												<td>₹<%=cartData.cartTotal ?? 0 - (cartData?.coupon?.discount ?
-														cartData?.coupon?.discount: 0) %>.00</td>
+												<td>₹<%=grandTotal%>.00</td>
 
 
 
@@ -680,16 +680,23 @@
 											<%if (cartData.isCouponApplied) {%>
 												<tr class="text-primary">
 													<td>Coupon Saving:</td>
-													<td>₹<%= cartData?.coupon?.discount%>.00</td>
+													<td class="text-success">- ₹<%= cartData?.coupon?.discount%>.00</td>
 												</tr>
 												<%}%>
+												<%if(cartData?.deliveryCharge == 0 || !cartData?.deliveryCharge){%>
 													<tr>
 														<td>Shipping:</td>
 														<td>Free shipping</td>
 													</tr>
+													<%}else{%>
+														<tr>
+															<td>Shipping:</td>
+															<td class="text-primary">+ ₹<%= cartData?.deliveryCharge ?? 0 %>.00</td>
+														</tr>
+														<%}%>
 													<tr class="summary-total">
 														<td>Total:</td>
-														<td>₹<%=cartData.cartTotal%>.00</td>
+														<td>₹<%=grandTotal - (cartData?.coupon?.discount ?? 0) + (cartData?.deliveryCharge ?? 0) %>.00</td>
 													</tr><!-- End .summary-total -->
 
 										</tbody>
@@ -728,7 +735,7 @@
 											</div><!-- End .card -->
 
 
-											<%if(cartData.cartTotal < 3000) {%>
+											<%if(grandTotal < 3000) {%>
 												<div class="card my-3">
 													<div class="card-header" id="heading-3">
 														<h2 class="card-title">
@@ -962,7 +969,8 @@
 
 					} else {
 						Swal.fire({
-							titleText: data.message,
+							title: 'Oops!',
+							text: data.message,
 							width: '300px',
 							padding: '10px',
 							icon: 'error',

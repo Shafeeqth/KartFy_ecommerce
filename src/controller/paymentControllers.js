@@ -102,6 +102,7 @@ const createPayPalPayment = async (req, res ,myOrder) => {
         paypal.payment.create(create_payment_json, function (error, payment) {
             console.log('comes here here also');
             if (error) {
+                console.log(error)
                 throw error;
             } else {
                 for (let i = 0; i < payment.links.length; i++) {

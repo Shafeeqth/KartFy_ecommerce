@@ -24,7 +24,8 @@ const checkValidCoupon = asyncHandler(async (req, res) => {
     let user = req.session.user;
     if (!user) return false
 
-    let cart = await Cart.findOne({ user: user._id });
+    let cart = await Cart.findOne({ user: user._id }).populate('products.product','price -_id');
+    let cartTotal = cart.products.reduce((acc, item) => acc + item.product.price * item.quantity,0);
     if (!cart) return res.status(500)
     if (cart.isCouponApplied == false) {
         return res.status(200)
@@ -34,10 +35,10 @@ const checkValidCoupon = asyncHandler(async (req, res) => {
                 message: 'No coupon found'
             })
     }
-    let coupon = await Coupon.findOne({ couponCode: cart.coupon.code });
+    let coupon = await Coupon.findOne({ _id: cart.coupon.couponId });
     let today = new Date()
 
-    if (coupon.minCost > cart.cartTotal) {
+    if (coupon.minCost > cartTotal) {
         return res.status(400)
             .json({
                 success: false,
@@ -334,10 +335,12 @@ const orderCancel = asyncHandler(async (req, res, next) => {
 
     let orderedItems = order.orderedItems;
 
+
     orderedItems.forEach(async item => {
+        
         await Inventory.updateOne({
-            product: item.product,
-            "sizeVariant.size": item.product.size
+            product:  item.product,
+            "sizeVariant.size": item.size
 
         },
             {

@@ -79,20 +79,20 @@
                                             <%if(inventory.totalStock < 1){%>
                                             <span class="product-label label-out">Out of stock</span>
                                             <%}%>
-                                            <a href="/api/v1/product-detail?id=<%=inventory.product._id%>">
-                                                <img src="/Data/uploads/<%= inventory.product.images[0]%>" alt="Product image"
+                                            <a href="/api/v1/product-detail?id=<%=inventory.products._id%>">
+                                                <img src="/Data/uploads/<%= inventory.products.images[0]%>" alt="Product image"
                                                     class="product-image">
                                             </a>
 
                                             <div class="product-action-vertical">
-                                                <button style="all: unset;" onclick="addToWishlist('<%=inventory.product._id%>')">
+                                                <button style="all: unset;" onclick="addToWishlist('<%=inventory.products._id%>')">
                                                     <a class="btn-product-icon btn-wishlist btn-expandable"><span>add
                                                             to wishlist</span></a></button>
 
                                             </div><!-- End .product-action -->
 
                                             <div class="product-action action-icon-top">
-                                                <button style="all: unset;" onclick="addToCart('<%=inventory.product._id%>')"> <a
+                                                <button style="all: unset;" onclick="addToCart('<%=inventory.products._id%>')"> <a
                                                         class="btn-product btn-cart"><span>add to
                                                             cart</span></a></button>
 
@@ -111,25 +111,29 @@
                                                  
                                                 </a>
                                             </div><!-- End .product-cat -->
-                                            <h3 data-product="<%=inventory.product.title%>" class="product-title"><a  href="">
-                                                <%=inventory.product.title%>
+                                            <h3 data-product="<%=inventory.products.title%>" class="product-title"><a  href="">
+                                                <%=inventory.products.title%>
                                                 </a></h3><!-- End .product-title -->
                                             <div class="product-price">
-
-                                                <span class="new-price">₹ <%= inventory.product.price %>.00</span>
-                                                <span class="old-price">₹ <%= inventory.product.mrpPrice %>.00</span>
+                                                <%if(inventory.products.price >= inventory.products.mrpPrice){%>
+                                                    <span class="new-price">₹ <%= inventory.products.price %>.00</span>
+                                                    <%}else{%>
+                                                <span class="new-price">₹ <%= inventory.products.price %>.00</span>
+                                                <span class="old-price">₹ <%= inventory.products.mrpPrice %>.00</span>
+                                                <span class="text-success mx-2"><%= Math.ceil(((inventory.products.mrpPrice - inventory.products.price)/(inventory.products.mrpPrice ) ) * 100 ) %>% OFF</span>
+                                                <%}%>
                                             </div><!-- End .product-price -->
                                             <div class="ratings-container">
                                                 <div class="ratings">
-                                                    <div class="ratings-val" style="width: <%=(inventory.product.avgRating / 5) * 100%>%"></div>
+                                                    <div class="ratings-val" style="width: <%=(inventory.reviewAvg / 5) * 100%>%"></div>
                                                     <!-- End .ratings-val -->
                                                 </div><!-- End .ratings -->
-                                                <span class="ratings-text">( <%=inventory.product.avgRating? inventory.product.avgRating : 0 %>
+                                                <span class="ratings-text">( <%=inventory.reviewCount %>
                                                         Reviews )</span>
                                             </div><!-- End .rating-container -->
                                             
 									<div class="select-custom">
-										<select  id="size<%=inventory.product._id%>" class="form-control rounded">
+										<select  id="size<%=inventory.products._id%>" class="form-control rounded">
 											
                                             <option selected value="Small">Small</option>
                                             <option value="Medium">Medium</option>

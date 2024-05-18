@@ -148,7 +148,7 @@ const addToCart = asyncHandler(async (req, res, next) => {
     
     let inventory = await Inventory.findOne({ product: id }).populate('product')
     console.log('Inventory', inventory)
-    let totalPrice = inventory.product.price;
+    
 
     let product = inventory.sizeVariant.find(item => item.size == size);
 
@@ -162,25 +162,7 @@ const addToCart = asyncHandler(async (req, res, next) => {
     }
     console.log(product, 'product')
     let userCart = await Cart.findOne({ user });
-    if(userCart && userCart.isCouponApplied) {
-        userCart.isCouponApplied = false,
    
-    //     await Coupon.findOneAndUpdate({
-    //         couponCode: userCart.coupon.code
-    //     },
-    //     {
-    //         $pull: {
-    //             appliedUsers: user
-    //         }
-    //     },
-    //     {
-    //         new: true
-
-    //     }
-    // )
-    userCart.totalPrice += userCart.coupon.discount;
-    delete userCart.coupon;
-    }
     if (!product.stock > 0) {
         return res.json({
             success: false,
@@ -190,10 +172,12 @@ const addToCart = asyncHandler(async (req, res, next) => {
 
 
     }
+    if(userCart && userCart.isCouponApplied) {
+        userCart.isCouponApplied = false,
+        delete userCart.coupon;
+    }
 
     if (addToCartFromWishlist === true) {
-
-
      
         if (!userCart) {
             let cartCreate = await Cart.create({
@@ -202,9 +186,8 @@ const addToCart = asyncHandler(async (req, res, next) => {
                     product: id,
                     size,
                     quantity: 1,
-                    totalPrice
+                 
                 }],
-                cartTotal: totalPrice
             })
 
             return res.json({
@@ -236,9 +219,9 @@ const addToCart = asyncHandler(async (req, res, next) => {
             product: id,
             quantity: 1,
             size,
-            totalPrice
+        
         })
-        userCart.cartTotal += totalPrice;
+   
         await Wishlist.deleteOne({ product: id })
         userCart = await userCart.save()
 
@@ -264,9 +247,7 @@ const addToCart = asyncHandler(async (req, res, next) => {
                 product: id,
                 size,
                 quantity: 1,
-                totalPrice,
             }],
-            cartTotal: totalPrice
         })
 
         return res.json({
@@ -300,9 +281,8 @@ const addToCart = asyncHandler(async (req, res, next) => {
         product: id,
         quantity: 1,
         size,
-        totalPrice
+
     })
-    userCart.cartTotal += totalPrice;
 
     userCart = await userCart.save()
 
@@ -775,10 +755,12 @@ const changeUserDetails = asyncHandler(async (req, res, next) => {
 const addCoupon = asyncHandler(async (req, res) => {
     let code = req.body.code;
     let user = req.session.user;
-    let coupon = await Coupon.findOne({
+    let coupon = await Coupon.findOne({ 
         couponCode: code
     })
-    let cart = await Cart.findOne({ user: user._id });
+    let cart = await Cart.findOne({ user: user._id }).populate('products.product','price -_id');
+    let cartTotal = cart.products.reduce((acc, item) => acc + item.product.price * item.quantity,0);
+   
     console.log('coupon', coupon)
     let now = new Date;
 
@@ -791,7 +773,7 @@ const addCoupon = asyncHandler(async (req, res) => {
             })
     }
     let expiryDate = new Date(coupon.expiryDate)
-    if (cart.cartTotal < coupon.minCost) {
+    if (cartTotal < coupon.minCost) {
         return res.status(400)
             .json({
                 success: false,
@@ -828,18 +810,16 @@ const addCoupon = asyncHandler(async (req, res) => {
 
     }
     coupon.limit -= 1;
-    // coupon.appliedUsers.push(user._id)
     await coupon.save()
 
 
-    let discount = Math.floor((coupon.discount * cart.cartTotal) / 100)
+    let discount = Math.floor((coupon.discount * cartTotal) / 100)
     cart.isCouponApplied = true;
     cart.coupon = {
-        name: coupon.title,
         code: coupon.couponCode,
+        couponId: coupon._id,
         discount,
     }
-    cart.cartTotal -= discount;
     cart = await cart.save();
     return res.status(200)
         .json({
@@ -869,9 +849,7 @@ const removeCoupon = asyncHandler(async (req, res) => {
                 coupon: ""
 
             },
-            $inc: {
-                cartTotal: discount
-            }
+           
 
 
 

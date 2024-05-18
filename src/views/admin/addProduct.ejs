@@ -384,17 +384,14 @@ let closeButton = document.querySelectorAll('.btn-close').forEach(item => {
         let closeButton = bootsrapModal.querySelectorAll('.btn-close').forEach(item => {
           item.addEventListener('click', () => {
             console.log('hello')
-            bootsrapModal.dispose();
-            cropper.distroy()
-            cropper = null;
+            // bootsrapModal.dispose();
+            // cropper.distroy()
+            // cropper = null;
           });
         })
         let imgSrc = cropper.getCroppedCanvas().toDataURL('image/jpeg');
         preview.src = imgSrc;
 
-
-
-        bootsrapModal.dispose();
 
 
       })
