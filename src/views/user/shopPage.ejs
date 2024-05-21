@@ -118,9 +118,9 @@
                                                 <%if(inventory.products.price >= inventory.products.mrpPrice){%>
                                                     <span class="new-price">₹ <%= inventory.products.price %>.00</span>
                                                     <%}else{%>
-                                                <span class="new-price">₹ <%= inventory.products.price %>.00</span>
+                                                <span class="new-price">₹ <%= Math.round(inventory.minimumPrice) %>.00</span>
                                                 <span class="old-price">₹ <%= inventory.products.mrpPrice %>.00</span>
-                                                <span class="text-success mx-2"><%= Math.ceil(((inventory.products.mrpPrice - inventory.products.price)/(inventory.products.mrpPrice ) ) * 100 ) %>% OFF</span>
+                                                <span class="text-success mx-2"><%= Math.ceil(((inventory.products.mrpPrice - inventory.minimumPrice)/(inventory.products.mrpPrice ) ) * 100 ) %>% OFF</span>
                                                 <%}%>
                                             </div><!-- End .product-price -->
                                             <div class="ratings-container">

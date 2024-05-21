@@ -57,12 +57,12 @@
 
 									<p>
 										Payment Id: <%=order.paymentId ? order.paymentId : 'None' %> <br>
-											Total Amount: <%=order.orderAmount%><br>
-												Saved discount: <%=order.totalSaved%><br>
+										Grand total: ₹ <%= +order.orderAmount + +order.totalSaved ?? 0 %>.00<br>
+												Saved discount: ₹ <%=order.totalSaved%>.00<br>
 													Payment Status: <%=order.paymentStatus%><br>
-														Delivery Charge: <%=order.deliveryCharge%><br>
-															Grand total: <%= +order.orderAmount + +order.totalSaved ?? 0 + +order.deliveryCharge ?? 0%><br>
-
+														Delivery Charge:  <%=order.deliveryCharge%>.00<br>
+															
+															Order Amount: <strong> ₹ <%=order.orderAmount%>.00</strong><br>
 
 
 									</p>
@@ -120,11 +120,11 @@
 												<td>
 													<input class="text-center text-success m-2" disabled
 														style="width: 80%;  padding: 10px 5px; font-weight: bold; border: none; "
-														value=" Price : ₹ <%= item.product.mrpPrice%>.00" type="text">
+														value=" Price : ₹ <%= item.totalPrice%>.00" type="text">
 													<br>
 													<input class="text-center text-success  m-2 " disabled
 														style="width: 80%; padding: 10px 5px; font-weight: bold; border: none; "
-														value=" Total : ₹ <%= item.product.mrpPrice * item.quantity%>.00"
+														value=" Total : ₹ <%= item.totalPrice * item.quantity%>.00"
 														type="text">
 												</td>
 												<td class="col-2">
@@ -370,7 +370,7 @@
 
 		function printInvoice(orderId) {
 			const downloadButton = document.getElementById('download');
-   			downloadButton.innerHTML = '<i style="background: none;" class="fas btn  fa-spinner fa-spin"></i> Downloading...'
+   			downloadButton.innerHTML = '   <span class="spinner-border spinner-border-md mx-3" role="status" style="" aria-hidden="true"></span> Downloading...'
 
 			fetch('/api/v1/admin/my-orders/single-orderDetails/order-invoice-download', {
 				method: "POST",

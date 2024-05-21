@@ -357,8 +357,7 @@ function deleteAddress(id) {
                             timer: 1500,
 
                         });
-                        //    window.history.back(-1)
-
+                        location.reload()
                         ;
                     }
                 }

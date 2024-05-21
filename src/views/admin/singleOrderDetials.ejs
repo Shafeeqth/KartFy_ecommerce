@@ -98,7 +98,7 @@
                       <th scope="col">Name</th>
                       <th scope="col">Details</th>
                       <th scope="col">Total</th>
-                      <th scope="col">Status</th>
+                      <th scope="col">Order Status</th>
                       <th scope="col">Ordered Date</th>
                       <th scope="col" class="text-end">Action</th>
                     </tr>
@@ -123,7 +123,7 @@
                       <td> <p style="margin: 0;"><strong>Size: </strong>  <%=item.size%></p>
                         <p> <strong>Quantity:</strong>   <%=item.quantity%></p>
                       </td>
-                      <td>₹<%= item.product.mrpPrice%>.00</td>
+                      <td>₹<%= item.quantity * item.totalPrice%>.00</td>
                       <td>
                         <%if(order.orderStatus== 'Delivered'){%>
                           <span class=" px-4 py-2 rounded-pill" style="font-weight: 400; background-color: rgb(46, 168, 56); color: #e1d8d8;">

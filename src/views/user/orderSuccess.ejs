@@ -70,9 +70,9 @@
                             </div>
                             <div class="checkout__order__total">
                                 <ul style="padding-left: 0px !important;">
-                                    <li>Subtotal <span>₹ <%=currentOrder.orderAmout%>.00</span></li>
-                                    <!-- <li>Discount <span>₹ </span></li> -->
-                                    <li>Shipping cost <span>₹ <%=currentOrder.deliveryCharge%>.00</span></li>
+                                    <li>Grand Total <span>₹ <%=currentOrder.orderAmount + currentOrder.totalSaved%>.00</span></li>
+                                    <li>Discount <span> - <%=currentOrder.totalSaved%>.00</span></li>
+                                    <li>Shipping cost <span> + <%=currentOrder.deliveryCharge%>.00</span></li>
                                     <li>Total <span>₹<%=currentOrder.orderAmount + currentOrder.deliveryCharge ?? 0  %>.00</span></li>
                                 </ul>
                             </div>

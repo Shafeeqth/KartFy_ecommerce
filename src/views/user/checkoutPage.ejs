@@ -404,10 +404,10 @@
 													<tbody>
 														<%let grandTotal=0;%>
 														
-															<%if(Array.isArray(cartData.products) &&
-																cartData.products.length> 0) {%>
+															<%if(Array.isArray(cartData) &&
+																cartData.length> 0) {%>
 																	
-																<%cartData.products.forEach(cart=> {%>
+																<%cartData.forEach(cart=> {%>
 																	<%total=0%>
 
 
@@ -433,21 +433,21 @@
 																				</div><!-- End .product -->
 																			</td>
 																			<td class="price-col">₹
-																				<%=cart.product.price%>.00
+																				<%=cart.minimumPrice%>.00
 																			</td>
 																			
 																			<td class="quantity-col">
 																				<div class="cart-product-quantity row">
 																					<input style="padding: 0; text-align: center;" disabled type="text"
 																						class="form-control "
-																						value="<%=cart.size%>">
+																						value="<%=cart.products.size%>">
 																					<input disabled type="text"
 																						class="form-control"
-																						value="<%=cart.quantity%>">
+																						value="<%=cart.products.quantity%>">
 																				</div>
 																				<!-- End .cart-product-quantity -->
 																			</td>
-																			<%  total += +cart.product.price * +cart.quantity%>
+																			<%  total += +cart.minimumPrice * +cart.products.quantity%>
 
 
 																			<td class="total-col">₹<%= total%>.00
@@ -614,7 +614,7 @@
 									<div class="cart-discount my-1">
 
 
-										<%if(!cartData.isCouponApplied) {%>
+										<%if(!cartData[0]?.isCouponApplied) {%>
 											<a onclick="event.preventDefault()" style="margin-left: 40% ;" href="">
 												<button style="all: unset;" type="button" class="btn btn-primary"
 													data-toggle="modal" data-target="#couponModal">
@@ -639,11 +639,11 @@
 												<div class="input-group">
 													<input type="text" disabled
 														class=" border-danger form-control m-0 font-weight-bold text-center text-danger "
-														value="<%=cartData.coupon.code%>">
+														value="<%=cartData[0].coupon.code%>">
 													<div class="input-group-append">
 														<button id="remove-button"
-															data-discount="<%=cartData?.coupon?.discount%>"
-															onclick="return event.preventDefault(), removeCoupon('<%=cartData?.coupon?.discount%>')"
+															data-discount="<%=cartData[0]?.coupon?.discount%>"
+															onclick="return event.preventDefault(), removeCoupon('<%=cartData[0]?.coupon?.discount%>')"
 															class="btn btn-outline-danger ">
 															<span class="btn-text"><i
 																	class="icon-long-arrow-right"></i></span>
@@ -677,13 +677,13 @@
 
 
 											</tr><!-- End .summary-subtotal -->
-											<%if (cartData.isCouponApplied) {%>
+											<%if (cartData[0]?.isCouponApplied) {%>
 												<tr class="text-primary">
 													<td>Coupon Saving:</td>
-													<td class="text-success">- ₹<%= cartData?.coupon?.discount%>.00</td>
+													<td class="text-success">- ₹<%= cartData[0]?.coupon?.discount%>.00</td>
 												</tr>
 												<%}%>
-												<%if(cartData?.deliveryCharge == 0 || !cartData?.deliveryCharge){%>
+												<%if(cartData[0]?.deliveryCharge == 0 || !cartData[0]?.deliveryCharge){%>
 													<tr>
 														<td>Shipping:</td>
 														<td>Free shipping</td>
@@ -691,19 +691,19 @@
 													<%}else{%>
 														<tr>
 															<td>Shipping:</td>
-															<td class="text-primary">+ ₹<%= cartData?.deliveryCharge ?? 0 %>.00</td>
+															<td class="text-primary">+ ₹<%= cartData[0]?.deliveryCharge ?? 0 %>.00</td>
 														</tr>
 														<%}%>
 													<tr class="summary-total">
 														<td>Total:</td>
-														<td>₹<%=grandTotal - (cartData?.coupon?.discount ?? 0) + (cartData?.deliveryCharge ?? 0) %>.00</td>
+														<td>₹<%=grandTotal - (cartData[0]?.coupon?.discount ?? 0) + (cartData[0]?.deliveryCharge ?? 0) %>.00</td>
 													</tr><!-- End .summary-total -->
 
 										</tbody>
 									</table><!-- End .table table-summary -->
 
 
-									<%if(Array.isArray(cartData.products) && cartData.products.length> 0 && address &&
+									<%if(Array.isArray(cartData) && cartData.length> 0 && address &&
 										address.length > 0) {%>
 
 										<div class="accordion-summary" id="accordion-payment">

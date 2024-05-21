@@ -60,22 +60,23 @@ paypal.configure({
     client_secret: PAYPAL_SECRET_KEY,
 });
 
-const createPayPalPayment = async (req, res ,myOrder) => {
+const createPayPalPayment = async (req, res , next, myOrder) => {
     try {
-
-        console.log(myOrder, 'order')
+     
      
         let items = myOrder.orderedItems.map((item, index) => {
             return {
                 "name": 'ABC',
                 "sku": ""+(index+1),
-                "price": ""+item.totalPrice / item.quantity,
+                "price": ""+item.totalPrice ,
                 "currency": "USD",
                 "quantity": ""+item.quantity
 
             }
         })
+        let totalAmount = myOrder.orderedItems.reduce( (acc, item ) => acc + (item.totalPrice * item.quantity),0);
      
+       
        
         const create_payment_json = {
             "intent": "sale",
@@ -93,7 +94,7 @@ const createPayPalPayment = async (req, res ,myOrder) => {
                 },
                 "amount": {
                     "currency": "USD",
-                    "total": "" + myOrder.orderAmount+".00",
+                    "total": "" + totalAmount +".00",
     
                 },
                 "description": "Hat for the best team ever"
@@ -103,6 +104,7 @@ const createPayPalPayment = async (req, res ,myOrder) => {
             console.log('comes here here also');
             if (error) {
                 console.log(error)
+                next(error)
                 throw error;
             } else {
                 for (let i = 0; i < payment.links.length; i++) {
@@ -136,7 +138,6 @@ const payPalSuccess = asyncHandler(async (req, res, next) => {
     };
     const payment = await paypal.payment.execute(paymentId, execute_payment_json);
 
-    console.log(JSON.stringify(payment));
 
 })
 

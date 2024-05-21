@@ -28,13 +28,6 @@ const productSchema = mongoose.Schema({
      isListed: {
         type: Boolean,
         default: true,
-    },soldCount: {
-        type: Number
-    },
-    avgRating: {
-        type: Number,
-        required: false,
-        default: 0
     }
     
 
@@ -66,11 +59,7 @@ const inventorySchema = mongoose.Schema({
 
         }
     }],
-    totalStock: {
-        type: Number,
-        default: 0,
-
-    }
+    
 },{
     timestamps: true
 });

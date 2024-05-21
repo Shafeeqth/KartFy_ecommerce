@@ -29,7 +29,7 @@
 								    
 
 								    
-								    	 <form   action="/api/v1/profile/add-address" method="POST" >
+								    	 <form  >
 											<h4>Add New Address</h4>
 											<div class="p-0 col-12 mb-2">
 												<label class="col-sm-12">Address Type</label>
@@ -164,7 +164,7 @@
        
 
 
-        if (name.length <=2 ) {
+    if (!/^[a-zA-Zà-žÀ-Ž0-9]{3,}([ '-][a-zA-Zà-žÀ-Ž0-9]+)*$/.test(name) ) {
           displayErrorMessage(form, "name", "Please enter a valid name.");
           return;
         }
@@ -188,7 +188,7 @@
           return;
         }
         
-        if (name.length <=4 ) {
+        if (!/^[a-zA-Zà-žÀ-Ž0-9]{3,}([ '-][a-zA-Zà-žÀ-Ž0-9]+)*$/.test(district)  ) {
           displayErrorMessage(
             form,
             "district",
@@ -207,7 +207,7 @@
         }
 
 		if (!/^[1-9][0-9]{5}$/.test(pincode)) {
-          displayErrorMessage(
+          displayErrorMessage( 
             form,
             "pincode",
             "Enter a valid pincode number."
@@ -223,6 +223,34 @@
           );
           return;
         }
+      let formData = new FormData(form);
+      
+     
+
+      fetch('/api/v1/profile/add-address',{
+        method: 'POST',
+        body: formData,
+        
+        
+
+      }).then(response => response.json())
+      .then(data => {
+        console.log(data)
+        Swal.fire({
+             title: 'Sucess',
+             text: data.message,
+             icon: 'success',
+             showConfirmButton: false,
+             timer: 1500
+        })
+        setTimeout(() => {
+          window.history.back(-1);
+          
+        }, 1600);
+
+      })
+      
+      .catch(error => console.log(error))
         
         
 
@@ -233,7 +261,7 @@
         
 
         // If all validations pass, you can submit the form
-        form.submit();
+    
       });
     }
 

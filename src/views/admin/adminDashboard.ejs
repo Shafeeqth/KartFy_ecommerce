@@ -141,6 +141,7 @@
 
             <div class="col-md-4 mb-4">
               <div class="card" style="width: 18rem">
+                <a style="all: unset;" href="/api/v1/admin/products/product-detail?id=<%= el.product._id%>">
                 <img
                   src="/Data/uploads/<%= el.product.images[0]%>"
                   style="width: 300px; height: 300px"
@@ -152,8 +153,9 @@
                   <p class="card-text">
                     Price: <%= el.product.price%>
                   </p>
-                  <p class="card-text">Brand: <%= el.product.category.Brands %></p>
+                  <p class="card-text">Sold count: <%= el.count %></p>
                 </div>
+              </a>
               </div>
             </div>
 

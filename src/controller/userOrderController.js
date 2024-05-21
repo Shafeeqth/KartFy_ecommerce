@@ -20,12 +20,13 @@ const fs = require('node:fs');
 const ejs = require('ejs');
 
 
+
 const checkValidCoupon = asyncHandler(async (req, res) => {
     let user = req.session.user;
     if (!user) return false
 
     let cart = await Cart.findOne({ user: user._id }).populate('products.product','price -_id');
-    let cartTotal = cart.products.reduce((acc, item) => acc + item.product.price * item.quantity,0);
+    let cartTotal = cart?.products.reduce((acc, item) => acc + item.product.price * item.quantity,0);
     if (!cart) return res.status(500)
     if (cart.isCouponApplied == false) {
         return res.status(200)
@@ -132,19 +133,210 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
     let userAddress = await Address.findById({ _id: address });
 
 
-    let cart = await Cart.findOne({
-        user: new mongoose.Types.ObjectId(user._id)
-    }).populate('products.product')
-    // return console.log(cart, 'cart')
-    let orderedItems = await Cart.findOne({
-        user: new mongoose.Types.ObjectId(user._id)
-    }, {
-        products: 1,
-        _id: 0,
+    let cart = await Cart.aggregate([
+        {
+            $match: {
+                user: new mongoose.Types.ObjectId( user._id)
+            }
 
+        },
+        {
+            $unwind: '$products'
+        },
+        {
+            $lookup: {
+                from: 'products',
+                localField: 'products.product',
+                foreignField: '_id',
+                as: 'productss',
+                
+            }
+        },
+        {
+            $unwind: '$productss'
+        },
+        {
+            $lookup: {
+                from: 'offers',
+                localField: 'productss._id',
+                foreignField: 'productIds',
+                as: 'productOffer',
+                pipeline: [
+                    {
+                        $match: {
+                            isListed: true
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $lookup: {
+                from: 'offers',
+                localField: 'productss.category.Category',
+                foreignField: 'appliedCategory',
+                as: 'categoryOffer',
+                pipeline: [
+                    {
+                        $match: {
+                            isListed: true
+                        }
+                    }
+                ]
+            }
+
+
+        },
+      
+        {
+            $addFields: {
+                shouldUnwindCategory: {
+                    $cond: [{
+                        $eq: [{
+                            $size: '$categoryOffer'
+                        }, 0]
+                    },
+                        false,
+                        true
+                    ]
+                },
+                shouldUnwindProduct: {
+                    $cond: [{
+                        $eq: [{
+                            $size: '$productOffer'
+                        }, 0]
+                    },
+                        false,
+                        true
+                    ]
+                }
+            }
+
+        },
+        {
+            $unwind: {
+                path: '$productOffer',
+                preserveNullAndEmptyArrays: true
+            },
+        },
+        {
+            $unwind: {
+                path: '$categoryOffer',
+                preserveNullAndEmptyArrays: true,
+            }
+
+        },
+        {
+            $addFields: {
+               
+                categoryOfferPrice: {
+                    $cond: [
+                        '$shouldUnwindCategory',
+                        {
+                            $subtract: ['$productss.price',
+                                {
+                                    $multiply: ['$productss.price',
+                                        {
+                                            $divide: ['$categoryOffer.discount', 100]
+                                        }
+                                    ]
+                                }
+                            ]
+
+                        },
+                        null
+                    ]
+
+                },
+                productOfferPrice: {
+                    $cond: [
+                        '$shouldUnwindProduct',
+                        {
+                            $subtract: ['$productss.price',
+                                {
+                                    $multiply: ['$productss.price',
+                                        {
+                                            $divide: ['$productOffer.discount', 100]
+                                        }
+                                    ]
+                                }
+                            ]
+
+                        },
+                        null
+                    ]
+
+                },
+               
+            }
+        },
+        {
+            $addFields: {
+                minimumPrice: {
+                    $round: [
+                    
+                        {
+                            $min: ['$productOfferPrice', '$categoryOfferPrice', '$productss.price']
+                        }
+
+                    ]
+                },
+            }
+        },
+        {
+            $addFields: {
+                savedPrice: {
+                    $subtract: [ '$productss.mrpPrice', '$minimumPrice']
+                }
+            }
+
+        },
+        {
+            $project: {
+                products: 1,
+                coupon: 1,
+                minimumPrice: 1,
+                savedPrice: 1,
+                deliveryCharge: 1
+
+            }
+        }
+    ])
+        console.log(cart);
+    let cartCoupon = cart[0].coupon;
+    if(cartCoupon) {
+        await Coupon.findOneAndUpdate({
+            _id: cartCoupon.couponId
+        },
+        {
+            $push: {
+                appliedUsers: user._id
+
+            }
+        }
+    )
+    }
+
+    let orderedItems = cart.map(item => {
+        return {
+            product: item.products.product,
+            quantity: item.products.quantity,
+            size: item.products.size,
+            totalPrice:  item.minimumPrice
+        }
 
     })
-    if( !cart.totalPrice > 5000){
+    
+    let orderAmount = orderedItems.reduce((acc, item) => acc + item.totalPrice * item.quantity, 0 );
+    let totalSaved = cart.reduce((acc, item) => acc + item.savedPrice * item.products.quantity, 0);
+    totalSaved += (cart[0].coupon?.discount ? cart[0].coupon?.discount: 0); // total price after deducting the coupn discount if there is any discount
+    orderAmount -= (cart[0].coupon?.discount ? cart[0].coupon?.discount : 0);
+    orderAmount += (cart[0].deliveryCharge ? cart[0].deliveryCharge : 0);
+   
+    let coupon;
+
+   
+    if( !orderAmount > 5000){
     let sourcePincode = '676525';
     // if(cart.deliveryCharge > 0) {
     //    let [sourceCordinate , destinationCordinate] = getCordinates(sourcePincode, userAddress.pincode);
@@ -158,15 +350,15 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
     }
 
 
-    cart.products.forEach(async (item) => {
+    orderedItems.forEach(async (item) => {
      
         let newProduct = await Inventory.findOneAndUpdate({
-            product: item.product._id,
+            product: item.product,
             'sizeVariant.size': item.size
         }, {
             $inc: {
                 'sizeVariant.$.stock': -parseInt(item.quantity),
-                totalStock: -parseInt(item.quantity)
+               
             }
         },
             { new: true }
@@ -175,30 +367,14 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
     })
   
 
-    let orderAmount = cart.products.map(item => item.product.price * item.quantity).reduce((acc, item) => acc + item);
-
-    orderedItems = orderedItems.products.map(item => {
-
-        return {
-            product: item.product,
-            quantity: item.quantity,
-            size: item.size,
-            totalPrice: item.totalPrice
+    if(cart[0].coupon) {
+         coupon = {
+            couponId: cart[0].coupon.couponId,
+            discount: cart[0].coupon.discount,
         }
-    })
 
-    // updating product's soldCount 
-    orderedItems.forEach(async item => {
-        await Product.findOneAndUpdate({
-            _id: item.product
-        },
-            {
-                $inc: {
-                    soldCount: 1
-                }
-            }
-        )
-    })
+    }
+    
 
     if (paymentMethod == 'COD') {
 
@@ -208,10 +384,11 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
             paymentMethod,
             paymentStatus: 'Paid',
             orderId,
-            coupon: cart.coupon ? cart.coupon: undefined,
+            coupon,
+            totalSaved,
             orderedItems,
-            orderAmount: orderAmount +( +cart.deliveryCharge ? +cart.deliveryCharge : 0),
-            deliveryCharge: cart.deliveryCharge ?? 0,
+            orderAmount,
+            deliveryCharge: cart[0].deliveryCharge ?? 0,
             orderStatus: 'Placed',
         });
         await Cart.deleteOne({
@@ -228,7 +405,7 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
 
     } else if (paymentMethod == 'Wallet') {
         let wallet = await Wallet.findOne({ user: user._id });
-        if (cart.cartTotal > wallet.balance) {
+        if (orderAmount > wallet.balance) {
             return res.status(400)
                 .json({
                     success: false,
@@ -242,11 +419,11 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
                 paymentMethod,
                 paymentStatus: 'Paid',
                 orderId,
-                coupon: cart.coupon ? cart.coupon: undefined,
+                coupon,
                 orderedItems,
-                orderAmount: orderAmount +( +cart.deliveryCharge ? +cart.deliveryCharge : 0),
-                totalSaved: cart.coupon?.discount ? cart.coupon?.discount : 0,
-                deliveryCharge: cart.deliveryCharge ?? 0,
+                orderAmount,
+                totalSaved,
+                deliveryCharge: cart[0].deliveryCharge ?? 0,
                 orderStatus: 'Placed'
             });
             await Cart.deleteOne({
@@ -280,9 +457,10 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
             paymentMethod,
             orderId,
             orderedItems,
-            coupon: cart.coupon ? cart.coupon: undefined,
-            orderAmount: orderAmount +( +cart.deliveryCharge ? +cart.deliveryCharge : 0),
-            deliveryCharge: cart.deliveryCharge ?? 0,
+            coupon,
+            totalSaved,
+            orderAmount,
+            deliveryCharge: cart[0].deliveryCharge ?? 0,
             orderStatus: 'Pending'
         });
 
@@ -296,22 +474,14 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
 
         } else if (paymentMethod == 'PayPal') {
 
-            createPayPalPayment(req, res, order);
+            createPayPalPayment(req, res, next, order);
 
             req.session.orderId = order._id;
 
 
 
         }
-        // return res.status(200)
-        //     .json({
-        //         success: true,
-        //         error: false,
-        //         orderType: paymentMethod,
-        //         data: order,
-        //         message: 'order placed'
-        //     })
-
+       
     }
 
 
@@ -576,7 +746,7 @@ const downloadOrderInvoice = asyncHandler(async (req, res) => {
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader(
         'Content-Disposition',
-        'attachment; filename= order invoice.pdf'
+        'attachment; filename= orderinvoice.pdf'
     );
     res.send(pdfBytes);
 

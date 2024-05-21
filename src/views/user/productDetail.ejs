@@ -106,12 +106,12 @@
 
                                     <div class="product-price">
                                         <%if(product.product.price >= product.product.mrpPrice){%>
-                                            <span class="new-price">₹ <%= product.product.price %>.00</span>
+                                            <span class="new-price">₹ <%= product.product.mrpPrice %>.00</span>
                                             <%}else{%>
 
-                                        <span class="new-price">₹ <%= product.product.price %>.00</span>
-                                        <span class="old-price">₹ <%= product.product.mrpPrice %>.00</span>
-                                        <span class="text-success mx-2"><%= Math.ceil(((product.product.mrpPrice - product.product.price)/(product.product.mrpPrice) ) * 100 ) %>% OFF</span>
+                                        <span class="new-price">₹ <%=Math.round(product.minimumPrice) %>.00</span>
+                                        <span class="old-price">₹ <%= Math.ceil(product.product.mrpPrice) %>.00</span>
+                                        <span class="text-success mx-2"><%= Math.ceil(((product.product.mrpPrice - product.minimumPrice)/(product.product.mrpPrice) ) * 100 ) %>% OFF</span>
                                         <%}%>
                                     </div><!-- End .product-price -->
                                   
@@ -151,7 +151,7 @@
                                         <div class="details-action-col" id="add-to-cart">
 
                                             
-                                          <button style="all: unset;" onclick="addToCart('<%=product.product._id%>')"><a  class="btn-product btn-cart">add to cart</a></button>  
+                                          <button style="all: unset;" onclick="addToCart('<%=product.product._id%>')"><a  class="btn-product btn-cart">Add to cart</a></button>  
                                         </div><!-- End .details-action-col -->
 
                                        
@@ -165,9 +165,9 @@
                                     <div class="product-details-footer">
                                         <div class="product-cat">
                                             <span>Category:</span>
-                                            <a href="#">Women</a>,
-                                            <a href="#">Dresses</a>,
-                                            <a href="#">Yellow</a>
+                                            <a href="#"> <%=product.Gender%> </a>,
+                                            <a href="#"> <%=product.Brand%> </a>,
+                                            <a href="#"> <%=product.Category%> </a>
                                         </div><!-- End .product-cat -->
 
                                         <div class="social-icons social-icons-sm">

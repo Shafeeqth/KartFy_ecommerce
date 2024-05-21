@@ -81,7 +81,7 @@
 									</div><!-- End .product -->
 								</td>
 								
-								<td class="price-col">₹<%=wishlist.product?.price%>.00</td>
+								<td class="price-col">₹<%= Math.round(wishlist.minimumPrice)%>.00</td>
 								<td>
 									<label for="size">Size:</label>
 									<div class="select-custom mx-4">

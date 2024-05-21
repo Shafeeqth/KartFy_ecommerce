@@ -208,6 +208,21 @@
 
           return false;
         }
+        else if(!/^[a-zA-Zà-žÀ-Ž]{3,}(?:[ '][a-zA-Zà-žÀ-Ž0-9]*)*$/.test(title.value.trim())) {
+          title.style.border = "solid 1px red";
+          titleError.innerText = "Title should valid "
+          titleDiv.scrollIntoView({
+            behavior: "smooth",
+            block: 'center',
+            inline: "center"
+          });
+          setTimeout(function () {
+            title.style.border = "";
+            titleError.innerText = ""
+          }, 3000);
+
+          return false;
+        }
         if (title.value.trim().length < 3) {
           title.style.border = "solid 1px red";
           titleError.innerText = "Title should be 3 charector long "
@@ -240,6 +255,23 @@
             }, 3000);
 
           }
+        else if(!/^[a-zA-Zà-žÀ-Ž]{3,}(?:[ '][a-zA-Zà-žÀ-Ž0-9]*)*$/.test(title.value.trim())) {
+          description.style.border = "solid 1px red";
+            descriptionError.innerText = "Description should not start with numbers and special charectores "
+            descriptionDiv.scrollIntoView({
+              behavior: "smooth",
+              block: 'center',
+              inline: "center"
+            });
+            setTimeout(function () {
+              description.style.border = "";
+              descriptionError.innerText = ""
+            }, 3000);
+
+          }
+
+          return false;
+        }
           else {
             description.style.border = "solid 1px red";
             descriptionError.innerText = "Description should be 20 charector long "

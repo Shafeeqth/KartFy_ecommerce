@@ -601,11 +601,11 @@ function previewImage1(event) {
     
            
     
-            if (description.length <= 10) {
+            if (!/^[a-zA-Zà-žÀ-Ž]{10,}(?:[ '][a-zA-Zà-žÀ-Ž0-9]*)*$/.test(description)) {
               displayErrorMessage(
                 form,
                 "description",
-                "Description must be 10 charectors."
+                "Description must be 10 charectors. and valid"
               );
               return;
             }

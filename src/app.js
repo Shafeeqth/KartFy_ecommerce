@@ -50,12 +50,6 @@ app.use(passport.session());
 
 
 
-
-
-
-
-
-
 app.use('/api/v1/admin', adminRouter);
 app.use('/api/v1', usersRouter);
 app.use('/google', googleRouter);
@@ -124,7 +118,7 @@ app.use('/google', googleRouter);
 //   // render the error page
 //   res.status(err.status || 500);
 //   let user = req.session.user?? null
-//   res.render('user/404',{user});
+//   res.render('404',{user});
 // });
 
 

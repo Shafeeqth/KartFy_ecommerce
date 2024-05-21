@@ -92,6 +92,7 @@ const loadEditProduct = asyncHandler(async (req, res) => {
     }).select('title -_id subCategories')
 
     let product = await Product.findOne({ _id: id });
+    console.log(product)
     res.render("admin/editProduct", { product ,category});
 
 

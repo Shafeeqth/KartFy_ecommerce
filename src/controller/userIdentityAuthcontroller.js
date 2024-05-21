@@ -9,7 +9,8 @@ const ApiResponse = require('../utilities/apiResponse');
 const asyncHandler = require('../utilities/asyncHandler');
 const User = require('../models/userModel');
 const Wallet = require('../models/walletModel');
-
+const Referrel = require('../models/referrelModel')
+const Notification = require('../models/notificationModel')
 
 
 
@@ -102,23 +103,48 @@ const createUser = asyncHandler(async (req, res, next) => {
 
 const varifyOtp = asyncHandler(async (req, res, next) => {
 
-    let { one, two, three, four } = req.body
-    let otp = `${one}${two}${three}${four}`;
    
-
-
-    let user = await OTP.findOne({ email: req.session.value.email, otp });
+    let {otp} = req.body;
+   
+    let user = await OTP.findOne({ email: req.session?.value?.email, otp });
         if (!user) {
-            req.flash('otpError', 'Incorrect OTP! please check again.')
-            return  res.redirect('/api/v1/otp-verification?errorOtp=' + encodeURIComponent('Incorrect OTP'))
-        }
-
+           
+            return  res.status(400)
+                .json({
+                    error: true,
+                    success: false,
+                    message: 'Incorrect OTP! please check again.'
+                })
+        }   
+        let referrelCode = generateOtp.generate(5, {
+            digits: true,
+            lowerCaseAlphabets: true,
+            upperCaseAlphabets: true,
+            specialChars: false,
+        });
              user = await User.create(req.session.value);
              await Wallet.create({user: user._id})
+             await Referrel.create({user: user._id, code: referrelCode})
+            await Notification.create({
+                recipient: user._id,
+                type: 'message',
+                title : 'Welcome to CartFy',
+                message: `Hello member, Welcome to the world of Fashion where
+                       meats expectations <br> <a href="/api/v1/profile">Go to Wallet</a>`,
+                url: 'api/v1/profile',
+                image:'depositphotos_71917829-stock-illustration-welcome-hand-drawn-lettering-against'
+
+            })
 
             req.session.value = null;
             req.session.user = user;
-            res.redirect('/api/v1/?success=' + encodeURIComponent('User account saved successfully'));
+            return  res.status(400)
+            .json({
+                error: false,
+                success: true,
+                message: 'User account saved successfully'
+            })
+            
 
 
 })

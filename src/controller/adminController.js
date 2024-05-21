@@ -48,7 +48,7 @@ const loadDashboard = asyncHandler(async (req, res) => {
    
     let topTenCetagory = await findTopTen('Category')
     let topTenBrand = await findTopTen('Brands')
-    // let topTenCetagory = await findTopTen('Category')
+   
 
     async function findTopTen(filter) {
 
@@ -176,7 +176,7 @@ const loadDashboard = asyncHandler(async (req, res) => {
     ])
     let monthlyData = Array.from({length: 12}).fill(0);
     monthlyDataAggre.forEach(item => {
-        let monthIndex = parseInt(item._id, 10);
+        let monthIndex = parseInt(item._id, 10)-1;
         if(monthIndex >= 0 && monthIndex < 12) {
             monthlyData[monthIndex] = item.totalAmount
         }
@@ -223,7 +223,7 @@ const getFilterData = asyncHandler( async (req, res) => {
 const newData = Array({length: 30}).fill(0);
 
 monthData.forEach(item => {
-    monthIndex = parseInt(item._id, 10) -1;
+    monthIndex = parseInt(item._id, 10)-1;
     if(monthIndex >= 0 && monthIndex < 30) {
         newData[monthIndex] = item.totalAmount;
     }

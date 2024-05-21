@@ -1,33 +1,40 @@
+const { required } = require('joi');
 const mongoose = require('mongoose');
 
 
 const notificationSchema = mongoose.Schema({
-    user: {
+    recipient: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true,
     },
-    oreder: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Order',
+    type: {
+        type: String,
+        enum: ['info', 'warning', 'error', 'success', 'message', 'alert'],
         required: true,
 
     },
-    product: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product',
-        required: true,
-
-    },
-    reason: {
+    title: {
         type: String,
         required: true
 
     },
-    comment: {
+    message: {
         type: String,
-        required: false
+        required: true
 
+    },
+    read: {
+        type: Boolean,
+        default: false
+
+    },
+    url: {
+        type: String,
+        required: true
+    },
+    image: {
+        type: String,
     }
 },
 {

@@ -35,34 +35,7 @@
     <link rel="stylesheet" href="/assets/css/demos/demo-17.css">
     <script src="https://kit.fontawesome.com/b5f8202a71.js" crossorigin="anonymous"></script>
     <style>
-        /* #error-div{
-            display: none;
-            animation: shake 0.5s;
-            animation-iteration-count: infinite;
-            width: 5rem;
-            height: 5rem;
-            border: 1px solid rgb(7, 84, 68);
-            background-color: rgb(203, 238, 231);
-            border-radius: 4px;
-            top: 13.6rem;
-            transition: cubic-bezier(0.075, 0.82, 0.165, 1);
-        } */
-
-        /* 
-            @keyframes shake {
-                0% { transform: translate(1px, 1px) rotate(0deg);}
-                10% { transform: translate(-1px, -2px) rotate(-1deg);}
-                20% { transform: translate(-3px, 0px) rotate(1deg);}
-                30% { transform: translate(3px, 2px) rotate(0deg);}
-                40% { transform: translate(1px, -1px) rotate(1deg);}
-                50% { transform: translate(-1px, 2px) rotate(-1deg);}
-                60% { transform: translate(-3px, 1px) rotate(0deg);}
-                70% { transform: translate(3px, 1px) rotate(-1deg);}
-                80% { transform: translate(-1px, -1px) rotate(1deg);}
-                90% { transform: translate(1px, 2px) rotate(0deg);}
-               100% { transform: translate(1px, -1px) rotate(-1deg);}
-                
-            } */
+       
     </style>
 </head>
 
@@ -105,7 +78,7 @@
 
                             <div class="header-dropdown">
                                 <a class="fw-bold text-md" href="#"><i class="fa-solid fa-user p-3"></i>
-                                    <%=user.name%>
+                                    <%=user.userName%>
                                 </a>
                                 <div class="header-menu">
                                     <ul>
@@ -155,7 +128,7 @@
                                 <span class="wishlist-txt m-3">My Wishlist</span>
                                 <i class="icon-heart-o"></i>
                                 <span class="wishlist-count">
-                                    <%=user.wishlistUser ? user.wishlistUser.length : 0 %>
+                                    <%=user.wishlistCount ? user.wishlistCount : 0 %>
                                 </span>
 
                             </a>
@@ -164,7 +137,7 @@
                                 <a href="/api/v1/cart" class="dropdown-toggle">
                                     <i class="icon-shopping-cart"></i>
                                     <span class="cart-count">
-                                        <%=user.cartUser ? user.cartUser.length : 0%>
+                                        <%=user.cartCount ? user.cartCount : 0%>
                                     </span>
 
                                 </a>
@@ -183,11 +156,22 @@
                             </div><!-- End .cart-dropdown -->
                         </div>
                         <a href="/api/v1/user-notifications">
-                            <button id="notificationButton" class="shakingAnimation" >
+                            <button id="notificationButton"  >
                                 <i class="fas fa-bell"></i>
-                                <span class="notification-count" id="notificationCount">0</span>
+                                <span class="notification-count" id="notificationCount"><%= user.notificationCount > 9 ? '9+' : user.notificationCount%></span>
                             </button>
                         </a>
+                        <script>
+                            let notificationButton = document.getElementById('notificationButton')
+                            let notificationCount = '<%= user.notificationCount%>'
+                            console.log(notificationCount)
+                            if(notificationCount > 0) {
+                                notificationButton.classList.add('shakingAnimation')
+                            }else{
+                                notificationButton.classList.remove('shakingAnimation')
+
+                            }
+                        </script>
                             <style>
                                 .shakingAnimation {
                                     animation: shake 0.7s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite alternate;
@@ -199,7 +183,7 @@
                                     /* Ensures the button stays in place when scrolling */
                                     top: 14%;
                                     /* Adjust position as needed */
-                                    right: -7%;
+                                    right: -6%;
                                     /* Adjust position as needed */
                                     background-color: transparent;
                                     /* Transparent background */
@@ -224,7 +208,7 @@
                                     background-color: red;
                                     color: white;
                                     border-radius: 50%;
-                                    padding: 1px 6px;
+                                    padding: 1px 8px;
                                     font-size: 12px;
                                     position: absolute;
                                     top: -1px;

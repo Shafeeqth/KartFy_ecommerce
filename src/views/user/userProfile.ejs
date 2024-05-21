@@ -66,8 +66,35 @@
 									<div class="row position-relative">
 										<%if(userProfile) {%>
 											<div class="col-lg-12 h-100">
+												<div class="row justify-content-end my-3 mr-3">
+													<button onclick="showReferrel(event)" class="btn btn- rounded" style="background-image:linear-gradient(to bottom right, rgb(121, 101, 10) , rgb(245, 227, 129));; margin:1% .2%; color: #fff;"><i class="fa-solid fa-indian-rupee-sign"></i>Refer a Friend</button>
+												</div>
+												<div id="referrel-div" class="row rounded" style="background-image:linear-gradient(to bottom right, rgb(121, 101, 10) , rgb(245, 227, 129));; margin:1% .2%; color: #fff; display: none;">
+													<div class="col-12" >
+														<div class="" >
+															<p class="my-0 text-white">You can Earn <span style="font:italic  bold 25px/30px  serif ;">₹500 </span> as Reward 
+																Your friend will get <span class="mr-3" style="font:italic  bold 25px/30px  serif ;">₹ 200.</span> 																It is your Referel Code share with <span style="font-size: large; font-weight: 500; font-style: italic;">Friends</span> </p>
+															
+														</div>
+													
+														
+													
+													
+														<div class=" row  align-items-center justify-content-center">
+															
+															
+															<div>
+																<div class="my-2" style="width: 150px; height: 40px; background-color: #ece2ab; text-align: center; justify-content: center; color: black; "><%=userProfile.referrels[0]?.code ?? 'None'%></div>
+															</div>
+
+														</div>
+														
+													</div>
+												</div>
 												<div class="card card-dashboard">
+													
 													<div class="card-body text-center">
+														
 														<h3 class="card-title fw-bold">Account Detail</h3>
 														<!-- End .card-title -->
 
@@ -481,6 +508,16 @@
 
 				})
 			})
+			function showReferrel(event) {
+			let element = event.target;
+			let referrelElement = document.getElementById('referrel-div')
+			if(referrelElement.style.display == 'block') {
+				referrelElement.style.display = 'none'
+			}else {
+				referrelElement.style.display = 'block'
+			}
+
+			}
 		</script>
 
 		<%- include('../partials/userFooter') -%>

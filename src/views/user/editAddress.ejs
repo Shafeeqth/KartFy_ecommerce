@@ -29,7 +29,7 @@
 								    
 
 								    
-								    	 <form   action="/api/v1/profile/edit-address" method="POST" >
+								    	 <form  >
 											<h4>Add New Address</h4>
 											<div class="p-0 col-12 mb-2">
 												<label class="col-sm-12">Address Type</label>
@@ -167,7 +167,7 @@
        
 
 
-        if (name.length <=2 ) {
+		if (!/^[a-zA-Zà-žÀ-Ž0-9]{3,}([ '-][a-zA-Zà-žÀ-Ž0-9]+)*$/.test(name) ) {
           displayErrorMessage(form, "name", "Please enter a valid name.");
           return;
         }
@@ -191,7 +191,8 @@
           return;
         }
         
-        if (name.length <=4 ) {
+		if (!/^[a-zA-Zà-žÀ-Ž0-9]{3,}([ '-][a-zA-Zà-žÀ-Ž0-9]+)*$/.test(district) ) {
+
           displayErrorMessage(
             form,
             "district",
@@ -227,6 +228,34 @@
           return;
         }
         
+		let formData = new FormData(form);
+      
+     
+
+      fetch('/api/v1/profile/edit-address',{
+        method: 'POST',
+        body: formData,
+        
+        
+
+      }).then(response => response.json())
+      .then(data => {
+        console.log(data)
+        Swal.fire({
+             title: 'Sucess',
+             text: data.message,
+             icon: 'success',
+             showConfirmButton: false,
+             timer: 1500
+        })
+        setTimeout(() => {
+          window.history.back(-1);
+          
+        }, 1600);
+
+      })
+      
+      .catch(error => console.log(error))
         
 
 
@@ -236,7 +265,7 @@
         
 
         // If all validations pass, you can submit the form
-        form.submit();
+      
       });
     }
 
@@ -278,180 +307,8 @@
     <script src="/assets/js/superfish.min.js"></script>
     <script src="/assets/js/owl.carousel.min.js"></script>
     <!-- Main JS File -->
-    <script src="/assets/js/main.js"></script>
-</body>
-
-
-<!-- molla/dashboard.html  22 Nov 2019 10:03:13 GMT -->
-</html>
-
-            <div class="page-content">
-            	<div class="dashboard">
-					<div class="row align-items-center justify-content-center">
-					<%if(messages.addressError){%>
-						<div id="error-div" class="alert text-danger fw-bold bg-light rounded text-center important border border-danger" role="alert"><%= messages.addressError  %></div>
-		
-					<%}%> 
-				</div>
-	                <div class="container">
-	                	<div class="row align-items-center justify-content-center">
-							
-
-	                		<div class="col-md-10 col-lg-10">
-	                			<div class="tab-content">
-								    
-
-								    
-
-								    
-								    	 <form  onsubmit="validate()" action="/api/v1/profile/edit-address" method="POST" >
-											<h4>Edit Address</h4>
-											<%if(address) {%>
-												<label>Fullname *</label>
-												<div class="text-danger" id="nameError"
-                                                    style="position: absolute; top: -22px; left: 6px">
-                                                </div>
-												<input type="text" class="form-control" id="name" value="<%=address.name%>" name="name" required>
-												<small class="form-text">This will be how your name will be displayed in the account section and in reviews</small>
-											
-			                				<div class="row my-2">
-												
-			                					<div class="col-sm-6">
-			                						<label>Phone *</label>
-													<div class="text-danger" id="phoneError"
-                                                    style="position: absolute; top: -22px; left: 6px">
-                                                </div>
-			                						<input type="text" class="form-control" value="<%=address.phone%>" name="phone" id="phone" required>
-			                					</div><!-- End .col-sm-6 -->
-
-			                					<div class="col-sm-6">
-			                						<label>Alternate Phone </label>
-													<div class="text-danger" id="alternateError"
-                                                    style="position: absolute; top: -22px; left: 6px">
-                                                </div>
-			                						<input type="text" class="form-control" id="alternatePhone" value="<%=address.alternatePhone%>" name="alternatePhone" >
-			                					</div><!-- End .col-sm-6 -->
-			                				</div><!-- End .row -->
-											<div class="row my-2">
-											<div class="col-6">
-		                					<label class="col-sm-12">State</label>
-											<div class="text-danger" id="stateError"
-                                                    style="position: absolute; top: -22px; left: 6px">
-                                                </div>
-		        							<select name="state" class="form-select col-sm-12 text-center py-3 border-0 rounded bg-light" > 
-												<option selected value="kerala">Kerala</option>
-												<option  value="Karnataka">Karnataka</option>
-												<option  value="Utterpradesh">Utterpradesh</option>
-												<option  value="Jargargh">Jargargh</option>
-												<option  value="Telengana">Telengana</option>
-												<option  value="Telengana">Telengana</option>
-												<option  value="Andra-Pradesh">Andra Pradesh</option>
-												<option  value="Goa">Goa</option>
-												<option  value="Delhi">Delhi</option>
-												
-											</select>
-										</div>
-											<div class="col-6">
-												<label>District * </label>
-												<div class="text-danger" id="districtError"
-                                                    style="position: absolute; top: -22px; left: 6px">
-                                                </div>
-												<input type="text" value="<%=address.district%>"  class="form-control" id="district"  name="district" required>
-											</div>
-										</div>
-										<div class="row my-2">
-												
-											<div class="col-sm-6">
-												<label>Locality</label>
-												<div class="text-danger" id="localityError"
-                                                    style="position: absolute; top: -22px; left: 6px">
-                                                </div>
-		            						<input type="text" value="<%=address.locality%>" class="form-control" id="locality" name="locality">
-											</div><!-- End .col-sm-6 -->
-
-											<div class="col-sm-6">
-												<label>Pincode </label>
-												<div class="text-danger" id="pincodeError"
-                                                    style="position: absolute; top: -22px; left: 6px">
-                                                </div>
-												<input type="text" class="form-control" value="<%=address.pincode%>" id="pincode" name="pincode" required>
-											</div><!-- End .col-sm-6 -->
-										</div><!-- End .row -->
-											
-		            						
-
-		            						<label>House No. Street No.</label>
-											<div class="text-danger" id="streetError"
-                                                    style="position: absolute; top: -22px; left: 6px">
-                                                </div>
-		            						<input type="text" class="form-control" value="<%=address.street%>" id="street" name="street">
-                                                <%}%>
-		            						<hr>
-		                					<button type="submit" class="btn btn-outline-primary-2">
-			                					<span>SAVE </span>
-			            						<i class="icon-long-arrow-right"></i>
-			                				</button>
-			                			</form>
-								    </div><!-- .End .tab-pane -->
-							
-	                		</div><!-- End .col-lg-9 -->
-	                	</div><!-- End .row -->
-	                </div><!-- End .container -->
-                </div><!-- End .dashboard -->
-            </div><!-- End .page-content -->
-        </main><!-- End .main -->
-		<script>
-			setTimeout(()=> {
-				document.getElementById('error-div').remove()
-			},4500)
-
-			function validate() {
-				console.log('im in validate')
-			let name = document.getElementById('name');
-			let alternatePhone = document.getElementById('alternatePhone');
-			let phone = document.getElementById('phone');
-			let district = document.getElementById('district');
-			let locality = document.getElementById('locality');
-			let pincode = document.getElementById('pincode');
-			let street = document.getElementById('street');
-			console.log(name, locality, alternatePhone, district, pincode, street)
-
-			let nameError = document.getElementById('nameError');
-			let alternateError = document.getElementById('alternateError');
-			let phoneError = document.getElementById('phoneError');
-			let stateError = document.getElementById('stateError');
-			let districtError = document.getElementById('districtError');
-			let localityError = document.getElementById('localityError');
-			let pincodeError = document.getElementById('pincodeError');
-			let streetError = document.getElementById('streetError');
-
-			if(name.value.trim().length < 3) {
-				name.style.border = '1px solid red';
-				nameError.textContent = 'Invalid name! Please check your name'
-				setTimeout(( ) => nameError.remove(),3000)
-				return false
-
-			}
-
-			
-
-			}
-
-			
-		</script>
-
-		<%-include('../partials/userFooter')%>
-    <!-- Plugins JS File -->
-    <script src="/assets/js/jquery.min.js"></script>
-    <script src="/assets/js/bootstrap.bundle.min.js"></script>
-    <script src="/assets/js/jquery.hoverIntent.min.js"></script>
-    <script src="/assets/js/jquery.waypoints.min.js"></script>
-    <script src="/assets/js/superfish.min.js"></script>
-    <script src="/assets/js/owl.carousel.min.js"></script>
-    <!-- Main JS File -->
-    <script src="/assets/js/main.js"></script>
-</body>
-
+    <script src="/assets/js/main.js"></script>\
+	
 
 <!-- molla/dashboard.html  22 Nov 2019 10:03:13 GMT -->
 </html>

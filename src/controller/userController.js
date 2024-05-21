@@ -14,6 +14,8 @@ const { Cart, Wishlist } = require('../models/CartAndWishlistModel');
 const { pipeline } = require('nodemailer/lib/xoauth2');
 const Wallet = require('../models/walletModel');
 const Banner = require('../models/bannerModel');
+const Referrel = require('../models/referrelModel');
+const Notification = require('../models/notificationModel');
 
 
 const loadHome = asyncHandler(async (req, res) => {
@@ -21,7 +23,7 @@ const loadHome = asyncHandler(async (req, res) => {
     let banners = await Banner.find({ isListed: true })
     console.log(banners)
 
-    res.status(200).render('user/homePage', { user, banners });
+    res.status(200).render('user/homePage', {  banners });
 
 
 })
@@ -53,10 +55,10 @@ const loadShop = asyncHandler(async (req, res) => {
         }
     }
     if (sort == 'high to Low') {
-        sort = { 'products.price': -1 }
-    } else if (sort == 'low-to-High') sort = { 'products.price': 1 }
+        sort = { 'minimumPrice': -1 }
+    } else if (sort == 'low-to-High') sort = { 'minimumPrice': 1 }
     else if (sort == 'date') sort = { 'products.createdAt': -1 }
-    else if (sort == 'rating' || sort == '') sort = { 'products.avgRating': -1 }
+    else if (sort == 'rating' || sort == '') sort = { 'reviewAvg:': -1 }
 
 
     let categories = await Category.find({ isListed: true })
@@ -78,6 +80,9 @@ const loadShop = asyncHandler(async (req, res) => {
             }
         },
         {
+            $unwind: '$products'
+        },
+        {
             $lookup: {
                 from: 'reviews',
                 localField: 'product',
@@ -86,30 +91,134 @@ const loadShop = asyncHandler(async (req, res) => {
             }
         },
         {
-            $unwind: '$products'
-        },
-        {
-            $match: matchValue
-        },
-        {
-            $match: {
-                'products.title': { $regex: search, $options: "i" },
-
+            $lookup: {
+                from: 'offers',
+                localField: 'products._id',
+                foreignField: 'productIds',
+                as: 'productOffer',
+                pipeline: [
+                    {
+                        $match: {
+                            isListed: true
+                        }
+                    }
+                ]
             }
         },
         {
-            $sort: sort
+            $lookup: {
+                from: 'offers',
+                localField: 'products.category.Category',
+                foreignField: 'appliedCategory',
+                as: 'categoryOffer',
+                pipeline: [
+                    {
+                        $match: {
+                            isListed: true
+                        }
+                    }
+                ]
+            }
+
+
+        },
+      
+        {
+            $addFields: {
+                shouldUnwindCategory: {
+                    $cond: [{
+                        $eq: [{
+                            $size: '$categoryOffer'
+                        }, 0]
+                    },
+                        false,
+                        true
+                    ]
+                },
+                shouldUnwindProduct: {
+                    $cond: [{
+                        $eq: [{
+                            $size: '$productOffer'
+                        }, 0]
+                    },
+                        false,
+                        true
+                    ]
+                }
+            }
+
         },
         {
-            $skip: page * limit
+            $unwind: {
+                path: '$productOffer',
+                preserveNullAndEmptyArrays: true
+            },
         },
         {
-            $limit: limit
+            $unwind: {
+                path: '$categoryOffer',
+                preserveNullAndEmptyArrays: true,
+            }
+
+        },
+        {
+            $addFields: {
+                reviewAvg: {
+                    $avg: '$reviews.rating'
+                },
+                totalStock: {
+                    $sum: '$sizeVariant.stock'
+
+                },
+
+                categoryOfferPrice: {
+                    $cond: [
+                        '$shouldUnwindCategory',
+                        {
+                            $subtract: ['$products.price',
+                                {
+                                    $multiply: ['$products.price',
+                                        {
+                                            $divide: ['$categoryOffer.discount', 100]
+                                        }
+                                    ]
+                                }
+                            ]
+
+                        },
+                        null
+                    ]
+
+                },
+                productOfferPrice: {
+                    $cond: [
+                        '$shouldUnwindProduct',
+                        {
+                            $subtract: ['$products.price',
+                                {
+                                    $multiply: ['$products.price',
+                                        {
+                                            $divide: ['$productOffer.discount', 100]
+                                        }
+                                    ]
+                                }
+                            ]
+
+                        },
+                        null
+                    ]
+
+                },
+               
+            }
         },
         {
             $addFields: {
                 totalStock: {
                     $sum: '$sizeVariant.stock'
+                },
+                minimumPrice: {
+                    $min: ['$productOfferPrice', '$categoryOfferPrice', '$products.price']
                 },
                 reviewAvg: {
                     $avg: '$reviews.rating'
@@ -129,6 +238,7 @@ const loadShop = asyncHandler(async (req, res) => {
                 sizeVariant: 1,
                 totalStock: 1,
                 category: 1,
+                minimumPrice: 1,
                 'products._id': 1,
                 'products.title': 1,
                 'products.category': 1,
@@ -143,14 +253,33 @@ const loadShop = asyncHandler(async (req, res) => {
                 'products.createdAt': 1,
                 'products.updatedAt': 1
             }
-        }
+        },     
+        {
+            $match: matchValue
+        },
+        {
+            $match: {
+                'products.title': { $regex: search, $options: "i" },
+
+            }
+        },
+        {
+            $sort: sort
+        },
+        {
+            $skip: page * limit
+        },
+        {
+            $limit: limit
+        },
+        
     ]);
-    console.log(inventory)
+
 
 
     let count = await Product.countDocuments()
 
-    res.render('user/shopPage', { user, inventory, count, categories });
+    res.render('user/shopPage', { inventory, count, categories });
 
 
 
@@ -160,75 +289,10 @@ const loadWishlist = asyncHandler(async (req, res) => {
 
 
     let user = req.session.user ? req.session.user : null;
-
-    let wishlist = await Wishlist.find({ user: user._id }).populate('product');
-    console.log('wishlist', wishlist);
-
-    res.render('user/wishlistPage', { user, wishlist });
-
-
-
-
-
-})
-
-const loadCart = asyncHandler(async (req, res) => {
-
-
-    let user = req.session.user ? req.session.user : null;
-    let cart = await Cart.findOne({ user }).populate('products.product');
-    console.log((cart))
-
-    res.render('user/cartPage', { user, cart });
-
-
-})
-
-const loadCheckout = asyncHandler(async (req, res) => {
-    // if(! req.session.allowedToCheckout) {
-    //     return res.status(401)
-    //     .redirect('/api/v1/')
-
-    // }
-    // const referrer = req.get('Referrer');
-    // console.log(referrer)
-    // if (!referrer || !referrer.includes('/cart')) {
-    //     console.log('comes here');
-    //     return res.status(401)
-    //     .redirect('/api/v1/')
-
-    // }
-
-
-    let user = req.session.user ? req.session.user : null;
-
-    if (user) {
-        let cartData = await Cart.findOne({ user }).populate('products.product')
-        cartData = cartData ?? []
-        let address = await Address.find({ user });
-        address = address ?? []
-        let coupons = await Coupon.find({ isListed: true })
-        let wallet = await Wallet.findOne({ user: user._id }).select('balance');
-        coupons = coupons ?? []
-        res.render('user/checkoutPage', { user, cartData, address, coupons, wallet });
-
-    }
-
-
-
-
-})
-
-const loadProductDetail = asyncHandler(async (req, res) => {
-
-    let productId = req.query['id'];
-    console.log(productId)
-
-    let user = req.session.user ? req.session.user : null;
-    let product = await Inventory.aggregate([
+    let wishlist = await Wishlist.aggregate([
         {
             $match: {
-                product: new mongoose.Types.ObjectId(productId)
+                user: new mongoose.Types.ObjectId(user._id)
 
             }
         },
@@ -240,35 +304,9 @@ const loadProductDetail = asyncHandler(async (req, res) => {
                 as: 'product'
             }
 
-        },       
-        {
-            $lookup: {
-                from: 'reviews',
-                localField: 'product._id',
-                foreignField: 'product',
-                as: 'reviews',
-                pipeline: [
-                    {
-                        $lookup: {
-                            from: 'users',
-                            localField: 'user',
-                            foreignField: '_id',
-                            as: 'user',
-                            pipeline: [{
-
-                                $project: {
-                                    name: 1
-                                }
-                            }]
-
-                        }
-
-                    },
-                ]
-
-            }
         },
        
+
         {
             $lookup: {
                 from: 'offers',
@@ -309,20 +347,605 @@ const loadProductDetail = asyncHandler(async (req, res) => {
                 shouldUnwindCategory: {
                     $cond: [{
                         $eq: [{
-                            $size: '$categoryOffer' },0]
+                            $size: '$categoryOffer'
+                        }, 0]
                     },
-                    false,
-                    true
-                ]
+                        false,
+                        true
+                    ]
                 },
                 shouldUnwindProduct: {
                     $cond: [{
                         $eq: [{
-                            $size: '$productOffer'},0]
+                            $size: '$productOffer'
+                        }, 0]
                     },
-                    false,
-                    true
+                        false,
+                        true
+                    ]
+                }
+            }
+
+        },
+        {
+            $unwind: {
+                path: '$productOffer',
+                preserveNullAndEmptyArrays: true
+            },
+        },
+        {
+            $unwind: {
+                path: '$categoryOffer',
+                preserveNullAndEmptyArrays: true,
+            }
+
+        },
+        {
+            $addFields: {
+              
+                categoryOfferPrice: {
+                    $cond: [
+                        '$shouldUnwindCategory',
+                        {
+                            $subtract: ['$product.price',
+                                {
+                                    $multiply: ['$product.price',
+                                        {
+                                            $divide: ['$categoryOffer.discount', 100]
+                                        }
+                                    ]
+                                }
+                            ]
+
+                        },
+                        null
+                    ]
+
+                },
+                productOfferPrice: {
+                    $cond: [
+                        '$shouldUnwindProduct',
+                        {
+                            $subtract: ['$product.price',
+                                {
+                                    $multiply: ['$product.price',
+                                        {
+                                            $divide: ['$productOffer.discount', 100]
+                                        }
+                                    ]
+                                }
+                            ]
+
+                        },
+                        null
+                    ]
+
+                },
+               
+            }
+        },
+        {
+            $addFields: {
+                minimumPrice: {
+                    $min: ['$productOfferPrice', '$categoryOfferPrice', '$product.price']
+                },
+                
+            },
+           
+        },
+        
+        {
+            $project: {
+                categoryOffer: 0,
+                productOffer: 0,
+                shouldUnwindCategory: 0,
+                shouldUnwindProduct: 0
+
+        
+                
+            }
+        }
+
+    ])
+
+
+ 
+
+    res.render('user/wishlistPage', {  wishlist });
+
+
+
+
+
+})
+
+const loadCart = asyncHandler(async (req, res) => {
+
+
+    let user = req.session.user ? req.session.user : null;
+    let cart = await Cart.aggregate([
+        {
+            $match: {
+                user: new mongoose.Types.ObjectId(user._id)
+
+            }
+        },
+        {
+            $unwind: '$products'
+        },
+        {
+            $lookup: {
+                from: 'products',
+                localField: 'products.product',
+                foreignField: '_id',
+                as: 'product',
+            
+            }
+
+        },
+       
+
+        {
+            $lookup: {
+                from: 'offers',
+                localField: 'product._id',
+                foreignField: 'productIds',
+                as: 'productOffer',
+                pipeline: [
+                    {
+                        $match: {
+                            isListed: true
+                        }
+                    }
                 ]
+            }
+        },
+        {
+            $lookup: {
+                from: 'offers',
+                localField: 'product.category.Category',
+                foreignField: 'appliedCategory',
+                as: 'categoryOffer',
+                pipeline: [
+                    {
+                        $match: {
+                            isListed: true
+                        }
+                    }
+                ]
+            }
+
+
+        },
+        {
+            $unwind: '$product'
+        },
+        {
+            $addFields: {
+                shouldUnwindCategory: {
+                    $cond: [{
+                        $eq: [{
+                            $size: '$categoryOffer'
+                        }, 0]
+                    },
+                        false,
+                        true
+                    ]
+                },
+                shouldUnwindProduct: {
+                    $cond: [{
+                        $eq: [{
+                            $size: '$productOffer'
+                        }, 0]
+                    },
+                        false,
+                        true
+                    ]
+                }
+            }
+
+        },
+        {
+            $unwind: {
+                path: '$productOffer',
+                preserveNullAndEmptyArrays: true
+            },
+        },
+        {
+            $unwind: {
+                path: '$categoryOffer',
+                preserveNullAndEmptyArrays: true,
+            }
+
+        },
+        {
+            $addFields: {
+              
+                categoryOfferPrice: {
+                    $cond: [
+                        '$shouldUnwindCategory',
+                        {
+                            $subtract: ['$product.price',
+                                {
+                                    $multiply: ['$product.price',
+                                        {
+                                            $divide: ['$categoryOffer.discount', 100]
+                                        }
+                                    ]
+                                }
+                            ]
+
+                        },
+                        null
+                    ]
+
+                },
+                productOfferPrice: {
+                    $cond: [
+                        '$shouldUnwindProduct',
+                        {
+                            $subtract: ['$product.price',
+                                {
+                                    $multiply: ['$product.price',
+                                        {
+                                            $divide: ['$productOffer.discount', 100]
+                                        }
+                                    ]
+                                }
+                            ]
+
+                        },
+                        null
+                    ]
+
+                },
+               
+            }
+        },
+        {
+            $addFields: {
+                minimumPrice: {
+                    $round: [
+                        {
+                             $min: ['$productOfferPrice', '$categoryOfferPrice', '$product.price']
+                            }
+                        ]
+                   
+                },
+                
+            },
+           
+        },
+        
+        {
+            $project: {
+                categoryOffer: 0,
+                productOffer: 0,
+                shouldUnwindCategory: 0,
+                shouldUnwindProduct: 0,
+                
+
+        
+                
+            }
+        }
+
+    ])
+ 
+
+    res.render('user/cartPage', {  cart });
+
+
+})
+
+const loadCheckout = asyncHandler(async (req, res) => {
+    // if(! req.session.allowedToCheckout) {
+    //     return res.status(401)
+    //     .redirect('/api/v1/')
+
+    // }
+    // const referrer = req.get('Referrer');
+    // console.log(referrer)
+    // if (!referrer || !referrer.includes('/cart')) {
+    //     console.log('comes here');
+    //     return res.status(401)
+    //     .redirect('/api/v1/')
+
+    // }
+
+
+    let user = req.session.user ? req.session.user : null;
+
+    if (user) {
+        let cartData = await Cart.aggregate([
+            {
+                $match: {
+                    user: new mongoose.Types.ObjectId(user._id)
+    
+                }
+            },
+            {
+                $unwind: '$products'
+            },
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: 'products.product',
+                    foreignField: '_id',
+                    as: 'product',
+                
+                }
+    
+            },
+           
+    
+            {
+                $lookup: {
+                    from: 'offers',
+                    localField: 'product._id',
+                    foreignField: 'productIds',
+                    as: 'productOffer',
+                    pipeline: [
+                        {
+                            $match: {
+                                isListed: true
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                $lookup: {
+                    from: 'offers',
+                    localField: 'product.category.Category',
+                    foreignField: 'appliedCategory',
+                    as: 'categoryOffer',
+                    pipeline: [
+                        {
+                            $match: {
+                                isListed: true
+                            }
+                        }
+                    ]
+                }
+    
+    
+            },
+            {
+                $unwind: '$product'
+            },
+            {
+                $addFields: {
+                    shouldUnwindCategory: {
+                        $cond: [{
+                            $eq: [{
+                                $size: '$categoryOffer'
+                            }, 0]
+                        },
+                            false,
+                            true
+                        ]
+                    },
+                    shouldUnwindProduct: {
+                        $cond: [{
+                            $eq: [{
+                                $size: '$productOffer'
+                            }, 0]
+                        },
+                            false,
+                            true
+                        ]
+                    }
+                }
+    
+            },
+            {
+                $unwind: {
+                    path: '$productOffer',
+                    preserveNullAndEmptyArrays: true
+                },
+            },
+            {
+                $unwind: {
+                    path: '$categoryOffer',
+                    preserveNullAndEmptyArrays: true,
+                }
+    
+            },
+            {
+                $addFields: {
+                  
+                    categoryOfferPrice: {
+                        $cond: [
+                            '$shouldUnwindCategory',
+                            {
+                                $subtract: ['$product.price',
+                                    {
+                                        $multiply: ['$product.price',
+                                            {
+                                                $divide: ['$categoryOffer.discount', 100]
+                                            }
+                                        ]
+                                    }
+                                ]
+    
+                            },
+                            null
+                        ]
+    
+                    },
+                    productOfferPrice: {
+                        $cond: [
+                            '$shouldUnwindProduct',
+                            {
+                                $subtract: ['$product.price',
+                                    {
+                                        $multiply: ['$product.price',
+                                            {
+                                                $divide: ['$productOffer.discount', 100]
+                                            }
+                                        ]
+                                    }
+                                ]
+    
+                            },
+                            null
+                        ]
+    
+                    },
+                   
+                }
+            },
+            {
+                $addFields: {
+                    minimumPrice: {
+                        $round: [
+                            {
+                                 $min: ['$productOfferPrice', '$categoryOfferPrice', '$product.price']
+                                }
+                            ]
+                       
+                    },
+                    
+                },
+               
+            },
+            
+            {
+                $project: {
+                    categoryOffer: 0,
+                    productOffer: 0,
+                    shouldUnwindCategory: 0,
+                    shouldUnwindProduct: 0,
+                    
+    
+            
+                    
+                }
+            }
+    
+        ])
+     
+        let address = await Address.find({ user });
+        address = address ?? []
+        let coupons = await Coupon.find({ isListed: true })
+        let wallet = await Wallet.findOne({ user: user._id }).select('balance');
+        coupons = coupons ?? []
+        res.render('user/checkoutPage', {  cartData, address, coupons, wallet });
+
+    }
+
+
+
+
+})
+
+const loadProductDetail = asyncHandler(async (req, res) => {
+
+    let productId = req.query['id'];
+    console.log(productId)
+
+    let user = req.session.user ? req.session.user : null;
+    let product = await Inventory.aggregate([
+        {
+            $match: {
+                product: new mongoose.Types.ObjectId(productId)
+
+            }
+        },
+        {
+            $lookup: {
+                from: 'products',
+                localField: 'product',
+                foreignField: '_id',
+                as: 'product'
+            }
+
+        },
+        {
+            $lookup: {
+                from: 'reviews',
+                localField: 'product._id',
+                foreignField: 'product',
+                as: 'reviews',
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: 'users',
+                            localField: 'user',
+                            foreignField: '_id',
+                            as: 'user',
+                            pipeline: [{
+
+                                $project: {
+                                    name: 1
+                                }
+                            }]
+
+                        }
+
+                    },
+                ]
+
+            }
+        },
+
+        {
+            $lookup: {
+                from: 'offers',
+                localField: 'product._id',
+                foreignField: 'productIds',
+                as: 'productOffer',
+                pipeline: [
+                    {
+                        $match: {
+                            isListed: true
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $lookup: {
+                from: 'offers',
+                localField: 'product.category.Category',
+                foreignField: 'appliedCategory',
+                as: 'categoryOffer',
+                pipeline: [
+                    {
+                        $match: {
+                            isListed: true
+                        }
+                    }
+                ]
+            }
+
+
+        },
+        {
+            $unwind: '$product'
+        },
+        {
+            $addFields: {
+                shouldUnwindCategory: {
+                    $cond: [{
+                        $eq: [{
+                            $size: '$categoryOffer'
+                        }, 0]
+                    },
+                        false,
+                        true
+                    ]
+                },
+                shouldUnwindProduct: {
+                    $cond: [{
+                        $eq: [{
+                            $size: '$productOffer'
+                        }, 0]
+                    },
+                        false,
+                        true
+                    ]
                 }
             }
 
@@ -349,26 +972,83 @@ const loadProductDetail = asyncHandler(async (req, res) => {
                     $sum: '$sizeVariant.stock'
 
                 },
-                categoryPrice: {
-                    $subtract: ['$product.price',
+
+                categoryOfferPrice: {
+                    $cond: [
+                        '$shouldUnwindCategory',
                         {
-                            $multiply:['$product.price', 
+                            $subtract: ['$product.price',
                                 {
-                                    $divide: ['$categoryOffer.discount', 100]
+                                    $multiply: ['$product.price',
+                                        {
+                                            $divide: ['$categoryOffer.discount', 100]
+                                        }
+                                    ]
                                 }
                             ]
-                        }
+
+                        },
+                        null
                     ]
 
+                },
+                productOfferPrice: {
+                    $cond: [
+                        '$shouldUnwindProduct',
+                        {
+                            $subtract: ['$product.price',
+                                {
+                                    $multiply: ['$product.price',
+                                        {
+                                            $divide: ['$productOffer.discount', 100]
+                                        }
+                                    ]
+                                }
+                            ]
+
+                        },
+                        null
+                    ]
+
+                },
+               
+            }
+        },
+        {
+            $addFields: {
+                minimumPrice: {
+                    $min: ['$productOfferPrice', '$categoryOfferPrice', '$product.price']
+                },
+                Category: {
+                    $first: '$product.category.Category'
+                },
+                Brand: {
+                    $first: '$product.category.Brands'
+                },
+                Gender: {
+                    $first: '$product.category.Gender'
                 }
+
+            },
+           
+        },
+        
+        {
+            $project: {
+                categoryOffer: 0,
+                productOffer: 0,
+                shouldUnwindCategory: 0,
+                shouldUnwindProduct: 0
+
+        
+                
             }
         }
 
     ])
 
 
-    console.log( product)
-    res.status(200).render('user/productDetail', { user, product: product[0] });
+    res.status(200).render('user/productDetail', { product: product[0] });
 
 
 
@@ -376,7 +1056,7 @@ const loadProductDetail = asyncHandler(async (req, res) => {
 
 
 const loadProfile = asyncHandler(async (req, res, next) => {
-
+    
     let user = req.session.user ? req.session.user : null;
     if (user) {
         let wallet = await Wallet.findOne({ user: user._id }).populate('user')
@@ -387,7 +1067,15 @@ const loadProfile = asyncHandler(async (req, res, next) => {
                     email: user.email
                 }
             },
+            {
+                $lookup: {
+                    from: 'referrels',
+                    localField: '_id',
+                    foreignField: 'user',
+                    as: 'referrels'
+                }
 
+            },
             {
                 $lookup: {
                     from: 'addresses',
@@ -403,7 +1091,8 @@ const loadProfile = asyncHandler(async (req, res, next) => {
 
         ])
         console.log(userProfile)
-        res.render("user/userProfile", { user, userProfile: userProfile[0], wallet })
+    
+        res.render("user/userProfile", {  userProfile: userProfile[0], wallet })
     }
 
 
@@ -413,7 +1102,7 @@ const loadProfile = asyncHandler(async (req, res, next) => {
 
 const loadAddAddress = asyncHandler(async (req, res) => {
     let user = req.session.user ?? null;
-    res.render('user/addAddress', { user });
+    res.render('user/addAddress');
 
 })
 
@@ -425,6 +1114,7 @@ const editAddress = asyncHandler(async (req, res) => {
         req.session.user.editAddressId = id
 
         let address = await Address.findById({ _id: id })
+        res.render('user/editAddress', {address})
     }
 
 })
@@ -440,7 +1130,7 @@ const loadOrderSuccess = asyncHandler(async (req, res) => {
         .populate('user')
         .populate('address')
 
-    res.render('user/orderSuccess', { user, currentOrder, orderId })
+    res.render('user/orderSuccess', {  currentOrder, orderId })
 
 
 })
@@ -452,9 +1142,79 @@ const loadWallet = asyncHandler(async (req, res) => {
     let user = req.session.user ?? null;
 
 
-    res.render('user/userWallet', { user, wallet })
+    res.render('user/userWallet', {  wallet })
 })
 
+const loadUserNotifications = asyncHandler(async (req, res) => {
+
+    let user = req.session.user;
+    if(!user) {
+        res.redirect('/api/v1')
+    }
+    let notifications =  await Notification.find({recipient: user._id}).sort({createdAt: -1});
+    console.log('notifications', notifications);
+    res.render('user/notifications', {notifications, page: 0, total: 0})
+})
+
+const applyUserReferrel = asyncHandler(async (req, res, next) => {
+     console.log('===========================',req.body);
+     let code = req.body.code
+     let referrel = await Referrel.findOne({code});
+     if(!referrel) {
+        return res.status(400)
+            .json({
+                error: true,
+                success: false,
+                message: 'Incorrect referrel code!'
+
+        })
+     }
+     let user = req.session.user;
+
+     await Wallet.findOneAndUpdate({
+        user: referrel.user
+     },
+     {
+        $inc: {
+            balance: 500
+        },
+        $push: {
+            transactions: {
+                mode: 'Credit',
+                amount: 500,
+                description: 'Referrel Offer amount credited'
+
+            }
+        }
+     }
+    )
+
+    await Wallet.findOneAndUpdate({
+        user: user._id
+     },
+     {
+        $inc: {
+            balance: 200
+        },
+        $push: {
+            transactions: {
+                mode: 'Credit',
+                amount: 200,
+                description: 'Referrel Offer amount credited'
+
+            }
+        }
+     }
+    )
+
+    return res.status(200)
+        .json({
+            success: true,
+            error: false,
+            message: 'Referrel applied successfully'
+        })
+
+})
 
 
 
@@ -482,8 +1242,10 @@ module.exports = {
     loadAddAddress,
     editAddress,
     loadOrderSuccess,
-
-    loadWallet
+    loadUserNotifications,
+    loadWallet,
+    applyUserReferrel,
+    
 
 
 

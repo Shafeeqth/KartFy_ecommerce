@@ -693,13 +693,23 @@
           return;
         }
         
-        if (isNaN(Number(discount)) || discount > 100 || discount.length <= 0 || discount <= 0) {
+        
+        if (isNaN(Number(discount)) || discount.length <= 0 || discount <= 0) {
           displayErrorMessage(
             form,
             "discount",
             "Please enter a valid discount percentage."
           );
           return;
+        }
+        if(discount > 95){
+          displayErrorMessage(
+            form,
+            "discount",
+            "Discount maximum is 95."
+          );
+          return;
+
         }
         
         if (selecteditems.selectedOptions.length == 0 ) {
@@ -744,6 +754,107 @@
         form.submit();
       });
     }
+
+
+
+
+const form = document.querySelector("#exampleModal2 form");
+
+form.addEventListener("submit", function (event) {
+  // Prevent the form from submitting by default
+  event.preventDefault();
+
+  // Remove previous error messages
+  clearErrorMessages(form);
+  console.log('comes hree')
+
+  // Perform validation
+  const name = form.elements.name.value.trim();
+  const edate = form.elements.edate.value;
+  const description = form.elements.description.value.trim();
+
+  const discount = form.elements.discount.value.trim();
+ 
+  // return console.log(selecteditems.selectedOptions)
+
+  if (!/^(?=.*\S)[a-zA-Z0-9 ]{3,30}$/.test(name)) {
+    displayErrorMessage(form, "name", "Please enter a valid coupon name.");
+    return;
+  }
+
+ 
+
+  if (!/^(?=.*\S)[a-zA-Z0-9 ]{10,30}$/.test(name)) {
+    displayErrorMessage(
+      form,
+      "description",
+      "Description must be 10 charectors."
+    );
+    return;
+  }
+  
+  
+  if (isNaN(Number(discount)) || discount.length <= 0 || discount <= 0) {
+    displayErrorMessage(
+      form,
+      "discount",
+      "Please enter a valid discount percentage."
+    );
+    return;
+  }
+  if(discount > 95){
+    displayErrorMessage(
+      form,
+      "discount",
+      "Discount maximum is 95."
+    );
+    return;
+
+  }
+  
+  
+  
+  const dateRegex =/^(?:19|20)\d\d-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])$/;
+  console.log(edate)
+
+
+  if (edate.length < 1 || !dateRegex.test(edate)) {
+    
+    displayErrorMessage(
+      form,
+      "edate",
+      "Invalid date format. Please use dd-mm-yyyy."
+    );
+    return;
+
+    if(edate < new Date.now()) {
+      displayErrorMessage(
+      form,
+      "edate",
+      "End date must be greater than current date."
+    );
+    return;
+
+    }
+  }
+
+
+
+
+
+ 
+
+  // Validate discount amount is a number
+  
+
+  // If all validations pass, you can submit the form
+  form.submit();
+});
+
+
+
+
+
 
     function displayErrorMessage(form, fieldName, message) {
       const field = form.elements[fieldName];

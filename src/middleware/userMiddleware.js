@@ -21,21 +21,6 @@ const { findOneAndUpdate } = require('../models/walletModel');
 /*==================================================User Authentication=================================================== */
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 const isUserAutharized = asyncHandler(async (req, res, next) => {
 
 
@@ -54,70 +39,106 @@ const isUserAutharized = asyncHandler(async (req, res, next) => {
     next()
 
 
-    // let id = req.session.user._id
+})
 
-    // let user = await User.aggregate([
-    //     {
-    //         $match:
-    //         {
-    //             _id: new mongoose.Types.ObjectId(id),
-    //             isBlocked: false
-    //         }
-    //     },
-    //     {
-    //         $project: {
-    //             _id: 1,
-    //             name: 1
-    //         }
-    //     },
+const userHeaderPopulator = asyncHandler(async (req, res, next) => {
+    
+    let user = req.session.user ?? null
+    if(!user) {
+        res.locals.user =  null
+       return  next();
+    }
+     user = await User.aggregate([
+        {
+            $match:
+            {
+                _id: new mongoose.Types.ObjectId(user._id),
+                
+            }
+        },
+        {
+            $project: {
+                _id: 1,
+                name: 1
+            }
+        },
+        {
+            $lookup: {
+                from: 'notifications',
+                localField: '_id',
+                foreignField: 'recipient',
+                as: 'notifications',
+                pipeline: [
+                    {
+                        $match:{
+                            read: false
+                        }
+                    }
+                ]
+               
+            }
+        },     
+        {
+            $lookup: {
+                from: 'carts',
+                localField: '_id',
+                foreignField: 'user',
+                as: 'cart',
+               
+            }
+        },
+        {
+            $lookup: {
+                from: 'wishlists',
+                localField: '_id',
+                foreignField: 'user',
+                as: 'wishlist',
+            }
+        },
         
+        {
+            $unwind: {
+                path: '$cart',
+                preserveNullAndEmptyArrays: true,
+            }
 
-    //     {
-    //         $lookup: {
-    //             from: 'carts',
-    //             localField: '_id',
-    //             foreignField: 'user',
-    //             as: 'cart',
-    //             pipeline: [{
-    //                 $unwind: '$products'
-    //                 },{
-    //                     $project: {
-    //                         products: 1
-    //                     }
-    //                 }
-    //             ]
-    //         }
-    //     },
-    //     {
-    //         $unwind: '$cart'
-    //     },
-    //     {
-    //         $unwind: '$cart.products'
-    //     },
-    //     {
-    //         $unwind: '$cart.products'
-    //     },       
-    //     {
-    //         $group: {
-    //             _id: null,
-    //             cartCount : {
-    //                 $sum: '$cart.products.quantity'
-    //             },
-               
-               
-               
+        },
+        {
+            $addFields: {
+                cartCount: {
+                    $sum: '$cart.products.quantity'
+                },
+                wishlistCount: {
+                    $size: '$wishlist'
+                },
+                notificationCount: {
+                    $size: '$notifications'
+                }
+            }
+        },
+        {
+            $project: {
+                cartCount: 1,
+                wishlistCount: 1,
+                name: 1,
+                notificationCount: 1
+            }
+        }
+       
 
-               
-               
-    //         }
-    //     }
-
-    // ])
-    // res.locals.userName = await User.findOne({_id: id}, {_id: 0, name: 1})
-    // console.log(res.locals.userName )
-    // res.locals.cartCount = user[0].cartCount
-    // res.locals.wishlistCount = await Wishlist.countDocuments({user: id})
-    // console.log(JSON.stringify(user), 'user')
+    ])
+   
+   
+    user = {
+        wishlistCount : user[0]?.wishlistCount,
+        cartCount: user[0]?.cartCount,
+        userName: user[0]?.name,
+        notificationCount: user[0]?.notificationCount,
+    }
+    console.log(user)
+    res.locals.user = user;
+    
+    next();
 
 })
 
@@ -147,7 +168,7 @@ const addToCart = asyncHandler(async (req, res, next) => {
 
     
     let inventory = await Inventory.findOne({ product: id }).populate('product')
-    console.log('Inventory', inventory)
+  
     
 
     let product = inventory.sizeVariant.find(item => item.size == size);
@@ -160,8 +181,11 @@ const addToCart = asyncHandler(async (req, res, next) => {
 
         })
     }
-    console.log(product, 'product')
     let userCart = await Cart.findOne({ user });
+    if (userCart && userCart.isCouponApplied) {
+        await userCart.removeCouponIfApplied();
+    }
+
    
     if (!product.stock > 0) {
         return res.json({
@@ -172,10 +196,8 @@ const addToCart = asyncHandler(async (req, res, next) => {
 
 
     }
-    if(userCart && userCart.isCouponApplied) {
-        userCart.isCouponApplied = false,
-        delete userCart.coupon;
-    }
+    
+    console.log('userCart)', userCart)
 
     if (addToCartFromWishlist === true) {
      
@@ -314,44 +336,27 @@ const removeFromCart = asyncHandler(async (req, res, next) => {
 
     let user = req.session.user
     let { id, size, total } = req.body;
-    let product = await Product.findOne({ _id: id })
+    console.log(req.body)
+  
     let userCart = await Cart.findOne({ user:user._id });
-    if(userCart && userCart.isCouponApplied) {
-        userCart.isCouponApplied = false,
    
-        await Coupon.findOneAndUpdate({
-            couponCode: userCart.coupon.code
-        },
-        {
-            $pull: {
-                appliedUsers: user._id
-            }
-        },
-        {
-            new: true
-
-        }
-    )
-    userCart.totalPrice += userCart.coupon.discount;
-    delete userCart.coupon
+    if (userCart && userCart.isCouponApplied) {
+        await userCart.removeCouponIfApplied();
     }
     await userCart.save()
 
 
-    await Cart.updateOne({
+    let cart = await Cart.findOneAndUpdate({
         user: user._id
     },
         {
             $pull: {
-                products: { _id: id }
+                products: { _id: new mongoose.Types.ObjectId(id )}
             },
-            $inc: {
-                cartTotal: -1 * total
-
-            }
-
+    
         }
     );
+     console.log(cart, 'cart')
     return res
         .status(200)
         .json({
@@ -483,28 +488,9 @@ const updateCartCount = asyncHandler(async (req, res, next) => {
     }
 
    
-    let userCart = await Cart.findOne({
-        user,
-    });
-  
-    if(userCart && userCart.isCouponApplied) {
-        userCart.isCouponApplied = false,
-   
-        await Coupon.findOneAndUpdate({
-            couponCode: userCart.coupon.code
-        },
-        {
-            $pull: {
-                appliedUsers: user
-            }
-        },
-        {
-            new: true
-
-        }
-    )
-    userCart.totalPrice += userCart.coupon.discount;
-    delete userCart.coupon
+    let userCart = await Cart.findOne({ user });
+    if (userCart && userCart.isCouponApplied) {
+        await userCart.removeCouponIfApplied();
     }
    
 
@@ -591,10 +577,11 @@ const findDeliveryCharge = asyncHandler(async (req, res, next) => {
 const addAddress = asyncHandler(async (req, res, next) => {
 
     let user = req.session?.user
-    if (!user) res.redirect('/api/v1/')
+    if (!user) res.redirect('/api/v1/');
+ console.log('body', req.body)
     let body = req.body;
     body.user = req.session.user._id;
-    console.log('===========================================================', body)
+   
     let { name, phone, alternatePhone, state, district, locality, pincode, street, type } = req.body
     // let { error, value } = userHelper.addressValidator.validate({ name, phone, alternatePhone, locality, district, pincode, street });
     // if (error) {
@@ -602,7 +589,13 @@ const addAddress = asyncHandler(async (req, res, next) => {
     //     return res.redirect('/api/v1/profile/add-address')
     // }
     let address = await Address.create(body);
-    res.redirect('/api/v1/profile')
+    return res.status(201)
+        .json({
+            success: true,
+            error: false,
+            data: address,
+            message: 'Address added successfully.'
+        })
     
 
 
@@ -632,6 +625,7 @@ const editAddress = asyncHandler(async (req, res, next) => {
 
     let user = req.session.user
     console.log(req.body)
+   
     if (user) {
 
         let id = req.session.user.editAddressId;
@@ -652,8 +646,8 @@ const editAddress = asyncHandler(async (req, res, next) => {
         req.session.user.editAddressId = undefined
 
 
-        try {
-            await Address.updateOne({
+    
+          let address =  await Address.findOneAndUpdate({
                 _id: new mongoose.Types.ObjectId(id)
             },
                 {
@@ -669,15 +663,16 @@ const editAddress = asyncHandler(async (req, res, next) => {
                         street
                     }
                 });
-        } catch (error) {
-            consoel.log(error)
-
-        }
-        res.redirect('/api/v1/profile')
-
-    } else {
-
+        
+        return res.status(201)
+        .json({
+            success: true,
+            error: false,
+            data: address,
+            message: 'Address edited successfully.'
+        })
     }
+   
 
 })
 
@@ -906,6 +901,7 @@ module.exports = {
 
 
     findDeliveryCharge,
+    userHeaderPopulator,
     
 
 

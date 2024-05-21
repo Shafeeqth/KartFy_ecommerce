@@ -118,15 +118,20 @@
                   <td><%= product.product.title %></td>
                   <td><%= product.size %></td>
                   <td><%= product.quantity %></td>
-                  <td>₹ <%= product.product.price %>.00</td>
-                  <td>₹ <%= product.product.price * product.quantity %>.00</td>
+                  <td>₹ <%= product.totalPrice %>.00</td>
+                  <td>₹ <%= product.totalPrice * product.quantity %>.00</td>
                   <!-- <td><%= product.status === "returned" ? "Yes" : "No" %></td> -->
                 </tr>
             <% }) } %>
             <tr>
-              <td colspan="5" class="text-right"><strong>Discount:</strong></td>
-              <td class="text-danger">₹ <% if(order.coupon) { %><%= order.coupon.discount %><% } else { %>00<% } %></td>
+              <td colspan="5" class="text-right"><strong>Delivery Charge:</strong></td>
+              <td class="text-danger">₹ <% if(order.deliveryCharge) { %><%= order.deliveryCharge %><% } else { %>00<% } %>.00</td>
             </tr>
+            <tr>
+              <td colspan="5" class="text-right"><strong>Coupon Discount:</strong></td>
+              <td class="text-danger">₹ <% if(order.coupon) { %><%= order.coupon.discount %><% } else { %>00<% } %>.00</td>
+            </tr>
+            
             <tr>
               <td colspan="5" class="text-right"><strong>Total:</strong></td>
               <td class="text-danger">₹ <%= order.orderAmount  %>.00</td>

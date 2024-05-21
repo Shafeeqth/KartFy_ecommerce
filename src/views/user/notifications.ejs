@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+
+
+<!-- Cartfy/index-17.html  22 Nov 2019 10:00:25 GMT -->
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>KartFy - Online shopping </title>
+    <meta name="keywords" content="HTML5 Template">
+    <meta name="description" content="KartFy - Bootstrap eCommerce Template">
+    <meta name="author" content="p-themes">
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/icons/favicon-16x16.png">
+    <link rel="manifest" href="/assets/images/icons/site.html">
+    <link rel="mask-icon" href="/assets/images/icons/safari-pinned-tab.svg" color="#666666">
+    <link rel="shortcut icon" href="/assets/images/icons/favicon.ico">
+    <meta name="apple-mobile-web-app-title" content="Molla">
+    <meta name="application-name" content="Molla">
+    <meta name="msapplication-TileColor" content="#cc9966">
+    <meta name="msapplication-config" content="/assets/images/icons/browserconfig.xml">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="stylesheet" href="/assets/vendor/line-awesome/line-awesome/line-awesome/css/line-awesome.min.css">
+    <!-- Plugins CSS File -->
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/css/plugins/owl-carousel/owl.carousel.css">
+    <link rel="stylesheet" href="/assets/css/plugins/magnific-popup/magnific-popup.css">
+    <!-- Main CSS File -->
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/skins/skin-demo-17.css">
+    <link rel="stylesheet" href="/assets/css/demos/demo-17.css">
+    <script src="https://kit.fontawesome.com/b5f8202a71.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div class="page-wrapper ">  
+        <header class="header header-6 ">
+            <div class="header-top">
+                <div class="container">
+                    <div class="header-left">
+                        <ul class="top-menu top-link-menu d-none d-md-block">
+                            <li>
+                                <a href="#">Links</a>
+                                <ul>
+                                    <li><a href="tel:+91 9744491844"><i class="icon-phone"></i>Call: +91 9744491844 </a></li>
+                                </ul>
+                            </li>
+                        </ul><!-- End .top-menu -->
+                    </div><!-- End .header-left -->
+
+                    <div class="header-right">
+                        <div class="social-icons social-icons-color">
+                            <a href="#" class="social-icon social-facebook" title="Facebook" target="_blank"><i class="icon-facebook-f"></i></a>
+                            <a href="#" class="social-icon social-twitter" title="Twitter" target="_blank"><i class="icon-twitter"></i></a>
+                            <a href="#" class="social-icon social-instagram" title="Pinterest" target="_blank"><i class="icon-instagram"></i></a>
+                            <a href="#" class="social-icon social-pinterest" title="Instagram" target="_blank"><i class="icon-pinterest-p"></i></a>
+                        </div><!-- End .soial-icons -->
+                        <ul class="top-menu top-link-menu">
+                            <li>
+                                <a href="#">Links</a>
+                                
+                            </li>
+                        </ul><!-- End .top-menu -->
+                       <div>About Us.</div>
+
+                     
+                    </div><!-- End .header-right -->
+                </div>
+            </div>
+            <div class="header-middle">
+                <div class="container">
+                    <div class="header-left">
+                        <div class="header-search header-search-extended header-search-visible d-none d-lg-block">
+                            <a href="" class="search-toggle" role="button"><i class="icon-search"></i></a>
+                            <form action="/api/v1/shop" method="get" aria-disabled="true">
+                                <div class="header-search-wrapper search-wrapper-wide">
+                                    <label for="q" class="sr-only">Search</label>
+                                    <button class="btn btn-primary" type="submit"><i class="icon-search"></i></button>
+                                    <input type="search" class="form-control" name="q" id="q" placeholder="Search product ..." required>
+                                </div><!-- End .header-search-wrapper -->
+                            </form>
+                        </div><!-- End .header-search -->
+                    </div>
+                    <div class="header-center">
+                        <a href="/api/v1/" class="logo">
+                            <img src="/assets/images/demos/demo-6/logo.png" alt="Molla Logo" width="82" height="20">
+                        </a>
+                    </div><!-- End .header-left -->
+                    <div class="header-right">
+                        <i class="la la-lightbulb-o fs-4"></i><p class="m-3 fs-4">Clearance<span class="highlight fw-bold">&nbsp;Up to 30% Off</span></p>
+                    </div>
+                    
+                </div><!-- End .container -->
+                
+            </div><!-- End .header-middle -->
+
+         
+        </header><!-- End .header -->
+
+       <section class="content-main bg-body-tertiary" >
+
+        <div class="content-header justify-content-center ">
+
+
+
+        </div>
+        <div class="card m-aut" style="width: 100%;">
+            <div class="card-body" id="Reload">
+               
+                <div class="table-responsive mx-3 mt-3 rounded " style="overflow: hidden;">
+                    <div id="reload">
+                        <table class="table " id="ReloadTable">
+                           
+
+                            <tbody>
+                                <%if(Array.isArray(notifications)&& notifications.length> 0) {%>
+                                    <%notifications.forEach(noti=>{%>
+                                        <%if(!noti.read) {%>
+                                        <tr style="width: 95%; background-color: aquamarine;" class="shadow justify-content-between"
+                                            ondblclick="orderDetails('')">
+                                        <%}else{%>
+                                            <tr style="width:95%; ;" class="shadow justify-content-between"
+                                            ondblclick="orderDetails('')">
+                                        <%}%>
+                                        
+                                            <td class="text-center col-12" >
+                                                <div class="row">
+                                                <div class="col-9">
+                                                <h5><%=noti.title%></h5>
+                                                <p><%=noti.message%></p>
+                                              
+                                            
+                                            
+
+                                            
+                                            <% const formattedDate=noti.createdAt.toLocaleString('en-US', {
+                                                weekday: 'short' , month: 'short' , day: 'numeric' ,
+                                                year: 'numeric' , hour: 'numeric' , minute: 'numeric' ,
+                                                second: 'numeric' , hour12: true }); %>
+                                               
+                                                    <%= formattedDate%>
+                                                
+                                              
+                                                </div>
+                                                    <% if(noti.image) {%>
+                                                    
+                                                        <div style="" class="col-3">
+                                                            <a class="row justify-content-center">
+                                                                <img style="height: 10rem; width: 10rem;" src="/notificationImages/istockphoto-1357143832-612x612.jpg"
+                                                                   alt="Notification image" class=" img-lg shadow rounded "  />
+                                                               
+                                                            </a>
+                                                        </div>
+    
+                                                        <%}%>
+                                                    </div>
+                                                </td>
+
+                                        </tr>
+
+                          
+                            <%})%>
+                                <%}else{%>
+                                    <tr>
+                                        <dt colspan="5">
+                                            No notificaions found.
+
+                                        </dt>
+                                    </tr>
+
+                                    <%}%>
+                                </tbody>
+
+
+                        </table>
+
+                    </div>
+<!-- 
+                    <div class="pagination-area p-2 ">
+                        <nav aria-label="Page navigation example">
+                            <ul class="pagination justify-content-center">
+
+                                <a class="page-link p-3 text-primary bg-light" href="?page=<%=page+1-1%>"><i
+                                        class="material-icons md-chevron_left"></i></a>
+
+                                <li class="page-item ">
+                                    <a class="page-link text-primary" href="?page=<%=page+1%>">
+                                        <%=page+1%>
+                                    </a>
+                                </li>
+
+                                <li class="page-item disabled">
+
+                                    <input disabled class="page-link" type="text" value="<%=total%>" name=""
+                                        id="">
+                                </li>
+
+                                <a class="page-link p-3 text-primary bg-light" href="?page=<%=page+1+1%>"><i
+                                        class="material-icons md-chevron_right"></i></a>
+
+                            </ul> -->
+
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+ </body>
+
+    <!-- Plugins JS File -->
+    <script src="/assets/js/jquery.min.js"></script>
+    <script src="/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/jquery.hoverIntent.min.js"></script>
+    <script src="/assets/js/jquery.waypoints.min.js"></script>
+    <script src="/assets/js/superfish.min.js"></script>
+    <script src="/assets/js/owl.carousel.min.js"></script>
+    <script src="/assets/js/wNumb.js"></script>
+    <script src="/assets/js/bootstrap-input-spinner.js"></script>
+    <script src="/assets/js/jquery.magnific-popup.min.js"></script>
+    <script src="/assets/js/nouislider.min.js"></script>
+    <!-- Main JS File -->
+    <script src="/assets/js/main.js"></script>
+</body>
+
+
+<!-- molla/category-boxed.html  22 Nov 2019 10:03:02 GMT -->
+</html>

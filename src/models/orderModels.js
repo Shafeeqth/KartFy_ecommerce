@@ -22,11 +22,11 @@ const orderSchema = mongoose.Schema({
                 type: String,
                 required: true,
             },
-            // totalPrice: {
-            //     type: Number,
-            //     required: true
+            totalPrice: {
+                type: Number,
+                required: true
 
-            // },
+            },
             isReviewed: {
                 type: Boolean,
                 default: false,
@@ -38,7 +38,7 @@ const orderSchema = mongoose.Schema({
             },
         }
     }],totalSaved: {
-        type: String,
+        type: Number,
         required: false,
         default: 0
     },
@@ -80,20 +80,9 @@ const orderSchema = mongoose.Schema({
         default: 0,
 
     },
-    appliedOffer: {
+    coupon: {
         type: {
-            offerId: {
-                type: mongoose.Schema.Types.ObjectId,
-        
-            },
-            discount:{
-                type: Number
-            }
-        },
-    },
-    appliedCoupon: {
-        type: {
-            offerId: {
+            couponId: {
                 type: mongoose.Schema.Types.ObjectId,
         
             },
@@ -127,10 +116,10 @@ const orderSchema = mongoose.Schema({
         timestamps: true
     });
 
-orderSchema.pre('save', function(next) {
-    this.totalSaved = this.appliedCoupon?.discount ?? 0 + this.appliedOffer?.discount ?? 0
-    next()
-})
+// orderSchema.pre('save', function(next) {
+//     this.totalSaved = this.appliedCoupon?.discount ?? 0 + this.appliedOffer?.discount ?? 0
+//     next()
+// })
 
 const Order = mongoose.model('Order', orderSchema);
 
@@ -152,7 +141,7 @@ const returnShcema = mongoose.Schema({
 
     },
     productPrice: {
-        type: String,
+        type: Number,
         required: true,
 
     },

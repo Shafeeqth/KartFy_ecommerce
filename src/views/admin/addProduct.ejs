@@ -463,6 +463,22 @@ let closeButton = document.querySelectorAll('.btn-close').forEach(item => {
           }, 3000);
 
           return false;
+        }
+          if (!/^[a-zA-Zà-žÀ-Ž]{3,}(?:[ '][a-zA-Zà-žÀ-Ž0-9]*)*$/.test(title.value.trim())) {
+          title.style.border = "solid 1px red";
+          titleError.innerText = "Title must be valid "
+          titleDiv.scrollIntoView({
+            behavior: "smooth",
+            block: 'center',
+            inline: "center"
+          });
+          setTimeout(function () {
+            title.style.border = "";
+            titleError.innerText = ""
+          }, 3000);
+
+          return false;
+        
         } else if (
           description.value.trim() === "" ||
           description.value.trim().length < 20
@@ -480,6 +496,19 @@ let closeButton = document.querySelectorAll('.btn-close').forEach(item => {
               descriptionError.innerText = ""
             }, 3000);
 
+          }
+          else if(!/^[a-zA-Zà-žÀ-Ž]{3,}(?:[ '][a-zA-Zà-žÀ-Ž0-9]*)*$/.test(description.value.trim())) {
+            description.style.border = "solid 1px red";
+            descriptionError.innerText = "Description should not start with number or special charector "
+            descriptionDiv.scrollIntoView({
+              behavior: "smooth",
+              block: 'center',
+              inline: "center"
+            });
+            setTimeout(function () {
+              description.style.border = "";
+              descriptionError.innerText = ""
+            }, 3000);
           }
           else {
             description.style.border = "solid 1px red";

@@ -60,6 +60,17 @@ const cartSchema = mongoose.Schema({
     {
         timestamps: true
     });
+
+    cartSchema.methods.removeCouponIfApplied = async function () {
+        if(this.isCouponApplied) {
+            this.isCouponApplied = false;
+            this.coupon = undefined;
+            await this.save();
+        }
+    }
+
+
+
 // cartSchema.pre('save', async (next) => {
 //     if(this.isCouponApplied === true) {
 //         this.isCouponApplied = false;

@@ -7,10 +7,12 @@ const userMiddleware = require('../middleware/userMiddleware.js');
 const UserIdentityAndAuth = require('../controller/userIdentityAuthcontroller.js');
 const { userAndemailValid } = require('../helpers/validations.js');
 const userOrderController = require('../controller/userOrderController.js')
-
+const upload = require('../helpers/multer.js');
 
 // Load the Home Page
-router.get('/',  userController.loadHome);
+router.get('/', userMiddleware.userHeaderPopulator, userController.loadHome);
+
+router.get('/user-notifications', userController.loadUserNotifications)
 
 
 
@@ -36,6 +38,8 @@ router
 .route('/otp-verification')
 .get(UserIdentityAndAuth.loadOtp)
 .post(UserIdentityAndAuth.varifyOtp);
+
+router.post('/referrel-apply', userController.applyUserReferrel)
 
 
 
@@ -65,7 +69,7 @@ router.post('/reset-password', UserIdentityAndAuth.resetPassword)
 /* ==============================Wishlist====================================================== */
 
 // show wishlist page
-router.get('/wishlist',userMiddleware.isUserAutharized, userController.loadWishlist);
+router.get('/wishlist' ,userMiddleware.isUserAutharized, userMiddleware.userHeaderPopulator, userController.loadWishlist);
 
 //add to wishlist
 router.post('/add-wishlist',  userMiddleware.addToWishlist);
@@ -79,7 +83,7 @@ router.delete('/remove-wishlist', userMiddleware.isUserAutharized, userMiddlewar
 /* ===================================Cart===================================================== */
 
 // Get user cart Page
-router.get('/cart',userMiddleware.isUserAutharized, userController.loadCart);
+router.get('/cart',userMiddleware.isUserAutharized, userMiddleware.userHeaderPopulator, userController.loadCart);
 
 // Add product to cart 
 router.post('/add-cart',  userMiddleware.addToCart);
@@ -99,17 +103,17 @@ router.post('/find-delivery-charge', userMiddleware.isUserAutharized, userMiddle
 /*=====================Load shop ===============================================================*/
 
 //load shop
-router.get('/shop',  userController.loadShop)
+router.get('/shop',userMiddleware.userHeaderPopulator,  userController.loadShop)
 
 // Get product detail Page
 
-router.get('/product-detail', userController.loadProductDetail );
+router.get('/product-detail',userMiddleware.userHeaderPopulator, userController.loadProductDetail );
 
 
 /* ===============================Checkout======================================================= */
 router.get('/start-checkout', userMiddleware.checkoutValidator)
 // load checkout page
-router.get('/checkout',  userMiddleware.isUserAutharized, userController.loadCheckout);
+router.get('/checkout',  userMiddleware.isUserAutharized, userMiddleware.userHeaderPopulator, userController.loadCheckout);
 
 //add address of users
 router.post('/apply-coupon', userMiddleware.isUserAutharized, userMiddleware.addCoupon);
@@ -129,12 +133,12 @@ router.put('/remove-coupon', userMiddleware.isUserAutharized, userMiddleware.rem
 router.get('/check-valid-coupon', userMiddleware.isUserAutharized, userOrderController.checkValidCoupon)
 
 // Get orders
-router.get('proceed-to-checkout', userMiddleware.isUserAutharized, userOrderController.proceedtToCheckout)
+router.get('/proceed-to-checkout', userMiddleware.isUserAutharized, userMiddleware.userHeaderPopulator, userOrderController.proceedtToCheckout)
 
-router.get('/my-orders',userMiddleware.isUserAutharized, userOrderController.loadMyOrders);
+router.get('/my-orders',userMiddleware.isUserAutharized, userMiddleware.userHeaderPopulator, userOrderController.loadMyOrders);
 
 //Load order details
-router.get('/my-orders/single-orderDetails', userMiddleware.isUserAutharized, userOrderController.loadSingleOrderDetails);
+router.get('/my-orders/single-orderDetails', userMiddleware.isUserAutharized, userMiddleware.userHeaderPopulator, userOrderController.loadSingleOrderDetails);
 
 router.post('/my-orders/single-orderDetails/order-invoice-download', userMiddleware.isUserAutharized, userOrderController.downloadOrderInvoice)
 
@@ -142,7 +146,7 @@ router.post('/my-orders/single-orderDetails/order-invoice-download', userMiddlew
 router.post('/order-place', userMiddleware.isUserAutharized, userOrderController.orderConfirm);
 
 //laod order success page
-router.get('/order-success', userMiddleware.isUserAutharized, userController.loadOrderSuccess)
+router.get('/order-success', userMiddleware.isUserAutharized, userMiddleware.userHeaderPopulator, userController.loadOrderSuccess)
 
 //Cancel order 
 router.put('/order-cancel', userMiddleware.isUserAutharized, userOrderController.orderCancel);
@@ -151,7 +155,7 @@ router.put('/order-cancel', userMiddleware.isUserAutharized, userOrderController
 router.post('/product-review', userMiddleware.isUserAutharized, userOrderController.orderProductReview  );
 
 //sumbit return page
-router.post('orders/order-return', userMiddleware.isUserAutharized, userOrderController.orderReturn  );
+router.post('/orders/order-return', userMiddleware.isUserAutharized, userOrderController.orderReturn  );
 
 
 /*==================================E-payment================================================= */
@@ -165,11 +169,11 @@ router.put('/orders/razorpay-failure', userMiddleware.isUserAutharized, userOrde
 
 
 //RazorPay success
-router.get('/orders/paypal-success', userMiddleware.isUserAutharized, userOrderController.paypalSuccess)
+router.get('/orders/paypal-success', userMiddleware.isUserAutharized, userMiddleware.userHeaderPopulator, userOrderController.paypalSuccess)
 
 
 //RazorPay failure
-router.get('/orders/paypal-failure', userMiddleware.isUserAutharized, userOrderController.paypalFailure)
+router.get('/orders/paypal-failure', userMiddleware.isUserAutharized, userMiddleware.userHeaderPopulator, userOrderController.paypalFailure)
 
 
 router.put('/retry-order-payment', userMiddleware.isUserAutharized, userOrderController.retryOrderPay);
@@ -184,19 +188,19 @@ router.put('/orders/razorpay-retry-success', userMiddleware.isUserAutharized, us
 
 //show user profile
 
-router.get('/profile', userMiddleware.isUserAutharized, userController.loadProfile);
+router.get('/profile', userMiddleware.isUserAutharized, userMiddleware.userHeaderPopulator, userController.loadProfile);
 
 //Edit user profile
 
 router
 .route('/profile/add-address')
-.get(userMiddleware.isUserAutharized, userController.loadAddAddress)
-.post(userMiddleware.isUserAutharized, userMiddleware.addAddress);
+.get(userMiddleware.isUserAutharized, userMiddleware.userHeaderPopulator, userController.loadAddAddress)
+.post(upload.none() ,userMiddleware.isUserAutharized, userMiddleware.addAddress);
 
 //load edit address
 router.route('/profile/edit-address')
-.get(userMiddleware.isUserAutharized, userController.editAddress)
-.post(userMiddleware.isUserAutharized, userMiddleware.editAddress)
+.get(userMiddleware.isUserAutharized, userMiddleware.userHeaderPopulator, userController.editAddress)
+.post(upload.none(), userMiddleware.isUserAutharized, userMiddleware.editAddress)
 
 //Delete user address
 router.delete('/delete-address', userMiddleware.isUserAutharized, userMiddleware.deleteAddress)
@@ -206,7 +210,7 @@ router.put('/profile/change-password', userMiddleware.isUserAutharized, userMidd
 
 router.put('/profile/change-user-details', userMiddleware.isUserAutharized, userMiddleware.changeUserDetails)
 
-router.get('/profile/wallet', userMiddleware.isUserAutharized, userController.loadWallet)
+router.get('/profile/wallet', userMiddleware.isUserAutharized, userMiddleware.userHeaderPopulator, userController.loadWallet)
 
 
 module.exports = router;
