@@ -1,21 +1,16 @@
 const router = require('express').Router();
 const upload = require('../helpers/multer');
 
-
-
-
 const adminController = require('../controller/adminController');
 const adminMiddleware = require('../middleware/adminMiddleware');
 const productController = require('../controller/adminProductController')
 const categoryController = require('../controller/adminCategoryController');
 
 
-
 /*============================= Routes related to admin authentications  ================================*/
 
-//Get admin dashboard 
-router.get('/', adminMiddleware.isLoged, adminController.loadDashboard ); 
 
+router.get('/', adminMiddleware.isLoged, adminController.loadDashboard ); 
 router.post('/get-fiter-data', adminMiddleware.isLoged, adminController.getFilterData)
 router.get('/sales-report', adminMiddleware.isLoged, adminController.loadSalesReport)
 router.post('/sales-report/download-excel', adminMiddleware.isLoged, adminController.salesReportDownLoadExcel)

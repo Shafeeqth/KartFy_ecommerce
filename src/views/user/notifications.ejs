@@ -114,19 +114,25 @@
                
                 <div class="table-responsive mx-3 mt-3 rounded " style="overflow: hidden;">
                     <div id="reload">
-                        <table class="table " id="ReloadTable">
+                        <table class="table table-hover " id="ReloadTable">
                            
 
                             <tbody>
                                 <%if(Array.isArray(notifications)&& notifications.length> 0) {%>
                                     <%notifications.forEach(noti=>{%>
                                         <%if(!noti.read) {%>
-                                        <tr style="width: 95%; background-color: aquamarine;" class="shadow justify-content-between"
-                                            ondblclick="orderDetails('')">
+                                            
+                                        <tr  style="width: 95%; background-color: aquamarine;" class="shadow justify-content-between"
+                                           >
+                                            <a href="<%=noti.url %>">
                                         <%}else{%>
+                                            
                                             <tr style="width:95%; ;" class="shadow justify-content-between"
-                                            ondblclick="orderDetails('')">
+                                            >
+                                            <a href="<%= noti.url %>">
+                                           
                                         <%}%>
+                                        
                                         
                                             <td class="text-center col-12" >
                                                 <div class="row">
@@ -160,7 +166,7 @@
                                                         <%}%>
                                                     </div>
                                                 </td>
-
+                                            </a>
                                         </tr>
 
                           

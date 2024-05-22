@@ -53,7 +53,6 @@ const createRazorpayOrder = async (req, res, myOrder) => {
 
 }
 
-
 paypal.configure({
     mode: PAYPAL_MODE,
     client_id: PAYPAL_CLIENT_ID,
@@ -76,8 +75,6 @@ const createPayPalPayment = async (req, res , next, myOrder) => {
         })
         let totalAmount = myOrder.orderedItems.reduce( (acc, item ) => acc + (item.totalPrice * item.quantity),0);
      
-       
-       
         const create_payment_json = {
             "intent": "sale",
             "payer": {
@@ -101,7 +98,7 @@ const createPayPalPayment = async (req, res , next, myOrder) => {
             }]
         };
         paypal.payment.create(create_payment_json, function (error, payment) {
-            console.log('comes here here also');
+
             if (error) {
                 console.log(error)
                 next(error)
@@ -137,7 +134,6 @@ const payPalSuccess = asyncHandler(async (req, res, next) => {
         }]
     };
     const payment = await paypal.payment.execute(paymentId, execute_payment_json);
-
 
 })
 

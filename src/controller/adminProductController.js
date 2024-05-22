@@ -17,16 +17,12 @@ const loadProducts = asyncHandler(async (req, res) => {
     page < 0 ? (page = 0) : page = page
 
     let total = await Product.countDocuments({});
-
-
-
     let products = await Product.find({})
         .sort({ createdAt: -1 })
         .skip(limit * page)
         .limit(limit)
 
-    res
-        .render('admin/adminProducts', {
+    res.render('admin/adminProducts', {
             products,
             page,
             total
@@ -65,8 +61,6 @@ const loadProductDetails = asyncHandler(async (req, res) => {
         }
 
 
-
-
     ])
     console.log(product)
 
@@ -92,7 +86,6 @@ const loadEditProduct = asyncHandler(async (req, res) => {
     }).select('title -_id subCategories')
 
     let product = await Product.findOne({ _id: id });
-    console.log(product)
     res.render("admin/editProduct", { product ,category});
 
 
@@ -272,9 +265,6 @@ const editProduct = asyncHandler(async (req, res, next) => {
 
 const listUnlistProduct = (req, res, next) => {
     const { id } = req.body
-    console.log(id)
-
-
     return Product.findOne({ _id: id })
         .then((category) => {
             if (category.isListed) {
@@ -304,14 +294,9 @@ const listUnlistProduct = (req, res, next) => {
                     }).catch((error) => {
                         console.log(error)
                     })
-
-
             }
 
         })
-
-
-
 
 }
 

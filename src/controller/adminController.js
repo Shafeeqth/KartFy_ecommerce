@@ -655,7 +655,6 @@ const listAndUnlistCoupon = asyncHandler(async (req, res) => {
             {
                 new: true
             }
-
         )
     } else {
         coupon = await Coupon.findOneAndUpdate({
@@ -669,7 +668,6 @@ const listAndUnlistCoupon = asyncHandler(async (req, res) => {
             {
                 new: true
             }
-
         )
     }
     return res.status(200)
@@ -705,8 +703,6 @@ const loadBanners = asyncHandler(async (req, res) => {
     page < 0 ? (page = 0) : page = page
 
     let total = await Coupon.countDocuments({});
-
-
     let banners = await Banner.find({}).skip(limit * page).limit();
 
     console.log('categories', banners);
@@ -815,7 +811,6 @@ const getOfferData = asyncHandler(async (req, res) => {
         let category = await Category.findOne({ title: 'Category' });
 
         let categoryData = category?.subCategories
-        console.log(categoryData)
         if (categoryData) {
             return res.status(200)
                 .json({
@@ -830,7 +825,6 @@ const getOfferData = asyncHandler(async (req, res) => {
 })
 
 const createOffer = asyncHandler(async (req, res) => {
-    console.log(req.body)
     let { name, description, edate, offertype, discount, selecteditems } = req.body;
     if (offertype == 'product') {
         let offer = await Offer.create({
@@ -925,7 +919,6 @@ const editOffer = asyncHandler(async (req, res) => {
 
 
 const returnChangeStatus = asyncHandler(async (req, res) => {
-    console.log(req.body)
     let { returnId, status } = req.body;
     let returns = await Return.findOne({ _id: returnId })
     if (!returns.returnStatus == 'Requested') {
@@ -973,7 +966,6 @@ const returnChangeStatus = asyncHandler(async (req, res) => {
 
         }
     })
-
 
     }
 

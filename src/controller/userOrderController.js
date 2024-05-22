@@ -2,14 +2,11 @@
 const { Order, Return, Review } = require('../models/orderModels');
 const Coupon = require('../models/couponModel');
 const User = require('../models/userModel');
-const Offer = require('../models/offerModel');
 const Address = require('../models/addressModel');
-const Category = require('../models/categoryModel');
 const { Product, Inventory } = require('../models/productModels');
 const { Cart, Wishlist } = require('../models/CartAndWishlistModel');
 const asyncHandler = require('../utilities/asyncHandler');
 const { calculateDeliveryCharge, getCordinates, getDistance } = require('../helpers/calculateDeliveryCharge');
-const userHelper = require('../helpers/validations');
 const { createRazorpayOrder, createPayPalPayment } = require('../controller/paymentControllers');
 const mongoose = require('mongoose');
 const Wallet = require('../models/walletModel');
@@ -21,49 +18,20 @@ const ejs = require('ejs');
 
 
 
-const checkValidCoupon = asyncHandler(async (req, res) => {
-    let user = req.session.user;
-    if (!user) return false
 
-    let cart = await Cart.findOne({ user: user._id }).populate('products.product','price -_id');
-    let cartTotal = cart?.products.reduce((acc, item) => acc + item.product.price * item.quantity,0);
-    if (!cart) return res.status(500)
-    if (cart.isCouponApplied == false) {
-        return res.status(200)
-            .json({
-                success: true,
-                error: false,
-                message: 'No coupon found'
-            })
-    }
-    let coupon = await Coupon.findOne({ _id: cart.coupon.couponId });
-    let today = new Date()
+const loadOrderSuccess = asyncHandler(async (req, res) => {
 
-    if (coupon.minCost > cartTotal) {
-        return res.status(400)
-            .json({
-                success: false,
-                error: true,
-                message: 'Cart balance is less than Coupon min Amount'
+    let orderId = req.query['orderId'];
+    let user = req.session?.user ?? null
+    res.locals.orderId = orderId;
+    let currentOrder = await Order.findById({
+        _id: orderId
+    })
+        .populate('user')
+        .populate('address')
 
-            })
+    res.render('user/orderSuccess', { currentOrder, orderId })
 
-    }
-    if (coupon.expiryDate < today) {
-        return res.status(400)
-            .json({
-                success: false,
-                error: true,
-                message: 'Coupon has expired'
-
-            })
-    }
-    return res.status(200)
-        .json({
-            success: true,
-            error: false,
-            message: 'Valid coupon'
-        })
 
 })
 
@@ -695,7 +663,6 @@ const loadMyOrders = asyncHandler(async (req, res) => {
         .render('user/myOrders',
             {
                 order,
-                user,
                 total,
                 page
             })
@@ -719,7 +686,7 @@ const loadSingleOrderDetails = asyncHandler(async (req, res, next) => {
         })
     }
 
-    res.render('user/singleOrderDetails', { user, order })
+    res.render('user/singleOrderDetails', { order })
 })
 
 const downloadOrderInvoice = asyncHandler(async (req, res) => {
@@ -953,10 +920,12 @@ module.exports = {
     paypalSuccess,
     paypalFailure,
     proceedtToCheckout,
-    checkValidCoupon,
     retryOrderPay,
     retryPaymentSuccess,
     retryPaymentFailure,
     downloadOrderInvoice,
+    loadOrderSuccess,
+
+
 
 }

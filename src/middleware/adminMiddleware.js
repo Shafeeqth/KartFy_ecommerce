@@ -1,8 +1,3 @@
-const helper = require('../helpers/validations');
-const nodemailer = require('nodemailer');
-const model = require('../models/otpModel');
-const path = require('path');
-const sharp = require('sharp');
 const mongoose = require('mongoose');
 const ApiError = require('../utilities/apiError');
 const ApiResponse = require('../utilities/apiResponse');
@@ -31,28 +26,9 @@ const adminLogout = asyncHandler(async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 module.exports = {
     isLoged,
     adminLogout,
-    
-  
-    
-
-
-
-
+ 
 
 }

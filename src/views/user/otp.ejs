@@ -163,7 +163,7 @@
                                                     OTP</button>
                                                 <button type="button" onclick="resendOPT()" class="btn btn-link"
                                                     id="resend-btn">Resend OTP</button>
-                                                <span id="countdown">3:00</span>
+                                                <span id="countdown">1:00</span>
                                             </div>
                                         </form>
                                     </div><!-- End .tab-pane -->
@@ -249,7 +249,10 @@
                             errorDiv.style.display = 'block',
                                 errorDiv.innerText = response.message;
 
-
+                            setTimeout(() => {
+                                errorDiv.style.display = 'none';
+                                
+                            }, 3000);
                         }
                         if (response.success) {
                             Swal.fire({
@@ -261,7 +264,8 @@
 
                             });
 
-                            setTimeout(async () => {
+                            setTimeout(async function askReferrel() {
+                                
                                 const { value: code } = await Swal.fire({
                                     title: "Do you have a referrel code",
                                     input: "text",
@@ -311,7 +315,7 @@
 
                                                         });
                                                         setTimeout(() => {
-                                                window.location.href = '/api/v1'
+                                                            askReferrel()
                                                 
                                             }, 1000);
 
@@ -329,7 +333,7 @@
             }
 
             function resendOPT() {
-                console.log('comes here')
+
                 fetch('/api/v1/resend-otp', {
                     headers: {
                         'Accept': 'application/json',
@@ -347,12 +351,20 @@
                             errorDiv.className = "alert text-danger f bg-light rounded text-center  "
                             errorDiv.innerText = respose.message
                             window.location.href = '/api/v1/signup'
+                            setTimeout(() => {
+                                errorDiv.style.display = 'none';
+                                
+                            }, 3000);
 
                         } else {
 
                             errorDiv.style.display = 'block'
                             errorDiv.className = "alert text-danger f bg-light rounded text-center  "
                             errorDiv.innerText = "An OTP has been send again!"
+                            setTimeout(() => {
+                                errorDiv.style.display = 'none';
+                                
+                            }, 3000);
 
                         }
 
@@ -370,7 +382,7 @@
 
             $(document).ready(function () {
                 // Countdown timer for 3 minutes
-                var timer = 180;
+                var timer = 60;
                 var interval = setInterval(function () {
                     timer--;
                     var minutes = Math.floor(timer / 60);
@@ -410,7 +422,7 @@
                 // Resend OTP button click handler
                 $("#resend-btn").on("click", function () {
                     // Restart the countdown timer
-                    timer = 180;
+                    timer = 60;
                     $("#countdown").text("3:00");
                     clearInterval(interval);
                     interval = setInterval(function () {

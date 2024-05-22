@@ -163,12 +163,16 @@
                         </a>
                         <script>
                             let notificationButton = document.getElementById('notificationButton')
+                            let notificationCounter = document.getElementById('notificationCount')
                             let notificationCount = '<%= user.notificationCount%>'
                             console.log(notificationCount)
                             if(notificationCount > 0) {
-                                notificationButton.classList.add('shakingAnimation')
+                                notificationButton.classList.add('shakingAnimation');
+                                notificationCounter.style.display = 'inline-block'
+
                             }else{
-                                notificationButton.classList.remove('shakingAnimation')
+                                notificationButton.classList.remove('shakingAnimation');
+                                notificationCounter.style.display = 'none'
 
                             }
                         </script>
