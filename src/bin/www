@@ -8,8 +8,8 @@ const app = require('../app');
 const connectDb = require ('../db/connectDb.js');
 const debug = require('debug')('ecommerce:server');
 const http = require('http');
-const { error } = require('console');
-const socketIo = require('socket.io')
+const { error, log } = require('console');
+const socketIo = require('socket.io');
 
 
 /**
@@ -23,7 +23,10 @@ app.set('port', port);
  * Create HTTP server.
  */
 
-const server = app;
+const server = http.createServer(app);
+const io = socketIo(server);
+
+
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -41,6 +44,21 @@ server.on('listening', onListening);
  */
 
 connectDb();
+
+
+/**
+ * handling socketIo events
+ */
+
+
+io.on('connection', (socket) => {
+  console.log('user connected');
+  
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  })
+})
+
 
 /**
  * Normalize a port into a number, string, or false.

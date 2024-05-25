@@ -34,9 +34,39 @@
     <link rel="stylesheet" href="/assets/css/skins/skin-demo-17.css">
     <link rel="stylesheet" href="/assets/css/demos/demo-17.css">
     <script src="https://kit.fontawesome.com/b5f8202a71.js" crossorigin="anonymous"></script>
-    <style>
-       
-    </style>
+    
+<script>
+    const socket = io();
+
+    socket.on('notify', (data) => {
+        const
+    })           const socket = io();
+                            
+                            let notificationButton = document.getElementById('notificationButton');
+                            let notificationCounter = document.getElementById('notificationCount');
+                            let cartCounter = document.getElementById('cart-count');
+                            let wishlistCounter = document.getElementById('wishlist-count');
+                         
+
+
+                            socket.on('notify', (data) => {
+                                notificationCounter.innerText = data
+
+                            });
+
+                            socket.on('updateCartCount', (count) => {
+                                cartCounter.innerText = data
+
+                            })
+
+                            socket.on('updateWishlistCount', (data) => {
+                                wishlistCounter.innerText = data
+
+                            })
+
+
+</script>
+    
 </head>
 
 

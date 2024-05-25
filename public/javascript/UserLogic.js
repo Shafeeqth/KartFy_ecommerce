@@ -57,9 +57,14 @@ function addToCartFromWishlist(id) {
                     showConfirmButton: false,
                     timer: 1500,
                 });
-                const removeAudio = document.getElementById('remove-audio')
-                if (removeAudio) removeAudio.play();
                 setTimeout(() => {
+                    const removeAudio = document.getElementById('remove-audio')
+                if (removeAudio) removeAudio.play();
+                    
+                }, 700);
+                
+                setTimeout(() => {
+                    $('#header-right').load('/api/v1/wishlist #header-right');
                    
                     $('#Reload').load('/api/v1/wishlist #Reload', null, () => {
                         
@@ -193,6 +198,7 @@ function addToWishlist(id) {
 
 
             } else if (response.data.addedToWishlist) {
+                $('#header-right').load('/api/v1/shop #header-right');
                 Swal.fire({
                     titleText: "Product added to wishlist",
                     icon: 'success',
@@ -259,6 +265,7 @@ function removeFromCart(id, size, total ) {
                 success: (response) => {
                     // window.location.reload(true)
                     if (response.success === true) {
+                        $('#header-right').load('/api/v1/cart #header-right');
                         $('#Reload').load('/api/v1/cart #Reload', null, () => {
 
                             Swal.fire({
@@ -312,6 +319,7 @@ function changeCount(event, cartId, productId, size, price) {
 
             
             }
+            $('#header-right').load('/api/v1/cart #header-right');
             
                 $('#Reload').load('/api/v1/cart #Reload', null,)
           
