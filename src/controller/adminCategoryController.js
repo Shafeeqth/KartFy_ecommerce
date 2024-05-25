@@ -53,12 +53,12 @@ const loadEditCategory = asyncHandler(async (req, res, next) => {
 
 
 })
-const loadAddSubCategory = asyncHandler(async (req, res) => {
+const loadAddSubCategory = asyncHandler(async (req, res, next) => {
 
     res.render('admin/addSubCategory', { title: 'Sub Category' })
 })
 
-const loadEditSubCategory = asyncHandler(async (req, res) => {
+const loadEditSubCategory = asyncHandler(async (req, res, next) => {
     let { id, subId } = req.query;
 
     let category = await Category.findOne({ _id: id });
@@ -67,7 +67,7 @@ const loadEditSubCategory = asyncHandler(async (req, res) => {
     res.render('admin/editSubCategory', { title: 'Edit subCategory', subCategory, id })
 })
 
-const loadSubCategories = asyncHandler(async (req, res) => {
+const loadSubCategories = asyncHandler(async (req, res, next) => {
     // let page = parseInt(req.query.page) -1 || 0;
     // let limit = parseInt(req.query.limit) || 7;
     // page < 0 ? (page = 0) : page = page

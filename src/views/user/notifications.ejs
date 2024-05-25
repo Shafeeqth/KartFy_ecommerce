@@ -5,6 +5,7 @@
 
 
 <!-- Cartfy/index-17.html  22 Nov 2019 10:00:25 GMT -->
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -35,10 +36,60 @@
     <link rel="stylesheet" href="/assets/css/skins/skin-demo-17.css">
     <link rel="stylesheet" href="/assets/css/demos/demo-17.css">
     <script src="https://kit.fontawesome.com/b5f8202a71.js" crossorigin="anonymous"></script>
+    <style>
+        .notificaion {
+            opacity: 0.9;
+          
+
+
+        }
+
+        .notificaion:hover {
+            opacity: 1;
+            transform: scaleY(1.05);
+        }
+
+        .wrap{
+            --f: 10px;
+            /* control the folded part*/
+            --r: 15px;
+            /* control the ribbon shape */
+            --t: 10px;
+            /* the top offset */
+/* 
+            position: absolute;
+            inset: var(--t) calc(-1*var(--f)) auto auto;
+            padding: 0 10px var(--f) calc(10px + var(--r));
+            clip-path:
+                polygon(0 0, 100% 0, 100% calc(100% - var(--f)), calc(100% - var(--f)) 100%,
+                    calc(100% - var(--f)) calc(100% - var(--f)), 0 calc(100% - var(--f)),
+                    var(--r) calc(50% - var(--f)/2));
+            background: #BD1550;
+            box-shadow: 0 calc(-1*var(--f)) 0 inset #0005; */
+        
+            width: 20rem;
+            height: 4rem;
+            background-image: linear-gradient(to right, red, yellow);
+            transform: rotate(-45deg);
+            position: absolute;
+            top: 9%;
+            left: -4%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            
+        }
+        .wrap p {
+            text-align: center;
+            font: italic small-caps bold 12px/30px Georgia, serif;
+            color: black;
+
+        }
+    </style>
 </head>
 
 <body>
-    <div class="page-wrapper ">  
+    <div class="page-wrapper ">
         <header class="header header-6 ">
             <div class="header-top">
                 <div class="container">
@@ -47,7 +98,8 @@
                             <li>
                                 <a href="#">Links</a>
                                 <ul>
-                                    <li><a href="tel:+91 9744491844"><i class="icon-phone"></i>Call: +91 9744491844 </a></li>
+                                    <li><a href="tel:+91 9744491844"><i class="icon-phone"></i>Call: +91 9744491844 </a>
+                                    </li>
                                 </ul>
                             </li>
                         </ul><!-- End .top-menu -->
@@ -55,36 +107,31 @@
 
                     <div class="header-right">
                         <div class="social-icons social-icons-color">
-                            <a href="#" class="social-icon social-facebook" title="Facebook" target="_blank"><i class="icon-facebook-f"></i></a>
-                            <a href="#" class="social-icon social-twitter" title="Twitter" target="_blank"><i class="icon-twitter"></i></a>
-                            <a href="#" class="social-icon social-instagram" title="Pinterest" target="_blank"><i class="icon-instagram"></i></a>
-                            <a href="#" class="social-icon social-pinterest" title="Instagram" target="_blank"><i class="icon-pinterest-p"></i></a>
+                            <a href="#" class="social-icon social-facebook" title="Facebook" target="_blank"><i
+                                    class="icon-facebook-f"></i></a>
+                            <a href="#" class="social-icon social-twitter" title="Twitter" target="_blank"><i
+                                    class="icon-twitter"></i></a>
+                            <a href="#" class="social-icon social-instagram" title="Pinterest" target="_blank"><i
+                                    class="icon-instagram"></i></a>
+                            <a href="#" class="social-icon social-pinterest" title="Instagram" target="_blank"><i
+                                    class="icon-pinterest-p"></i></a>
                         </div><!-- End .soial-icons -->
                         <ul class="top-menu top-link-menu">
                             <li>
                                 <a href="#">Links</a>
-                                
+
                             </li>
                         </ul><!-- End .top-menu -->
-                       <div>About Us.</div>
+                        <div>About Us.</div>
 
-                     
+
                     </div><!-- End .header-right -->
                 </div>
             </div>
             <div class="header-middle">
                 <div class="container">
                     <div class="header-left">
-                        <div class="header-search header-search-extended header-search-visible d-none d-lg-block">
-                            <a href="" class="search-toggle" role="button"><i class="icon-search"></i></a>
-                            <form action="/api/v1/shop" method="get" aria-disabled="true">
-                                <div class="header-search-wrapper search-wrapper-wide">
-                                    <label for="q" class="sr-only">Search</label>
-                                    <button class="btn btn-primary" type="submit"><i class="icon-search"></i></button>
-                                    <input type="search" class="form-control" name="q" id="q" placeholder="Search product ..." required>
-                                </div><!-- End .header-search-wrapper -->
-                            </form>
-                        </div><!-- End .header-search -->
+
                     </div>
                     <div class="header-center">
                         <a href="/api/v1/" class="logo">
@@ -92,101 +139,243 @@
                         </a>
                     </div><!-- End .header-left -->
                     <div class="header-right">
-                        <i class="la la-lightbulb-o fs-4"></i><p class="m-3 fs-4">Clearance<span class="highlight fw-bold">&nbsp;Up to 30% Off</span></p>
+                        <i class="la la-lightbulb-o fs-4"></i>
+                        <p class="m-3 fs-4">Clearance<span class="highlight fw-bold">&nbsp;Up to 30% Off</span></p>
                     </div>
-                    
+
                 </div><!-- End .container -->
-                
+
             </div><!-- End .header-middle -->
 
-         
+
         </header><!-- End .header -->
 
-       <section class="content-main bg-body-tertiary" >
+        <section class="content-main bg-body-tertiary">
 
-        <div class="content-header justify-content-center ">
+            <div class="content-header justify-content-center ">
 
 
 
-        </div>
-        <div class="card m-aut" style="width: 100%;">
-            <div class="card-body" id="Reload">
-               
-                <div class="table-responsive mx-3 mt-3 rounded " style="overflow: hidden;">
-                    <div id="reload">
-                        <table class="table table-hover " id="ReloadTable">
-                           
+            </div>
+            <div class="card m-aut" style="width: 100%; ">
+                <div class="card-body" id="Reload">
 
-                            <tbody>
-                                <%if(Array.isArray(notifications)&& notifications.length> 0) {%>
-                                    <%notifications.forEach(noti=>{%>
-                                        <%if(!noti.read) {%>
+                    <div class="table-responsive mx-3 mt-1 rounded " style="overflow: hidden; margin-top: -2rem ;">
+                        <div id="reload">
+                            <table class="table table-hover " id="ReloadTable">
+
+
+                                <tbody>
+                                    <%if(Array.isArray(notifications)&& notifications.length> 0) {%>
+                                        <%notifications.forEach(noti=>{%>
                                             
-                                        <tr  style="width: 95%; background-color: aquamarine;" class="shadow justify-content-between"
-                                           >
-                                            <a href="<%=noti.url %>">
-                                        <%}else{%>
-                                            
-                                            <tr style="width:95%; ;" class="shadow justify-content-between"
-                                            >
-                                            <a href="<%= noti.url %>">
-                                           
-                                        <%}%>
-                                        
-                                        
-                                            <td class="text-center col-12" >
-                                                <div class="row">
-                                                <div class="col-9">
-                                                <h5><%=noti.title%></h5>
-                                                <p><%=noti.message%></p>
-                                              
-                                            
-                                            
+                                            <%if(!noti.read){%>
+                                                <tr style="width: 95%; background-color: aquamarine;"
+                                                    onclick="viewMore('<%=noti._id%>', '<%=noti.url%>')"
+                                                    class="shadow notificaion justify-content-between ">
 
-                                            
-                                            <% const formattedDate=noti.createdAt.toLocaleString('en-US', {
-                                                weekday: 'short' , month: 'short' , day: 'numeric' ,
-                                                year: 'numeric' , hour: 'numeric' , minute: 'numeric' ,
-                                                second: 'numeric' , hour12: true }); %>
-                                               
-                                                    <%= formattedDate%>
-                                                
-                                              
-                                                </div>
-                                                    <% if(noti.image) {%>
-                                                    
-                                                        <div style="" class="col-3">
-                                                            <a class="row justify-content-center">
-                                                                <img style="height: 10rem; width: 10rem;" src="/notificationImages/istockphoto-1357143832-612x612.jpg"
-                                                                   alt="Notification image" class=" img-lg shadow rounded "  />
-                                                               
-                                                            </a>
-                                                        </div>
-    
+                                                    <%}else{%>
+
+                                                <tr style="width:95%; "
+                                                    onclick="viewMore('<%=noti._id%>', '<%=noti.url%>')"
+                                                    class="shadow notificaion justify-content-between pt-0 pb-1">
+
+
+                                                    <%}%>
+
+
+                                                        <td class="text-center col-12 "
+                                                            style="position: relative; padding-top: 1.5%;padding-bottom: 1%;  overflow: hidden;">
+                                                            <div class="row">
+                                                              
+                                                                <div class="col-10">
+                                                                    <%if(noti.type == 'message') {%>
+                                                                        <%if(!noti.read) {%>
+                                                                            <div class="wrap" style="  background-image: linear-gradient(to right, rgb(114, 74, 0), yellow);">
+                                                                                <p>
+                                                                                    <%=noti.type%>
+                                                                                </p>
+                                                                            </div>
+                                                                            
+                                                                                <%}else{%>
+                                                                                    <div class="wrap" style=" opacity: .5; background-image: linear-gradient(to right, rgb(114, 74, 0), yellow);">
+                                                                                        <p>
+                                                                                            <%=noti.type%>
+                                                                                        </p>
+                                                                                    </div>
+                                                                                    <%}%>
+                                                                        
+                                                                        <%}else if(noti.type == 'alert'){%>
+                                                                          
+                                                                                <%if(!noti.read) {%>
+                                                                                    <div class="wrap" style="  background-image: linear-gradient(to right , rgb(217, 24, 201), rgb(255, 255, 0));">
+                                                                                        <p>
+                                                                                            <%=noti.type%>
+                                                                                        </p>
+                                                                                    </div>
+                                                                             
+                                                                                        <%}else{%>
+                                                                                            <div class="wrap" style="opacity: .5;  background-image: linear-gradient(to right , rgb(217, 24, 201), rgb(255, 255, 0));">
+                                                                                                <p>
+                                                                                                    <%=noti.type%>
+                                                                                                </p>
+                                                                                            </div>
+                                                                                            <%}%>
+                                                                           
+                                                                            <%}else if(noti.type == 'info'){%>
+                                                                                
+                                                                                    <%if(!noti.read) {%>
+                                                                                        <div class="wrap" style="  background-image: linear-gradient(to right, rgb(0, 166, 255), yellow);">
+                                                                                            <p>
+                                                                                                <%=noti.type%>
+                                                                                            </p>
+                                                                                        </div>
+                                                                                       
+                                                                                            <%}else{%>
+                                                                                                <div class="wrap" style=" opacity: .5; background-image: linear-gradient(to right, rgb(0, 166, 255), yellow);">
+                                                                                                    <p>
+                                                                                                        <%=noti.type%>
+                                                                                                    </p>
+                                                                                                </div>
+                                                                                                <%}%>
+                                                                                
+                                                                            <%}else if(noti.type == 'error'){%>
+                                                                             
+                                                                                    <%if(!noti.read) {%>
+                                                                                        <div class="wrap" style="  background-image: linear-gradient(to right, red, yellow);">
+                                                                                            <p>
+                                                                                                <%=noti.type%>
+                                                                                            </p>
+                                                                                        </div>
+                                                                                        
+                                                                                            <%}else{%>
+                                                                                                <div class="wrap" style=" opacity: .5; background-image: linear-gradient(to right, red, yellow);">
+                                                                                                    <p>
+                                                                                                        <%=noti.type%>
+                                                                                                    </p>
+                                                                                                </div>
+                                                                                                <%}%>
+                                                                               
+                                                                                <%}else if(noti.type == 'success'){%>
+                                                                                        <%if(!noti.read) {%>
+                                                                                            <div class="wrap" style="  background-image: linear-gradient(to right, rgb(0, 255, 68), yellow);">
+                                                                                                <p>
+                                                                                                    <%=noti.type%>
+                                                                                                </p>
+                                                                                            </div>
+                                                                                           
+                                                                                                <%}else{%>
+                                                                                                    <div class="wrap" style=" opacity: .5; background-image: linear-gradient(to right, rgb(0, 255, 68), yellow);">
+                                                                                                        <p>
+                                                                                                            <%=noti.type%>
+                                                                                                        </p>
+                                                                                                    </div>
+                                                                                                    <%}%>
+                                                                                    
+                                                                                <%}else if(noti.type == 'warning'){%>
+                                                                                  
+                                                                                     
+                                                                                            <%if(noti.read) {%>
+                                                                                                <div class="wrap" style="  background-image: linear-gradient(to right, red, yellow);">
+                                                                                                    <p>
+                                                                                                        <%=noti.type%>
+                                                                                                    </p>
+                                                                                                </div>
+                                                                                                <%}else{%>
+                                                                                                    <div class="wrap" style=" opacity: .5; background-image: linear-gradient(to right, red, yellow);">
+                                                                                        <p>
+                                                                                            <%=noti.type%>
+                                                                                        </p>
+                                                                                    </div>
+                                                                                                    <%}%>
+                                                                                    
+                                                                                 <%}%>
+
+
+
+                                                                    <h5>
+                                                                        <%=noti.title%>
+                                                                    </h5>
+                                                                    <p>
+                                                                        <%=noti.message%>
+                                                                    </p>
+
+
+
+
+
+                                                                    <% const
+                                                                        formattedDate=noti.createdAt.toLocaleString('en-US',
+                                                                        { month: 'short' , day: 'numeric' ,
+                                                                        weekday: 'short' , hour: 'numeric' ,
+                                                                        minute: 'numeric' , second: 'numeric' , hour12:
+                                                                        true }); %>
+
+                                                                        <div class="row justify-content-end">
+                                                                            <span
+                                                                                style=" font-style:normal; font-weight: 300; font-size: smaller; font-variant: small-caps;">
+                                                                                <%= formattedDate%>
+                                                                            </span>
+                                                                        </div>
+
+
+
+                                                                </div>
+
+                                                                <% if(noti.image) {%>
+
+
+                                                                    <div style="" class="col-2">
+                                                                        <div class=" "
+                                                                            style="position: absolute; top: -22%; left: 75%;display: flex; justify-content: end; align-items: center; flex-direction: row;">
+                                                                            <%if(!noti.read) {%>
+                                                                                <!-- <span style="width: 8px; height: 8px; background-color: green; border-radius: 50%; align-self: center; margin-top: 5%; "></span> -->
+                                                                                <span class="ml-2"
+                                                                                    style="font-weight: ; font-size: 100%; margin-right: -100%;color: rgb(106, 202, 228);"><i
+                                                                                        class="fa-solid fa-eye-slash"></i></span>
+
+                                                                                <%}else{%>
+                                                                                    <span class=" ml-2" style="font-weight: ; font-size: 100%; margin-right: -100%; color: rgba(2, 136, 2, 0.7); ">
+                                                                                    <i class="fa-solid fa-eye"></i></span>
+                                                                                    <%}%>
+
+
+                                                                        </div>
+                                                                        <div
+                                                                            class="row justify-content-end align-items-center mr-5">
+
+                                                                            <img style="height: 10rem; width: 10rem;"
+                                                                                src="<%=noti.image%>"
+                                                                                alt="Notification image"
+                                                                                class=" img-lg shadow rounded " />
+
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <%}%>
+                                                            </div>
+                                                        </td>
+
+                                                </tr>
+
+
+                                                <%})%>
+                                                    <%}else{%>
+                                                        <tr>
+                                                            <dt colspan="5">
+                                                                No notificaions found.
+
+                                                            </dt>
+                                                        </tr>
+
                                                         <%}%>
-                                                    </div>
-                                                </td>
-                                            </a>
-                                        </tr>
-
-                          
-                            <%})%>
-                                <%}else{%>
-                                    <tr>
-                                        <dt colspan="5">
-                                            No notificaions found.
-
-                                        </dt>
-                                    </tr>
-
-                                    <%}%>
                                 </tbody>
 
 
-                        </table>
+                            </table>
 
-                    </div>
-<!-- 
+                        </div>
+                        <!-- 
                     <div class="pagination-area p-2 ">
                         <nav aria-label="Page navigation example">
                             <ul class="pagination justify-content-center">
@@ -215,26 +404,47 @@
                     </div>
                 </div>
             </div>
-        </div>
+    </div>
 
     </section>
- </body>
+</body>
+<script src="https://kit.fontawesome.com/b5f8202a71.js" crossorigin="anonymous"></script>
 
-    <!-- Plugins JS File -->
-    <script src="/assets/js/jquery.min.js"></script>
-    <script src="/assets/js/bootstrap.bundle.min.js"></script>
-    <script src="/assets/js/jquery.hoverIntent.min.js"></script>
-    <script src="/assets/js/jquery.waypoints.min.js"></script>
-    <script src="/assets/js/superfish.min.js"></script>
-    <script src="/assets/js/owl.carousel.min.js"></script>
-    <script src="/assets/js/wNumb.js"></script>
-    <script src="/assets/js/bootstrap-input-spinner.js"></script>
-    <script src="/assets/js/jquery.magnific-popup.min.js"></script>
-    <script src="/assets/js/nouislider.min.js"></script>
-    <!-- Main JS File -->
-    <script src="/assets/js/main.js"></script>
+<script>
+    function viewMore(notificationId, url) {
+
+        fetch('/api/v1/user-notifications/mark-as-seen', {
+            method: 'PATCH',
+            body: JSON.stringify({ notificationId }),
+            headers: {
+                'Content-Type': 'application/json',
+
+            }
+
+        }).then(response => response.json())
+            .then(data => {
+                window.location.href = url.toString()
+            }
+            )
+    }
+</script>
+
+<!-- Plugins JS File -->
+<script src="/assets/js/jquery.min.js"></script>
+<script src="/assets/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/js/jquery.hoverIntent.min.js"></script>
+<script src="/assets/js/jquery.waypoints.min.js"></script>
+<script src="/assets/js/superfish.min.js"></script>
+<script src="/assets/js/owl.carousel.min.js"></script>
+<script src="/assets/js/wNumb.js"></script>
+<script src="/assets/js/bootstrap-input-spinner.js"></script>
+<script src="/assets/js/jquery.magnific-popup.min.js"></script>
+<script src="/assets/js/nouislider.min.js"></script>
+<!-- Main JS File -->
+<script src="/assets/js/main.js"></script>
 </body>
 
 
 <!-- molla/category-boxed.html  22 Nov 2019 10:03:02 GMT -->
+
 </html>

@@ -57,7 +57,7 @@
               <td class=" justify-content-center col-3" >
               
                 <div style="float:left; flex-wrap: wrap;" class="m-2">
-                  <a href="api/v1/admin/products/product-detail?id=<%=order.productId?._id%>">
+                  <a href="/api/v1/admin/products/product-detail?id=<%=order.productId?._id%>">
                 <img
                 src="/Data/uploads/<%=order.productId?.images[0]%>"
                 alt=""
@@ -113,7 +113,10 @@
                   </span>
                    
                   <%}else if(order.returnStatus== 'Requested'){%>
-                    <button onclick="showMessage()" class=" btn btn-info rounded"><%= order.returnStatus%></button>
+
+                    <button type="button" class="btn btn-info rounded" data-toggle="modal" data-target="#requestModal<%=order._id%>">
+                      <%= order.returnStatus%>
+                    </button>
                   
                   <%}else{%>
                     <span class=" px-4 py-2 rounded-pill" style="font-weight: 400; background-color: rgb(134, 32, 78); color: #e1d8d8;">
@@ -121,45 +124,44 @@
                       </span>
                     <%}%>
                 </td >
+
+              </tr>
+
+                Modal
+  <div class="modal fade" id="requestModal<%=order._id%>" tabindex="-1" role="dialog" aria-labelledby="requestModalLabel<%=order._id%>" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" style="color : rgb(248, 241, 241);" id="requestModalLabel<%=order._id%>">Request Details</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+        <div class="row align-items-center justify-content-around">
+          <div class="col-6 text-center row justify-content-center align-items-around" style="height: 200px; background-color: #c6dfef; border-radius: 6%;">
+          <h3>Reason</h3>
+          <p class="text-center" style="font-size: large; color: ;"><%=order.reason%></p>
+          </div>
+          <div class="col-6 text-center row justify-content-center align-items-around" style="height: 200px; background-color: #f8eafb; border-radius: 6%;">
+          <h3>Message</h3>
+          <p class="text-center" style="font-size: large; "><%=order.message ? order.message: 'None' %></p>
+          </div>
+        </div>
+         
+        </div>
+        <div class="modal-footer justify-content-around">
+          <button type="button" class="btn btn-reject" data-dismiss="modal" onclick="updateStatus('<%=order._id%>','Rejected')" >Reject</button>
+          <button type="button" class="btn btn-accept" onclick="updateStatus('<%=order._id%>','Accepted')">Accept</button>
+        </div>
+      </div>
+    </div>
+  </div>
                
           
 
-            <table style="margin-top: -1%;visibility: hidden ;position: absolute; top: 50%; right: 1%; z-index: 10;" class="table bg-light" id="returnTable" >
-              
-             
-                          <tr class="col-12 shadow" style="display: ; width: 100%;">
-              <td class="text-center  col-6">
-                <div style="background-color: rgb(234, 198, 205); height: 100Px; align-content: center;" class="rounded-pill">
-                  <p class="text-center" style="text-decoration: underline;"> Reason</p>
-                  <h5 style="" class="h-50">
-                    <%=order.reason%>
-                  </h5>
-                </div>
-               
-                <div class="row justify-content-center mt-1">
-                  <button onclick="updateStatus('<%=order._id%>','Rejected')" style="width: 15%;"  class="btn btn-danger  mx-5">Reject</button>
-                </div>
-              
-              </td>
-              <td class="text-center  col-6">
-                <div style="background-color:  rgb(234, 198, 205); height: 100Px; align-content: center;" class="rounded-pill">
-                  <p class="text-center" style="text-decoration: underline;"> Message</p>
-                  <h5 style="" class="h-50">
-                    <%=order.comments%>
-                  </h5>
-                </div>
-                <div class="row justify-content-center mt-1">
-                  <button onclick="updateStatus('<%=order._id%>','Accepted')" style="width: 15%;" class="text-center btn btn-success mx-5">Accept</button>
-                </div>
- 
-              </td>
-            
-            
-                </tr>
+           
           
-  
-            </table>
-          </tr>
 
 
             
@@ -182,7 +184,35 @@
           </div>
 
 
-          
+         
+  <!-- Custom CSS for styling -->
+  <style>
+    .modal-header {
+      background-color: #1f0101;
+      color: rgb(255, 255, 255);
+      font-size: larger;
+    }
+    .modal-footer .btn-accept {
+      background-color: #28a745;
+      color: white;
+    }
+    .modal-footer .btn-reject {
+      background-color: #dc3545;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <!-- Button to trigger modal -->
+ 
+
+  
+
+  <!-- Bootstrap JS and dependencies -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
           
           <!-- card-body end// -->
         </div>
@@ -212,14 +242,7 @@
       
         </section>
       <script>
-        function showMessage() {
-          let returnTable = document.getElementById('returnTable')
-          if(returnTable.style.visibility == 'hidden') {
-            returnTable.style.visibility = 'visible'
-          }else{
-            returnTable.style.visibility = 'hidden'
-          }
-        }
+       
 
         function updateStatus(returnId, status) {
           console.log(returnId, status)
@@ -247,8 +270,7 @@
                 showConfirmButton:false,
                 timer:1500,
             })
-            let returnTable = document.getElementById('returnTable')
-          returnTable.style.visibility == 'hidden';
+         
           location.reload(true)
            
             }else{

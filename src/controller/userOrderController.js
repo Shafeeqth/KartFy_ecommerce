@@ -6,20 +6,19 @@ const Address = require('../models/addressModel');
 const { Product, Inventory } = require('../models/productModels');
 const { Cart, Wishlist } = require('../models/CartAndWishlistModel');
 const asyncHandler = require('../utilities/asyncHandler');
-const { calculateDeliveryCharge, getCordinates, getDistance } = require('../helpers/calculateDeliveryCharge');
 const { createRazorpayOrder, createPayPalPayment } = require('../controller/paymentControllers');
 const mongoose = require('mongoose');
 const Wallet = require('../models/walletModel');
-const { findDeliveryCharge } = require('../middleware/userMiddleware');
 const puppeteer = require('puppeteer');
 const path = require('path');
 const fs = require('node:fs');
 const ejs = require('ejs');
+const Notification = require('../models/notificationModel')
 
 
 
 
-const loadOrderSuccess = asyncHandler(async (req, res) => {
+const loadOrderSuccess = asyncHandler(async (req, res, next) => {
 
     let orderId = req.query['orderId'];
     let user = req.session?.user ?? null
@@ -36,7 +35,7 @@ const loadOrderSuccess = asyncHandler(async (req, res) => {
 })
 
 
-const proceedtToCheckout = asyncHandler(async (req, res) => {
+const proceedtToCheckout = asyncHandler(async (req, res, next) => {
     let user = req.session.user;
     let cart = await Cart.findOne({ user: user._id });
 
@@ -361,7 +360,17 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
         });
         await Cart.deleteOne({
             user: user._id
-        })
+        });
+
+        const notification = await Notification.create({
+            recipient: user._id,
+            type: 'info',
+            title: 'Order placed successfully',
+            message: 'Dear user, Your order has successfully placed! Get more details about the order Check here',
+            url: '/api/v1/my-orders/single-orderDetails?id='+order._id,
+            image: '/notificationImages/12083598_Wavy_Bus-26_Single-03.jpg',
+        }) 
+
         return res.status(201)
             .json({
                 success: true,
@@ -404,7 +413,17 @@ const orderConfirm = asyncHandler(async (req, res, next) => {
                 description: 'Product ordered with wallet ',
                 mode: 'Debit'
             })
-            await wallet.save()
+            await wallet.save();
+
+            const notification = await Notification.create({
+                recipient: user._id,
+                type: 'info',
+                title: 'Order placed successfully',
+                message: 'Dear user, Your order has successfully placed! Get more details about the order Check here',
+                url: '/api/v1/my-orders/single-orderDetails?id='+order._id,
+                image: '/notificationImages/12083598_Wavy_Bus-26_Single-03.jpg',
+            }) 
+
             res.status(200)
                 .json({
                     success: true,
@@ -491,22 +510,22 @@ const orderCancel = asyncHandler(async (req, res, next) => {
     })
 
     if (order.orderStatus == 'Placed' && ['PayPal', 'RazorPay', 'Wallet'].includes(order.paymentMethod)) {
+        let refundAmount = order.orderAmount + (order.coupon?.discount || 0)
         let wallet = await Wallet.findOneAndUpdate({
             user: user._id
         },
             {
                 $inc: {
-                    balance: order.orderAmount
+                    balance: refundAmount 
                 },
                 $push: {
                     transactions: {
-                        amount: order.orderAmount,
+                        amount: refundAmount,
                         mode: 'Credit',
                         description: 'Order cancel amount credited ',
 
                     }
                 }
-
             },
             {
                 new: true
@@ -522,6 +541,15 @@ const orderCancel = asyncHandler(async (req, res, next) => {
 
     order = await order.save();
 
+    const notification = await Notification.create({
+    type: 'alert',
+    recipient: user._id,
+    title: 'Oops..! Order got Cancelled',
+    message: 'Dear user, Your order got Cancelled! Check your order Check here',
+    url: '/api/v1/my-orders/single-orderDetails?id='+order._id,
+    image: '/notificationImages/8918481_4029028.jpg',
+    })
+
     return res.json({
         success: true,
         error: false,
@@ -534,7 +562,7 @@ const orderCancel = asyncHandler(async (req, res, next) => {
 });
 
 
-const orderProductReview = asyncHandler(async (req, res) => {
+const orderProductReview = asyncHandler(async (req, res, next) => {
     let user = req.session.user
     if (!user) return res.redirect('/api/v1')
     let { rating, comment, review, orderId, productId, orderedItemId, size } = req.body;
@@ -586,15 +614,9 @@ console.log(req.body)
             message: 'Product review successfully submited'
         })
 
-
-
-
-
-
-
 })
 
-const orderReturn = asyncHandler(async (req, res) => {
+const orderReturn = asyncHandler(async (req, res, next) => {
     console.log(req.body)
     let user = req.session.user
 
@@ -613,7 +635,7 @@ const orderReturn = asyncHandler(async (req, res) => {
 
 
     })
-
+    let product = await Product.findById(productId)
 
     let order = await Order.findOneAndUpdate({
         _id: orderId,
@@ -627,7 +649,18 @@ const orderReturn = asyncHandler(async (req, res) => {
         {
             new: true
         }
-    )
+    );
+
+    const notification = await Notification.create({
+        recipient: user._id,
+        type: 'info',
+        title: 'Product Return requested send successfully!',
+        message: 'Dear user, Your product return request has send successfully! Get more details about the return.. !',
+        url: '/api/v1/my-orders/single-orderDetails?id='+order._id,
+        image: '/Data/uploads/'+product.images[0],
+        });
+
+
     return res.status(201)
         .json({
             success: true,
@@ -638,7 +671,7 @@ const orderReturn = asyncHandler(async (req, res) => {
 
 
 
-const loadMyOrders = asyncHandler(async (req, res) => {
+const loadMyOrders = asyncHandler(async (req, res, next) => {
 
     let user = req.session?.user;
     let page = parseInt(req.query.page) - 1 || 0;
@@ -654,7 +687,7 @@ const loadMyOrders = asyncHandler(async (req, res) => {
     })
         .populate('address')
         .populate('orderedItems.product')
-        .sort({ createdAt: -1 })
+        .sort({ updatedAt: -1 })
         .skip(page * limit)
         .limit(limit)
 
@@ -689,7 +722,7 @@ const loadSingleOrderDetails = asyncHandler(async (req, res, next) => {
     res.render('user/singleOrderDetails', { order })
 })
 
-const downloadOrderInvoice = asyncHandler(async (req, res) => {
+const downloadOrderInvoice = asyncHandler(async (req, res, next) => {
     let user = req.session.user;
     let { orderId } = req.body;
     let userDetails = await User.findById(user._id);
@@ -720,8 +753,8 @@ const downloadOrderInvoice = asyncHandler(async (req, res) => {
 })
 
 
-const razorpaySuccess = asyncHandler(async (req, res) => {
-
+const razorpaySuccess = asyncHandler(async (req, res, next) => {
+    let user = req.session.user;
     let { paymentId, orderId } = req.body;
     let order = await Order.findOneAndUpdate({
         _id: orderId
@@ -740,6 +773,15 @@ const razorpaySuccess = asyncHandler(async (req, res) => {
         }
     )
 
+    const notification = await Notification.create({
+        recipient: user._id,
+        type: 'info',
+        title: 'Order placed successfully',
+        message: 'Dear user, Your order has successfully placed! Get more details about the order Check here',
+        url: '/api/v1/my-orders/single-orderDetails?id='+order._id,
+        image: '/notificationImages/12083598_Wavy_Bus-26_Single-03.jpg',
+    }) 
+
     return res.status(200)
         .json({
             success: true,
@@ -750,8 +792,9 @@ const razorpaySuccess = asyncHandler(async (req, res) => {
 
 })
 
-const razorpayFailure = asyncHandler(async (req, res) => {
+const razorpayFailure = asyncHandler(async (req, res, next) => {
     let { orderId } = req.body;
+    let user = req.session.user;
     let order = await Order.findOneAndUpdate({
         _id: orderId
     },
@@ -768,6 +811,14 @@ const razorpayFailure = asyncHandler(async (req, res) => {
             new: true
         }
     )
+    const notification = await Notification.create({
+        recipient: user._id,
+        type: 'error',
+        title: 'Oops! Payment Failure',
+        message: 'Dear user, Your order request has been failed due to payment failure! Get more details about the order Check here',
+        url: '/api/v1/my-orders/single-orderDetails?id='+order._id,
+        image: '/notificationImages/10783810_19197383.jpg',
+    }) 
 
     return res.status(400)
         .json({
@@ -780,9 +831,10 @@ const razorpayFailure = asyncHandler(async (req, res) => {
 
 })
 
-const paypalSuccess = asyncHandler(async (req, res) => {
+const paypalSuccess = asyncHandler(async (req, res, next) => {
     let orderId = req.session.orderId;
     req.session.orderId = null;
+    let user = req.session.user;
     console.log(req.query)
 
     let { paymentId } = req.query;
@@ -802,6 +854,16 @@ const paypalSuccess = asyncHandler(async (req, res) => {
             new: true
         }
     )
+    const notification = await Notification.create({
+        recipient: user._id,
+        type: 'info',
+        title: 'Order placed successfully',
+        message: 'Dear user, Your order has successfully placed! Get more details about the order Check here',
+        url: '/api/v1/my-orders/single-orderDetails?id='+order._id,
+        image: '/notificationImages/12083598_Wavy_Bus-26_Single-03.jpg',
+    }) 
+
+
     return res.redirect('/api/v1/order-success?orderId=' + orderId)
 
 
@@ -818,8 +880,8 @@ const paypalSuccess = asyncHandler(async (req, res) => {
 })
 
 
-const paypalFailure = asyncHandler(async (req, res) => {
-
+const paypalFailure = asyncHandler(async (req, res, next) => {
+    let user = req.session.user;
     let orderId = req.session.orderId;
     req.session.orderId = null;
     let order = await Order.findOneAndUpdate({
@@ -838,6 +900,14 @@ const paypalFailure = asyncHandler(async (req, res) => {
             new: true
         }
     )
+    const notification = await Notification.create({
+        recipient: user._id,
+        type: 'error',
+        title: 'Oops! Payment Failure',
+        message: 'Dear user, Your order request has been failed due to payment failure! Get more details about the order Check here',
+        url: '/api/v1/my-orders/single-orderDetails?id='+order._id,
+        image: '/notificationImages/10783810_19197383.jpg',
+    }) 
 
     return res.redirect(`api/v1/admin//my-orders/single-orderDetails?id=${orderId}`)
 
@@ -851,14 +921,15 @@ const paypalFailure = asyncHandler(async (req, res) => {
     //     })
 })
 
-const retryOrderPay = asyncHandler(async (req, res) => {
+const retryOrderPay = asyncHandler(async (req, res, next) => {
     let orderId = req.body.orderId;
     let order = await Order.findOne({ _id: orderId });
     createRazorpayOrder(req, res, order);
 })
 
-const retryPaymentSuccess = asyncHandler(async (req, res) => {
+const retryPaymentSuccess = asyncHandler(async (req, res, next) => {
     let { orderId, paymentId } = req.body;
+    let user = req.session.user;
     let order = await Order.findOneAndUpdate({
         _id: orderId
     },
@@ -873,6 +944,16 @@ const retryPaymentSuccess = asyncHandler(async (req, res) => {
             new: true
         }
     )
+    const notification = await Notification.create({
+        recipient: user._id,
+        type: 'info',
+        title: 'Order placed successfully',
+        message: 'Dear user, Your order has successfully placed! Get more details about the order Check here',
+        url: '/api/v1/my-orders/single-orderDetails?id='+order._id,
+        image: '/notificationImages/12083598_Wavy_Bus-26_Single-03.jpg',
+    }) 
+
+
     return res.status(200)
         .json({
             success: true,
@@ -882,8 +963,9 @@ const retryPaymentSuccess = asyncHandler(async (req, res) => {
         })
 })
 
-const retryPaymentFailure = asyncHandler(async (req, res) => {
+const retryPaymentFailure = asyncHandler(async (req, res, next) => {
     let { orderId } = req.body;
+    let user = req.session.user;
     let order = await Order.findOneAndUpdate({
         _id: orderId
     },
@@ -896,7 +978,17 @@ const retryPaymentFailure = asyncHandler(async (req, res) => {
         {
             new: true
         }
-    )
+    );
+
+    const notification = await Notification.create({
+        recipient: user._id,
+        type: 'error',
+        title: 'Oops! Payment Failure',
+        message: 'Dear user, Your order request has been failed due to payment failure! Get more details about the order Check here',
+        url: '/api/v1/my-orders/single-orderDetails?id='+order._id,
+        image: '/notificationImages/10783810_19197383.jpg',
+    }) 
+
     return res.status(200)
         .json({
             success: false,

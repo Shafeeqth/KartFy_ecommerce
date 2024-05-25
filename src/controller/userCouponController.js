@@ -1,14 +1,9 @@
-
-
 const mongoose = require('mongoose');
 const Coupon = require('../models/couponModel');
 const { Cart, Wishlist } = require('../models/CartAndWishlistModel');
 const asyncHandler = require('../utilities/asyncHandler');
 
-
-
-
-const checkValidCoupon = asyncHandler(async (req, res) => {
+const checkValidCoupon = asyncHandler(async (req, res, next) => {
     let user = req.session.user;
     if (!user) return false
 
@@ -55,7 +50,7 @@ const checkValidCoupon = asyncHandler(async (req, res) => {
 })
 
 
-const addCoupon = asyncHandler(async (req, res) => {
+const addCoupon = asyncHandler(async (req, res, next) => {
     let code = req.body.code;
     let user = req.session.user;
     let coupon = await Coupon.findOne({ 
@@ -136,7 +131,7 @@ const addCoupon = asyncHandler(async (req, res) => {
 });
 
 
-const removeCoupon = asyncHandler(async (req, res) => {
+const removeCoupon = asyncHandler(async (req, res, next) => {
     let { discount } = req.body;
     let user = req.session.user._id
     console.log(discount);

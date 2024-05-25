@@ -15,31 +15,31 @@ const Notification = require('../models/notificationModel')
 
 
 
-const loadRegister = asyncHandler(async (req, res) => {
+const loadRegister = asyncHandler(async (req, res, next) => {
     if(req.session.user) return res.redirect('/api/v1/') 
     res.render('user/userRegister');
 })
 
-const loadLogin = asyncHandler(async (req, res) => {
+const loadLogin = asyncHandler(async (req, res, next) => {
     if(req.session.user) return res.redirect('/api/v1/') 
 
     res.render('user/userLogin');
 })
 
 
-const loadOtp = asyncHandler(async (req, res) => {
+const loadOtp = asyncHandler(async (req, res, next) => {
     let email = req.session.user?.email || res.locals.user
     res.render('user/otp', { email });
 })
 
 
-const loadForgetPage = asyncHandler(async (req, res) => {
+const loadForgetPage = asyncHandler(async (req, res, next) => {
 
     res.render('user/forgotPassword');
 
 })
 
-const loadResetPassword = asyncHandler(async (req, res) => {
+const loadResetPassword = asyncHandler(async (req, res, next) => {
     let token = req.query.token;
     req.session.token = token;
     console.log(token)
@@ -128,11 +128,10 @@ const varifyOtp = asyncHandler(async (req, res, next) => {
             await Notification.create({
                 recipient: user._id,
                 type: 'message',
-                title : 'Welcome to CartFy',
-                message: `Hello member, Welcome to the world of Fashion where
-                       meats expectations <br> <a href="/api/v1/profile">Go to Wallet</a>`,
-                url: 'api/v1/profile',
-                image:'depositphotos_71917829-stock-illustration-welcome-hand-drawn-lettering-against'
+                title : 'Welcome to CartFy', 
+                message: `Hello member, Welcome to the world of Fashion, where  Fashion meats the customers's expectations `,
+                url: '/api/v1/profile',
+                image:'notificationImages/5538691_2887096.jpg'
 
             })
 

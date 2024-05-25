@@ -2,10 +2,8 @@ const mongoose = require('mongoose');
 const ApiError = require('../utilities/apiError');
 const ApiResponse = require('../utilities/apiResponse');
 const asyncHandler = require('../utilities/asyncHandler');
-const { Order, OrderReturn, Review } = require('../models/orderModels');
 const Coupon = require('../models/couponModel');
 const User = require('../models/userModel');
-const Offer = require('../models/offerModel');
 const Address = require('../models/addressModel');
 const Category = require('../models/categoryModel');
 const { Product, Inventory } = require('../models/productModels');
@@ -16,7 +14,7 @@ const Referrel = require('../models/referrelModel');
 const Notification = require('../models/notificationModel');
 
 
-const loadHome = asyncHandler(async (req, res) => {
+const loadHome = asyncHandler(async (req, res, next) => {
     let user = req.session.user ? req.session.user : null;
     let banners = await Banner.find({ isListed: true })
     console.log(banners)
@@ -27,7 +25,7 @@ const loadHome = asyncHandler(async (req, res) => {
 })
 
 
-const loadShop = asyncHandler(async (req, res) => {
+const loadShop = asyncHandler(async (req, res, next) => {
 
 
     console.log(req.query)
@@ -269,7 +267,7 @@ const loadShop = asyncHandler(async (req, res) => {
 
 
 
-const loadCheckout = asyncHandler(async (req, res) => {
+const loadCheckout = asyncHandler(async (req, res, next) => {
     // if(! req.session.allowedToCheckout) {
     //     return res.status(401)
     //     .redirect('/api/v1/')
@@ -421,7 +419,7 @@ const loadCheckout = asyncHandler(async (req, res) => {
                     },
                 },
             },
-          {
+            {
                 $project: {
                     categoryOffer: 0,
                     productOffer: 0,
@@ -442,7 +440,7 @@ const loadCheckout = asyncHandler(async (req, res) => {
 
 })
 
-const loadProductDetail = asyncHandler(async (req, res) => {
+const loadProductDetail = asyncHandler(async (req, res, next) => {
 
     let productId = req.query['id'];
     console.log(productId)
@@ -459,7 +457,7 @@ const loadProductDetail = asyncHandler(async (req, res) => {
                 localField: 'product',
                 foreignField: '_id',
                 as: 'product'
-           }
+            }
         },
         {
             $lookup: {
@@ -482,10 +480,15 @@ const loadProductDetail = asyncHandler(async (req, res) => {
                             }]
                         }
                     },
+                    {
+                        $sort: {
+                            createdAt: -1
+                        }
+                    }
                 ]
             }
         },
-       {
+        {
             $lookup: {
                 from: 'offers',
                 localField: 'product._id',
@@ -676,7 +679,7 @@ const loadProfile = asyncHandler(async (req, res, next) => {
 
 })
 
-const loadAddAddress = asyncHandler(async (req, res) => {
+const loadAddAddress = asyncHandler(async (req, res, next) => {
     let user = req.session.user ?? null;
     res.render('user/addAddress');
 
@@ -760,10 +763,10 @@ const addAddress = asyncHandler(async (req, res, next) => {
 
     let user = req.session?.user
     if (!user) res.redirect('/api/v1/');
- console.log('body', req.body)
+    console.log('body', req.body)
     let body = req.body;
     body.user = req.session.user._id;
-   
+
     let { name, phone, alternatePhone, state, district, locality, pincode, street, type } = req.body
     // let { error, value } = userHelper.addressValidator.validate({ name, phone, alternatePhone, locality, district, pincode, street });
     // if (error) {
@@ -790,10 +793,10 @@ const deleteAddress = asyncHandler(async (req, res, next) => {
     if (user) {
         await Address.deleteOne({ user, _id: id })
         res.json({
-             success: true,
-             error: false,
-             message: 'Address deleted successfully'
-             })
+            success: true,
+            error: false,
+            message: 'Address deleted successfully'
+        })
 
 
     } else {
@@ -808,7 +811,7 @@ const editAddress = asyncHandler(async (req, res, next) => {
 
     let user = req.session.user
     console.log(req.body)
-   
+
     if (user) {
 
         let id = req.session.user.editAddressId;
@@ -829,31 +832,31 @@ const editAddress = asyncHandler(async (req, res, next) => {
         req.session.user.editAddressId = undefined
 
 
-    
-          let address =  await Address.findOneAndUpdate({
-                _id: new mongoose.Types.ObjectId(id)
-            },
-                {
-                    $set: {
-                        type,
-                        name,
-                        phone,
-                        alternatePhone,
-                        state,
-                        district,
-                        locality,
-                        pincode,
-                        street
-                    }
-                });
-        
+
+        let address = await Address.findOneAndUpdate({
+            _id: new mongoose.Types.ObjectId(id)
+        },
+            {
+                $set: {
+                    type,
+                    name,
+                    phone,
+                    alternatePhone,
+                    state,
+                    district,
+                    locality,
+                    pincode,
+                    street
+                }
+            });
+
         return res.status(201)
-        .json({
-            success: true,
-            error: false,
-            data: address,
-            message: 'Address edited successfully.'
-        })
+            .json({
+                success: true,
+                error: false,
+                data: address,
+                message: 'Address edited successfully.'
+            })
     }
 
 })
@@ -899,10 +902,10 @@ const changePassword = asyncHandler(async (req, res, next) => {
             }
         })
         return res.json({
-             success: true,
-             error: false,
-             message: 'Password updated successfully'
-             })
+            success: true,
+            error: false,
+            message: 'Password updated successfully'
+        })
 
     } else {
 
@@ -935,6 +938,31 @@ const changeUserDetails = asyncHandler(async (req, res, next) => {
 })
 
 
+const notificationMarkAsSeen = asyncHandler(async (req, res, next) => {
+    let { notificationId } = req.body;
+    let notification = await Notification.findOneAndUpdate({
+        _id: notificationId
+    },
+        {
+            $set: {
+
+                read: true,
+            }
+        },
+        {
+            new: true,
+        }
+    )
+
+    return res.status(200)
+        .json({
+            success: true,
+            error: false,
+            message: 'Notification marked as read'
+        })
+})
+
+
 module.exports = {
     loadHome,
     loadShop,
@@ -949,12 +977,13 @@ module.exports = {
     deleteAddress,
     changePassword,
     changeUserDetails,
+    notificationMarkAsSeen
 
 
 
 
 
-    
+
 
 
 

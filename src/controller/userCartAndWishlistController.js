@@ -4,7 +4,7 @@ const { Cart, Wishlist } = require('../models/CartAndWishlistModel');
 const asyncHandler = require('../utilities/asyncHandler');
 const { calculateDeliveryCharge, getCordinates, getDistance } = require('../helpers/calculateDeliveryCharge');
 
-const loadCart = asyncHandler(async (req, res) => {
+const loadCart = asyncHandler(async (req, res, next) => {
 
     let user = req.session.user ? req.session.user : null;
     let cart = await Cart.aggregate([
@@ -434,7 +434,7 @@ const updateCartCount = asyncHandler(async (req, res, next) => {
 });
 
 
-const loadWishlist = asyncHandler(async (req, res) => {
+const loadWishlist = asyncHandler(async (req, res, next) => {
     let user = req.session.user ? req.session.user : null;
     let wishlist = await Wishlist.aggregate([
         {

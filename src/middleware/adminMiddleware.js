@@ -18,7 +18,7 @@ const isLoged = asyncHandler(async (req, res, next) => {
 
 
 
-const adminLogout = asyncHandler(async (req, res) => {
+const adminLogout = asyncHandler(async (req, res, next) => {
     req.session.admin = null;
     return res.redirect('/api/v1/admin/login?LogoutMessage=' + encodeURIComponent('Admin Logged out successfully'));
 })

@@ -1,20 +1,9 @@
-
-const bcrypt = require('bcrypt');
-const userHelper = require('../helpers/validations');
-const nodemailer = require('nodemailer');
-const generateOtp = require('otp-generator');
 const mongoose = require('mongoose');
-
-const Coupon = require('../models/couponModel');
 const User = require('../models/userModel');
-const Offer = require('../models/offerModel');
-const Address = require('../models/addressModel');
-const Category = require('../models/categoryModel');
-const { Product, Inventory } = require('../models/productModels');
 const { Cart, Wishlist } = require('../models/CartAndWishlistModel');
 const asyncHandler = require('../utilities/asyncHandler');
 const { calculateDeliveryCharge, getCordinates, getDistance } = require('../helpers/calculateDeliveryCharge');
-const { findOneAndUpdate } = require('../models/walletModel');
+
 
 
 const isUserAutharized = asyncHandler(async (req, res, next) => {

@@ -11,7 +11,7 @@ const sharp = require('sharp');
 
 
 
-const loadProducts = asyncHandler(async (req, res) => {
+const loadProducts = asyncHandler(async (req, res, next) => {
     let page = parseInt(req.query.page) -1 || 0;
     let limit = parseInt(req.query.limit) || 7;
     page < 0 ? (page = 0) : page = page
@@ -30,7 +30,7 @@ const loadProducts = asyncHandler(async (req, res) => {
 
 
 })
-const loadProductDetails = asyncHandler(async (req, res) => {
+const loadProductDetails = asyncHandler(async (req, res, next) => {
 
     let { id } = req.query;
     let product = await Product.aggregate([
@@ -67,7 +67,7 @@ const loadProductDetails = asyncHandler(async (req, res) => {
     res.render('admin/adminProductDetails', { product })
 
 })
-const loadAddProduct = asyncHandler(async (req, res) => {
+const loadAddProduct = asyncHandler(async (req, res, next) => {
 
     let category = await Category.find({
         isListed: true
@@ -77,7 +77,7 @@ const loadAddProduct = asyncHandler(async (req, res) => {
 
 })
 
-const loadEditProduct = asyncHandler(async (req, res) => {
+const loadEditProduct = asyncHandler(async (req, res, next) => {
     let id = req.query.id;
     res.locals.productId = id; 
 
@@ -300,7 +300,7 @@ const listUnlistProduct = (req, res, next) => {
 
 }
 
-const editProductSizeCount = asyncHandler (async (req, res) => {
+const editProductSizeCount = asyncHandler (async (req, res, next) => {
     console.log(req.body)
     let {count, itemId, productId, size} = req.body;
 

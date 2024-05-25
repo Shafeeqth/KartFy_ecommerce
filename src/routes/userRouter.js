@@ -14,7 +14,8 @@ const upload = require('../helpers/multer.js');
 // Load the Home Page
 router.get('/', userMiddleware.userHeaderPopulator, userController.loadHome);
 
-router.get('/user-notifications', userController.loadUserNotifications)
+router.get('/user-notifications', userController.loadUserNotifications);
+router.patch('/user-notifications/mark-as-seen', userController.notificationMarkAsSeen )
 
 
 

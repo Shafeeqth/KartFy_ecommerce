@@ -7,7 +7,6 @@ const { Order, OrderReturn, Review, Return } = require('../models/orderModels');
 const Coupon = require('../models/couponModel');
 const User = require('../models/userModel');
 const Offer = require('../models/offerModel');
-const Address = require('../models/addressModel');
 const { v4: uuidv4, v5: uuidv5 } = require('uuid');
 const Category = require('../models/categoryModel');
 const Banner = require('../models/bannerModel');
@@ -15,12 +14,13 @@ const path = require('node:path');
 const sharp = require('sharp');
 const { Product, Inventory } = require('../models/productModels')
 const Wallet = require('../models/walletModel');
-const excelJs =  require('exceljs');
+const excelJs = require('exceljs');
+const Notification = require('../models/notificationModel');
 
 
 
-const loadDashboard = asyncHandler(async (req, res) => {
-    let now  = new Date();
+const loadDashboard = asyncHandler(async (req, res, next) => {
+    let now = new Date();
     let users = await User.countDocuments({})
     let products = await Product.countDocuments({ isListed: true });
     let orders = await Order.countDocuments({ orderStatus: 'Delivered' });
@@ -45,10 +45,10 @@ const loadDashboard = asyncHandler(async (req, res) => {
 
     ]);
 
-   
+
     let topTenCetagory = await findTopTen('Category')
     let topTenBrand = await findTopTen('Brands')
-   
+
 
     async function findTopTen(filter) {
 
@@ -144,7 +144,7 @@ const loadDashboard = asyncHandler(async (req, res) => {
                 localField: '_id',
                 foreignField: '_id',
                 as: 'product',
-                
+
             }
         },
         {
@@ -153,7 +153,7 @@ const loadDashboard = asyncHandler(async (req, res) => {
     ])
 
     let monthlyDataAggre = await Order.aggregate([
-       
+
         {
             $match: {
                 orderStatus: 'Delivered'
@@ -172,22 +172,22 @@ const loadDashboard = asyncHandler(async (req, res) => {
                 }
             }
         },
- 
+
     ])
-    let monthlyData = Array.from({length: 12}).fill(0);
+    let monthlyData = Array.from({ length: 12 }).fill(0);
     monthlyDataAggre.forEach(item => {
-        let monthIndex = parseInt(item._id, 10)-1;
-        if(monthIndex >= 0 && monthIndex < 12) {
+        let monthIndex = parseInt(item._id, 10) - 1;
+        if (monthIndex >= 0 && monthIndex < 12) {
             monthlyData[monthIndex] = item.totalAmount
         }
     })
-   monthlyRevenue = monthlyDataAggre.find(item => item._id ==  now.getMonth()+1).totalAmount 
+    monthlyRevenue = monthlyDataAggre.find(item => item._id == now.getMonth() + 1).totalAmount
 
     res.status(200)
         .render('admin/adminDashboard', { userCount: users, orderCount: orders, product: products, revenue: revenue[0].revenue, monthlyRevenue, monthlyData, name: topSellingProduct, brand: topTenBrand, topTenCetagory: topTenCetagory });
 })
 
-const getFilterData = asyncHandler( async (req, res) => {
+const getFilterData = asyncHandler(async (req, res, next) => {
     console.log(req.body);
     const data = requiredMonth = req.body.data;
     const startDay = new Date(requiredMonth + '-01T00:00:00Z');
@@ -219,30 +219,30 @@ const getFilterData = asyncHandler( async (req, res) => {
                 }
             }
         },
-])
-const newData = Array({length: 30}).fill(0);
+    ])
+    const newData = Array({ length: 30 }).fill(0);
 
-monthData.forEach(item => {
-    monthIndex = parseInt(item._id, 10)-1;
-    if(monthIndex >= 0 && monthIndex < 30) {
-        newData[monthIndex] = item.totalAmount;
-    }
-});
- res.status(200)
- .json({
-    success: true,
-    newData,
-    data,
-    error: false,
-    message: 'filter data fetched successfully'
+    monthData.forEach(item => {
+        monthIndex = parseInt(item._id, 10) - 1;
+        if (monthIndex >= 0 && monthIndex < 30) {
+            newData[monthIndex] = item.totalAmount;
+        }
+    });
+    res.status(200)
+        .json({
+            success: true,
+            newData,
+            data,
+            error: false,
+            message: 'filter data fetched successfully'
 
- })
+        })
 })
 
-const loadSalesReport = asyncHandler(async (req, res) => {
-    let query = {orderStatus: 'Delivered'};
-    if(req.query.startDate) {
-        const {startDate, endDate} = req.query;
+const loadSalesReport = asyncHandler(async (req, res, next) => {
+    let query = { orderStatus: 'Delivered' };
+    if (req.query.startDate) {
+        const { startDate, endDate } = req.query;
         const sDate = new Date(startDate);
         const eDate = new Date(endDate);
         query = {
@@ -254,13 +254,13 @@ const loadSalesReport = asyncHandler(async (req, res) => {
         }
     }
     const report = await Order.find(query).populate('orderedItems.product')
-    res.render('admin/salesreport', {report})
+    res.render('admin/salesreport', { report })
 })
 
-const salesReportDownLoadExcel = asyncHandler( async (req, res) => {
-    let query = {orderStatus: 'Delivered'};
-    if(req.query.startDate) {
-        const {startDate, endDate} = req.body;
+const salesReportDownLoadExcel = asyncHandler(async (req, res, next) => {
+    let query = { orderStatus: 'Delivered' };
+    if (req.query.startDate) {
+        const { startDate, endDate } = req.body;
         const sDate = new Date(startDate);
         const eDate = new Date(endDate);
         query = {
@@ -277,7 +277,7 @@ const salesReportDownLoadExcel = asyncHandler( async (req, res) => {
         },
         {
             $unwind: '$orderedItems'
-        
+
         },
         {
             $lookup: {
@@ -293,7 +293,7 @@ const salesReportDownLoadExcel = asyncHandler( async (req, res) => {
         {
             $group: {
                 _id: '$orderId',
-                item:{ $first: '$$ROOT'}
+                item: { $first: '$$ROOT' }
             }
         },
         // {
@@ -303,23 +303,23 @@ const salesReportDownLoadExcel = asyncHandler( async (req, res) => {
         //     }
         // }
 
-        
-       
+
+
     ])
     console.log(report)
 
-       
+
 
     const workBook = new excelJs.Workbook();
     const workSheet = workBook.addWorksheet('Report');
-    const destinationPath = path.join(__dirname,'../../public/excelSheets');
+    const destinationPath = path.join(__dirname, '../../public/excelSheets');
     workSheet.columns = [
-        {header: "S no.", key: "s_no", width: 10},
-        {header: "OrderId", key: "o_id", width: 10},
-        {header: "Proudct Details", key: "product_details", width: 30},
-        {header: "Order price", key: "order_price", width: 10},
-        {header: "Payment Method", key: "payment_method", width: 10},
-        {header: "Date", key: "date", width: 10},
+        { header: "S no.", key: "s_no", width: 10 },
+        { header: "OrderId", key: "o_id", width: 10 },
+        { header: "Proudct Details", key: "product_details", width: 30 },
+        { header: "Order price", key: "order_price", width: 10 },
+        { header: "Payment Method", key: "payment_method", width: 10 },
+        { header: "Date", key: "date", width: 10 },
 
 
     ]
@@ -327,19 +327,19 @@ const salesReportDownLoadExcel = asyncHandler( async (req, res) => {
 
     })
 
-   
-    
+
+
     // let counter = 1;
     // report.forEach(item => {
     //     item
     // })
 
-    
+
 
 })
 
 
-const loadLogin = asyncHandler(async (req, res) => {
+const loadLogin = asyncHandler(async (req, res, next) => {
     if (req.session.admin) {
         res.redirect('/api/v1/admin')
     }
@@ -354,7 +354,7 @@ const loadLogin = asyncHandler(async (req, res) => {
     }
 })
 
-const checkAuthentic = asyncHandler(async (req, res) => {
+const checkAuthentic = asyncHandler(async (req, res, next) => {
     email = process.env.ADMIN_EMAIL;
     password = process.env.ADMIN_PASSWORD;
     if (email == req.body.email) {
@@ -379,7 +379,7 @@ const checkAuthentic = asyncHandler(async (req, res) => {
 
 
 
-const loadCustomers = asyncHandler(async (req, res) => {
+const loadCustomers = asyncHandler(async (req, res, next) => {
     let page = parseInt(req.query.page) - 1 || 0;
     let limit = parseInt(req.query.limit) || 7;
     page < 0 ? (page = 0) : page = page
@@ -398,7 +398,7 @@ const loadCustomers = asyncHandler(async (req, res) => {
 
 })
 
-const loadOrders = asyncHandler(async (req, res) => {
+const loadOrders = asyncHandler(async (req, res, next) => {
     let page = parseInt(req.query.page) - 1 || 0;
     let limit = parseInt(req.query.limit) || 7;
     page < 0 ? (page = 0) : page = page
@@ -411,7 +411,7 @@ const loadOrders = asyncHandler(async (req, res) => {
         .populate('user')
         .populate('address')
         .populate('orderedItems.product')
-        .sort({ createdAt: -1 })
+        .sort({ updatedAt: -1 })
         .skip(page * limit)
         .limit(limit)
 
@@ -424,7 +424,7 @@ const loadOrders = asyncHandler(async (req, res) => {
 
 })
 
-const loadSingleOrderDetails = asyncHandler(async (req, res) => {
+const loadSingleOrderDetails = asyncHandler(async (req, res, next) => {
 
     let orderId = req.query.id
     let order = await Order.findOne({
@@ -433,7 +433,7 @@ const loadSingleOrderDetails = asyncHandler(async (req, res) => {
         .populate('user')
         .populate('address')
         .populate('orderedItems.product');
-        console.log(order)
+    console.log(order)
     res.render('admin/singleOrderDetials', { order })
 
 
@@ -443,7 +443,7 @@ const loadSingleOrderDetails = asyncHandler(async (req, res) => {
 
 
 
-const loadCoupons = asyncHandler(async (req, res) => {
+const loadCoupons = asyncHandler(async (req, res, next) => {
     let page = parseInt(req.query.page) - 1 || 0;
     let limit = parseInt(req.query.limit) || 7;
     page < 0 ? (page = 0) : page = page
@@ -458,7 +458,7 @@ const loadCoupons = asyncHandler(async (req, res) => {
 
 
 
-const loadReturns = asyncHandler(async (req, res) => {
+const loadReturns = asyncHandler(async (req, res, next) => {
     let page = parseInt(req.query.page) - 1 || 0;
     let limit = parseInt(req.query.limit) || 7;
     page < 0 ? (page = 0) : page = page
@@ -519,21 +519,23 @@ const blockOrUnblockUser = asyncHandler(async (req, res, next) => {
 const changeOrderStatus = asyncHandler(async (req, res, next) => {
     console.log(req.body)
     let { orderId, productId, index, status, userId, orderAmount } = req.body;
-    let order = await Order.findOne({_id: orderId});
+    let order = await Order.findOne({ _id: orderId });
     order.orderStatus = status;
-    if (status == 'Cancelled' && order.paymentStatus == 'Paid' ) {
+    let flag = true;
+    if (status == 'Cancelled' && order.paymentStatus == 'Paid') {
         if (['PayPal', 'RazorPay', 'Wallet'].includes(order.paymentMethod)) {
+            let refundAmount = order.orderAmount + (order.coupon?.discount || 0)
             let wallet = await Wallet.updateOne({
                 user: userId
             }, {
                 $inc: {
-                    balance: order.orderAmount
+                    balance: refundAmount,
 
                 },
                 $push: {
                     transactions: {
                         mode: 'Credit',
-                        amount: order.orderAmount,
+                        amount: refundAmount,
                         description: 'Order canceled by admin amount credit ',
 
                     }
@@ -541,6 +543,15 @@ const changeOrderStatus = asyncHandler(async (req, res, next) => {
             })
 
         }
+        const notification = await Notification.create({
+            recipient: order.user,
+            type: 'error',
+            title: 'Oops! Order got Cancelled by the Admin',
+            message: 'Dear user, Your order got cancelled by admin! Check your order Check here',
+            url: '/api/v1/my-orders/single-orderDetails?id=' + order._id,
+            image: '/notificationImages/8918481_4029028.jpg',
+        })
+        flag = false;
 
     }
     order.orderedItems.forEach(async item => {
@@ -548,15 +559,39 @@ const changeOrderStatus = asyncHandler(async (req, res, next) => {
             product: item.product,
             'sizeVariant.size': item.size
         },
-        {
-            $inc: {
-                'sizeVariant.$.stock': item.quantity
-            }
+            {
+                $inc: {
+                    'sizeVariant.$.stock': item.quantity
+                }
 
-        }
-    )
+            }
+        )
     })
     await order.save();
+    let image;
+    if(status == 'Shipped'){
+        image = '1287161_164732-OVURV2-709.jpg';
+
+
+    }else if(status == 'Delivered') {
+        image = '7967777_3802305.jpg'
+
+    }else if(status == 'Out For Delivery') {
+        image = '29765706_7591470.jpg'
+
+    }
+
+    if (flag) {
+        const notification = await Notification.create({
+            recipient: order.user,
+            type: 'message',
+            title: 'Order ' + status,
+            message: 'Dear user, Your order is ' + status + '! Check your order Check here',
+            url: '/api/v1/my-orders/single-orderDetails?id=' + order._id,
+            image: '/notificationImages/'+image,
+        })
+
+    }
 
 
     return res.json({
@@ -570,14 +605,14 @@ const changeOrderStatus = asyncHandler(async (req, res, next) => {
 
 })
 
-const createCoupon = asyncHandler(async (req, res) => {
+const createCoupon = asyncHandler(async (req, res, next) => {
 
     let { name: title, description, discount, minOrder: minCost, edate: expiryDate, limit } = req.body;
     let firstCode = title.split(' ')[0];
     let middleCode = generateRandomString(4);
     let lastCode = discount;
     let couponCode = firstCode + middleCode + lastCode;
-  
+
     await Coupon.create({
         title,
         description,
@@ -612,7 +647,7 @@ const createCoupon = asyncHandler(async (req, res) => {
 
 });
 
-const editCoupon = asyncHandler(async (req, res) => {
+const editCoupon = asyncHandler(async (req, res, next) => {
     console.log(req.body)
     const { name, id, description, discount, minOrder, edate, limit } = req.body;
 
@@ -639,7 +674,7 @@ const editCoupon = asyncHandler(async (req, res) => {
 })
 
 
-const listAndUnlistCoupon = asyncHandler(async (req, res) => {
+const listAndUnlistCoupon = asyncHandler(async (req, res, next) => {
     let { id } = req.body
     let coupon = await Coupon.findOne({ _id: id })
 
@@ -680,7 +715,7 @@ const listAndUnlistCoupon = asyncHandler(async (req, res) => {
 })
 
 
-const loadOffers = asyncHandler(async (req, res) => {
+const loadOffers = asyncHandler(async (req, res, next) => {
     let page = parseInt(req.query.page) - 1 || 0;
     let limit = parseInt(req.query.limit) || 7;
     page < 0 ? (page = 0) : page = page
@@ -697,7 +732,7 @@ const loadOffers = asyncHandler(async (req, res) => {
 
 })
 
-const loadBanners = asyncHandler(async (req, res) => {
+const loadBanners = asyncHandler(async (req, res, next) => {
     let page = parseInt(req.query.page) - 1 || 0;
     let limit = parseInt(req.query.limit) || 7;
     page < 0 ? (page = 0) : page = page
@@ -710,7 +745,7 @@ const loadBanners = asyncHandler(async (req, res) => {
 
 })
 
-const createBanner = asyncHandler(async (req, res) => {
+const createBanner = asyncHandler(async (req, res, next) => {
     let { name, description, url } = req.body;
     let cropPath = path.join(__dirname, '../../public/Data/banners/sharped');
     let crop = await sharp(req.file.path).resize(1600, 900).toFile(`${cropPath}/${req.file.originalname}`);
@@ -722,11 +757,11 @@ const createBanner = asyncHandler(async (req, res) => {
         image: req.file.originalname
     })
     return res.status(201)
-  
+
 })
 
 
-const editBanner = asyncHandler(async (req, res) => {
+const editBanner = asyncHandler(async (req, res, next) => {
     let { name, description, url, id } = req.body;
 
 
@@ -769,7 +804,7 @@ const editBanner = asyncHandler(async (req, res) => {
 
 })
 
-const listAndUnlistBanner = asyncHandler(async (req, res) => {
+const listAndUnlistBanner = asyncHandler(async (req, res, next) => {
     const { bannerId } = req.body;
 
     let banner = await Banner.findOne({
@@ -793,7 +828,7 @@ const listAndUnlistBanner = asyncHandler(async (req, res) => {
 
 })
 
-const getOfferData = asyncHandler(async (req, res) => {
+const getOfferData = asyncHandler(async (req, res, next) => {
     let { offerType } = req.body;
     if (offerType == 'product') {
         let product = await Product.find({ isListed: true });
@@ -824,7 +859,7 @@ const getOfferData = asyncHandler(async (req, res) => {
     }
 })
 
-const createOffer = asyncHandler(async (req, res) => {
+const createOffer = asyncHandler(async (req, res, next) => {
     let { name, description, edate, offertype, discount, selecteditems } = req.body;
     if (offertype == 'product') {
         let offer = await Offer.create({
@@ -848,7 +883,7 @@ const createOffer = asyncHandler(async (req, res) => {
         .redirect('/api/v1/admin/offers')
 })
 
-const listAndUnlistOffer = asyncHandler(async (req, res) => {
+const listAndUnlistOffer = asyncHandler(async (req, res, next) => {
     let { id } = req.body
     let offer = await Offer.findOne({ _id: id })
 
@@ -890,8 +925,8 @@ const listAndUnlistOffer = asyncHandler(async (req, res) => {
         })
 })
 
-const editOffer = asyncHandler(async (req, res) => {
- 
+const editOffer = asyncHandler(async (req, res, next) => {
+
     const { name, id, description, discount, edate } = req.body;
 
     const offer = await Offer.findOneAndUpdate({
@@ -912,15 +947,15 @@ const editOffer = asyncHandler(async (req, res) => {
         }
     )
     res.redirect('/api/v1/admin/offers')
-  
+
 })
 
 
 
 
-const returnChangeStatus = asyncHandler(async (req, res) => {
+const returnChangeStatus = asyncHandler(async (req, res, next) => {
     let { returnId, status } = req.body;
-    let returns = await Return.findOne({ _id: returnId })
+    let returns = await Return.findOne({ _id: returnId });
     if (!returns.returnStatus == 'Requested') {
         return res.status(500)
             .json({
@@ -929,6 +964,8 @@ const returnChangeStatus = asyncHandler(async (req, res) => {
                 message: 'Something went wrong'
             })
     }
+    const product = await Product.findById(returns.productId);
+    let flag = true;
 
     if (status == 'Accepted') {
         let wallet = await Wallet.findOneAndUpdate({
@@ -951,21 +988,28 @@ const returnChangeStatus = asyncHandler(async (req, res) => {
             },
             {
                 new: true
-            }
-
-        )
+            });
 
         await Inventory.findOneAndUpdate({
             product: returns.product,
-            'sizeVariant.size': returns.size 
+            'sizeVariant.size': returns.size
         },
-    {
-        $inc: {
-            'sizeVariant.$.stock': returns.quantity,
-           
+            {
+                $inc: {
+                    'sizeVariant.$.stock': returns.quantity,
 
-        }
-    })
+
+                }
+            });
+        const notification = await Notification.create({
+            recipient: returns.user,
+            type: 'success',
+            title: 'Return request Accepted',
+            message: 'Dear user, Your Return request has been accepted! Check your order Check here',
+            url: '/api/v1/my-orders/single-orderDetails?id=' + order._id,
+            image: '/Data/uploads/' + product.images[0],
+        })
+        flag = false;
 
     }
 
@@ -978,6 +1022,18 @@ const returnChangeStatus = asyncHandler(async (req, res) => {
             'orderedItems.$.returnStatus': status
         }
     })
+
+    if (flag) {
+        const notification = await Notification.create({
+            recipient:  returns.user,
+            type: 'error',
+            title: 'Return request got Rejected!',
+            message: 'Dear user, Your Return request has been rejected by the admin! Check your order, Check here',
+            url: '/api/v1/my-orders/single-orderDetails?id=' + order._id,
+            image: '/Data/uploads/' + product.images[0],
+        })
+
+    }
 
     returns.returnStatus = status;
     returns = await returns.save();
