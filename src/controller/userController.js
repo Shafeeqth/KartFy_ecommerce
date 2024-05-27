@@ -665,15 +665,11 @@ const loadProfile = asyncHandler(async (req, res, next) => {
             },
 
 
-
-
-
         ])
         console.log(userProfile)
 
         res.render("user/userProfile", { userProfile: userProfile[0], wallet })
     }
-
 
 
 
@@ -693,13 +689,12 @@ const loadUserNotifications = asyncHandler(async (req, res, next) => {
     if (!user) {
         return res.redirect('/api/v1')
     }
-    let notifications = await Notification.find({ recipient: user._id }).sort({ createdAt: -1 });
-    console.log('notifications', notifications);
+    let notifications = await Notification.find({ recipient: user._id }).sort({ createdAt: -1 }).limit(12);
     res.render('user/notifications', { notifications, page: 0, total: 0 })
 })
 
+
 const applyUserReferrel = asyncHandler(async (req, res, next) => {
-    console.log('===========================', req.body);
     let code = req.body.code
     let referrel = await Referrel.findOne({ code });
     if (!referrel) {
@@ -967,10 +962,10 @@ module.exports = {
     loadHome,
     loadShop,
     loadCheckout,
+    editAddress,
     loadProductDetail,
     loadProfile,
     loadAddAddress,
-    editAddress,
     loadUserNotifications,
     applyUserReferrel,
     addAddress,
