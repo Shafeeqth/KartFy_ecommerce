@@ -307,16 +307,6 @@
 
           let modal = document.getElementById(`imageModal${idNumber}`);
 
-let bootsrapModal = bootstrap.Modal.getInstance(modal);
-
-let closeButton = document.querySelectorAll('.btn-close').forEach(item => {
-  item.addEventListener('click', () => {
-    console.log('hello')
-    bootsrapModal.dispose();
-    cropper.distroy()
-    cropper = null;
-  });
-})
         });
 
         let img = document.createElement('img');
@@ -372,15 +362,8 @@ let closeButton = document.querySelectorAll('.btn-close').forEach(item => {
         let modal = document.getElementById(`imageModal${idNumber}`);
 
         let bootsrapModal = bootstrap.Modal.getInstance(modal);
+        bootsrapModal.hide();
 
-        let closeButton = bootsrapModal.querySelectorAll('.btn-close').forEach(item => {
-          item.addEventListener('click', () => {
-            console.log('hello')
-            // bootsrapModal.dispose();
-            // cropper.distroy()
-            // cropper = null;
-          });
-        })
         let imgSrc = cropper.getCroppedCanvas().toDataURL('image/jpeg');
         preview.src = imgSrc;
 

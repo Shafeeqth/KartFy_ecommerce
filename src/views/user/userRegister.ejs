@@ -107,8 +107,8 @@
 
             </div><!-- End .header-middle -->
             <style>
-                #toggleButton{
-                    
+                #toggleButton {
+
                     background: none;
                     border: none;
                     cursor: pointer;
@@ -118,16 +118,46 @@
                     transform: translateY(-50%);
                 }
 
-                #toggleButton i{
+                #toggleButton i {
                     color: #999;
                     font-weight: bold;
                 }
 
+                #message {
+                    display: none;
+                    background: #f1f1f1;
+                    color: #000;
+                    position: relative;
+                    padding: 20px;
+                    margin-top: 10px;
+                }
 
+                #message p {
+                    padding: 5px 2px;
+                    font-size: 18px;
+                }
 
+                /* Add a green text color and a checkmark when the requirements are right */
+                .valid {
+                    color: green;
+                }
 
+                .valid:before {
+                    position: relative;
+                    left: -35px;
+                    content: "✔";
+                }
 
+                /* Add a red text color and an "x" when the requirements are wrong */
+                .invalid {
+                    color: red;
+                }
 
+                .invalid:before {
+                    position: relative;
+                    left: -35px;
+                    content: "✖";
+                }
             </style>
 
 
@@ -149,9 +179,12 @@
                             <div class="tab-content">
                                 <div class="tab-pane fade show active" id="signin" role="tabpanel"
                                     aria-labelledby="signin-tab">
-                                    <div style="display: none;" id="main-error" class="alert text-danger fw-bold bg-light rounded text-center  border border-danger" role="alert"></div>
+                                    <div style="display: none;" id="main-error"
+                                        class="alert text-danger fw-bold bg-light rounded text-center  border border-danger"
+                                        role="alert"></div>
                                     <form>
-                                        <div class="form-group row align-items-center justify-content-center" style="position: relative;">
+                                        <div class="form-group row align-items-center justify-content-center"
+                                            style="position: relative;">
                                             <label for="name">Username *</label>
                                             <div class="text-danger" id="nameError"
                                                 style="position: absolute; top: 20% ;">
@@ -160,7 +193,8 @@
                                             <input type="text" class="form-control" id="name" name="name" required>
                                         </div><!-- End .form-group -->
 
-                                        <div class="form-group row align-items-center justify-content-center" style="position: relative;">
+                                        <div class="form-group row align-items-center justify-content-center"
+                                            style="position: relative;">
                                             <label for="email">Email address *</label>
                                             <div class="text-danger" id="emailError"
                                                 style="position: absolute; top:20%;">
@@ -169,21 +203,34 @@
                                             <input type="text" class="form-control" id="email" name="email" required>
                                         </div><!-- End .form-group -->
 
-                                        <div class="form-group row align-items-center justify-content-center" style="position: relative;">
+                                        <div class="form-group row align-items-center justify-content-center"
+                                            style="position: relative;">
                                             <label for="password">Password *</label>
                                             <!-- <input
                                             type="checkbox" onclick="show()"
                                             style="position: absolute; top: 66%; left: 95%;"> -->
-                                            <button id="toggleButton"> <i class="fa fa-eye" aria-hidden="true"></i></button>
+                                            <button id="toggleButton"> <i class="fa fa-eye"
+                                                    aria-hidden="true"></i></button>
                                             <div class="text-danger" id="passwordError"
                                                 style="position: absolute;  top:20%;">
                                             </div>
 
-                                            <input type="password" class="form-control" id="password" name="password"
-                                                placeholder="* Must have 1 upper 1 lower 1 special charector" required>
+                                            <input type="password" class="form-control" id="password"
+                                                pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                                                title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+                                                name="password" placeholder="" required>
                                         </div><!-- End .form-group -->
+                                        <div id="message">
+                                            <h3>Password must contain the following:</h3>
+                                            <p id="letter" class="invalid">A <b>lowercase</b> letter</p>
+                                            <p id="capital" class="invalid">A <b>capital (uppercase)</b> letter</p>
+                                            <p id="number" class="invalid">A <b>number</b></p>
+                                            <p id="length" class="invalid">Minimum <b>8 characters</b></p>
+                                        </div>
 
-                                        <div class="form-group row align-items-center justify-content-center" style="position: relative;">
+
+                                        <div class="form-group row align-items-center justify-content-center"
+                                            style="position: relative;">
                                             <label for="confirm-password">Confirm Password *</label>
                                             <div class="text-danger" id="confirmPasswordError"
                                                 style="position: absolute; top:20%;">
@@ -195,14 +242,15 @@
                                         </div><!-- End .form-group -->
 
                                         <div class="form-footer row mt-2">
-                                            <button onclick="validateAndSubmit()"type="button"
+                                            <button onclick="validateAndSubmit()" type="button"
                                                 class="btn btn-outline-primary-2 col-4 mx-3 rounded">
                                                 <span>Submit</span>
                                                 <i class="icon-long-arrow-right"></i>
                                             </button>
 
 
-                                            <a href="/api/v1/signin" class="forgot-link col-6">Already Have an Account?</a>
+                                            <a href="/api/v1/signin" class="forgot-link col-6">Already Have an
+                                                Account?</a>
                                         </div><!-- End .form-footer -->
                                     </form>
                                     <div class="form-choice my-0">
@@ -238,10 +286,10 @@
                 const toggleButton = document.getElementById('toggleButton');
 
 
-                toggleButton.addEventListener('click', function(event) {
+                toggleButton.addEventListener('click', function (event) {
                     event.preventDefault()
 
-                    if(password.type === 'password') {
+                    if (password.type === 'password') {
                         password.type = 'text';
                         toggleButton.innerHTML = '<i class="fa fa-eye-slash" aria-hidden="true"> </i>';
                     } else {
@@ -249,7 +297,7 @@
                         toggleButton.innerHTML = '<i class="fa fa-eye" aria-hidden="true"></i>';
                     }
                 })
-                    
+
 
 
 

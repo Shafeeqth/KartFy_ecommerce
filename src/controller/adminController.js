@@ -967,6 +967,15 @@ const returnChangeStatus = asyncHandler(async (req, res, next) => {
     const product = await Product.findById(returns.productId);
     let flag = true;
 
+    let order = await Order.findOneAndUpdate({
+        _id: returns.order,
+        'orderedItems._id': returns.orderedItemId
+    }, {
+        $set: {
+            'orderedItems.$.returnStatus': status
+        }
+    })
+
     if (status == 'Accepted') {
         let wallet = await Wallet.findOneAndUpdate({
             user: new mongoose.Types.ObjectId(returns.user)
@@ -1001,6 +1010,8 @@ const returnChangeStatus = asyncHandler(async (req, res, next) => {
 
                 }
             });
+          
+        
         const notification = await Notification.create({
             recipient: returns.user,
             type: 'success',
@@ -1014,15 +1025,7 @@ const returnChangeStatus = asyncHandler(async (req, res, next) => {
     }
 
 
-    let order = await Order.findOneAndUpdate({
-        _id: returns.order,
-        'orderedItems._id': returns.orderedItemId
-    }, {
-        $set: {
-            'orderedItems.$.returnStatus': status
-        }
-    })
-
+ 
     if (flag) {
         const notification = await Notification.create({
             recipient:  returns.user,

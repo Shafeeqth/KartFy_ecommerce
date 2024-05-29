@@ -86,11 +86,12 @@ const createUser = asyncHandler(async (req, res, next) => {
     sendMail(value.email, 'CartFy OTP Verification', otpTemplate(Otp, value.name));
     
     const otp = await OTP.updateOne({
-        email : value.email
+        email : value.email,
+        otp: Otp
        },
        {
             $set: { 
-               email, 
+               email: value.email , 
                otp: Otp 
            } 
        }, 
@@ -173,10 +174,22 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
 
     if (user) {
 
-        const tokens = await OTP.create({      
-                    email, 
-                    token  
-                   });
+        const tokens = await OTP.updateOne({
+            email ,
+            token  
+           },
+           {
+                $set: { 
+                   email, 
+                   token  
+               } 
+           }, 
+           {
+                upsert: true 
+               }
+       );
+
+      
         sendMail(email, 'Reset Account Password', passwordUpdated(token, user.name));
         req.flash('sentEmail', `Please check your Email ${req.body.email}`);
         return res.redirect('/api/v1/forgot-password?checkEmail=' + encodeURIComponent('Please check your email'));

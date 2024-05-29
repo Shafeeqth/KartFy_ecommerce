@@ -372,7 +372,7 @@
 			const downloadButton = document.getElementById('download');
    			downloadButton.innerHTML = '   <span class="spinner-border spinner-border-md mx-3" role="status" style="" aria-hidden="true"></span> Downloading...'
 
-			fetch('/api/v1/admin/my-orders/single-orderDetails/order-invoice-download', {
+			fetch('/api/v1/my-orders/single-orderDetails/order-invoice-download', {
 				method: "POST",
 				body: JSON.stringify({orderId}),
 				headers: {
