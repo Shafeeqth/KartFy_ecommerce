@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let userEmail = document.getElementById('email');
     let userPassword = document.getElementById('password');
     let userConfirmPassword = document.getElementById('confirm-password');
-
+    let message =  document.getElementById('message');
 
     let nameError = document.getElementById('nameError');
     let emailError = document.getElementById('emailError');
@@ -66,6 +66,55 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
     });
+    // let letter = document.getElementById('letter');
+    // let capital = document.getElementById('capital');
+    // let number = document.getElementById('number');
+    // let length = document.getElementById('length');
+    // // let letter = document.getElementById('letter');
+  
+    // userPassword.onfocus = function () {
+    //     message.style.display  = 'block';
+    //     };
+    // userPassword.onblur = function() {
+    //     message.style.display = 'none';
+    // }
+    // let lowerCaseAlphabets = /[a-z]/g;
+    // let upperCaseLetters = /[A-Z]/g;
+    // let numbers = /[0-9]/g;
+
+    // if(userPassword.value.match(upperCaseLetters)) {
+    //     capital.classList.remove('invalid');
+    //     capital.classList.add('valid');
+        
+    // }else {
+    //     capital.classList.remove('valid');
+    //     capital.classList.add('invalid');
+    // }
+
+    // if(userPassword.value.match(lowerCaseAlphabets)) {
+    //     letter.classList.remove('invalid');
+    //     letter.classList.add('valid');
+        
+    // }else {
+    //     letter.classList.remove('valid');
+    //     letter.classList.add('invalid');
+    // }
+    // if(userPassword.value.match(numbers)) {
+    //     number.classList.remove('invalid');
+    //     number.classList.add('valid');
+        
+    // }else {
+    //     number.classList.remove('valid');
+    //     number.classList.add('invalid');
+    // }
+    // if(userPassword.value.length > 7 ) {
+    //     length.classList.remove('invalid');
+    //     length.classList.add('valid');
+        
+    // }else {
+    //     length.classList.remove('valid');
+    //     length.classList.add('invalid');
+    // }
 
     userPassword.addEventListener('keyup', function (event) {
 

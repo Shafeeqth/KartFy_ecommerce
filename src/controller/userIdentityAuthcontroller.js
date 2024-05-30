@@ -147,7 +147,7 @@ const varifyOtp = asyncHandler(async (req, res, next) => {
         title: 'Welcome to CartFy',
         message: `Hello member, Welcome to the world of Fashion, where  Fashion meats the customers's expectations `,
         url: '/api/v1/profile',
-        image: 'notificationImages/5538691_2887096.jpg'
+        image: '/notificationImages/5538691_2887096.jpg'
 
     })
 

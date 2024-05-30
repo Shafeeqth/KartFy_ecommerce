@@ -238,9 +238,10 @@
 
           return false;
         } else if (
-          description.value.trim() === "" ||
+          description.value.trim() === "" 
+          // ||
           
-          !/^[a-zA-Zà-žÀ-Ž]{10,}(?:[ '][a-zA-Zà-žÀ-Ž0-9]*)*$/.test(description.value.trim())
+          // !/^[a-zA-Zà-žÀ-Ž]{10,}(?:[ '][a-zA-Zà-žÀ-Ž0-9]*)*$/.test(description.value.trim())
         ) {
           if (description.value.trim() === '') {
             description.style.border = "solid 1px red";
@@ -307,7 +308,8 @@
               }else if(response.error) {
                 
                   Swal.fire({
-                    title: response.error,
+                    title: 'Oops',
+                    text: response.message,
                     icon: "warning",
                     showConfirmButton: false,
                     timer: 1500,

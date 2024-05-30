@@ -181,7 +181,7 @@ const loadDashboard = asyncHandler(async (req, res, next) => {
             monthlyData[monthIndex] = item.totalAmount
         }
     })
-    monthlyRevenue = monthlyDataAggre.find(item => item._id == now.getMonth() + 1).totalAmount
+    monthlyRevenue = monthlyDataAggre.find(item => item._id == now.getMonth() + 1)?.totalAmount
 
     res.status(200)
         .render('admin/adminDashboard', { userCount: users, orderCount: orders, product: products, revenue: revenue[0].revenue, monthlyRevenue, monthlyData, name: topSellingProduct, brand: topTenBrand, topTenCetagory: topTenCetagory });
