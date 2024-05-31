@@ -34,7 +34,7 @@
     <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="/assets/css/skins/skin-demo-17.css">
     <link rel="stylesheet" href="/assets/css/demos/demo-17.css">
-    <script src="https://kit.fontawesome.com/b5f8202a71.js" crossorigin="anonymous"></script>
+   
 </head>
 
 <body>
@@ -77,18 +77,12 @@
                     <div class="header-left">
                         <div class="header-search header-search-extended header-search-visible d-none d-lg-block">
                             <a href="" class="search-toggle" role="button"><i class="icon-search"></i></a>
-                            <form action="/api/v1/shop" method="get" aria-disabled="true">
-                                <div class="header-search-wrapper search-wrapper-wide">
-                                    <label for="q" class="sr-only">Search</label>
-                                    <button class="btn btn-primary" type="submit"><i class="icon-search"></i></button>
-                                    <input type="search" class="form-control" name="q" id="q" placeholder="Search product ..." required>
-                                </div><!-- End .header-search-wrapper -->
-                            </form>
+                           
                         </div><!-- End .header-search -->
                     </div>
                     <div class="header-center">
                         <a href="/api/v1/" class="logo">
-                            <img src="/assets/images/demos/demo-6/logo.png" alt="Molla Logo" width="82" height="20">
+                            <img src="/assets/images/demos/demo-6/logo.png" alt="CartFy Logo" width="82" height="20">
                         </a>
                     </div><!-- End .header-left -->
                     <div class="header-right">
@@ -103,21 +97,13 @@
         </header><!-- End .header -->
 
         <main class="main">
-            <nav aria-label="breadcrumb" class="breadcrumb-nav border-0 mb-0">
-                <div class="container">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-                        <li class="breadcrumb-item"><a href="#">Pages</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">404</li>
-                    </ol>
-                </div><!-- End .container -->
-            </nav><!-- End .breadcrumb-nav -->
+            
 
-        	<div class="error-content text-center" style="background-image: url(assets/images/backgrounds/error-bg.jpg)">
+        	<div class="error-content text-center" style="background-image: url(/assets/images/backgrounds/error-bg.jpg)">
             	<div class="container">
             		<h1 class="error-title">Error 404</h1><!-- End .error-title -->
             		<p>We are sorry, the page you've requested is not available.</p>
-            		<a href="index.html" class="btn btn-outline-primary-2 btn-minwidth-lg">
+            		<a href="/api/v1" class="btn btn-outline-primary-2 btn-minwidth-lg">
             			<span>BACK TO HOMEPAGE</span>
             			<i class="icon-long-arrow-right"></i>
             		</a>
@@ -357,6 +343,7 @@
     </div> -->
     <!-- </div>  -->
     <!-- Plugins JS File -->
+    <script src="https://kit.fontawesome.com/b5f8202a71.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="/javascript/userLogic.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>

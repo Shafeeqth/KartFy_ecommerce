@@ -259,6 +259,7 @@ const loadShop = asyncHandler(async (req, res, next) => {
     ]);
 
     let count = await Product.countDocuments()
+    console.log(inventory)
 
     res.render('user/shopPage', { inventory, count, categories });
 
