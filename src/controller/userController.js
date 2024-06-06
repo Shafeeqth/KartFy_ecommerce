@@ -12,6 +12,7 @@ const Wallet = require('../models/walletModel');
 const Banner = require('../models/bannerModel');
 const Referrel = require('../models/referrelModel');
 const Notification = require('../models/notificationModel');
+const bcrypt = require('bcrypt');
 
 
 const loadHome = asyncHandler(async (req, res, next) => {
@@ -639,7 +640,7 @@ const loadProfile = asyncHandler(async (req, res, next) => {
     let user = req.session.user ? req.session.user : null;
     if (user) {
         let wallet = await Wallet.findOne({ user: user._id }).populate('user')
-        wallet.transactions.sort((a, b) => b.date - a.date)
+        wallet?.transactions?.sort((a, b) => b?.date - a?.date)
         let userProfile = await User.aggregate([
             {
                 $match: {
@@ -666,9 +667,9 @@ const loadProfile = asyncHandler(async (req, res, next) => {
 
 
         ])
-        console.log(userProfile)
+       
 
-        res.render("user/userProfile", { userProfile: userProfile[0], wallet })
+        res.render("user/userProfile", { userProfile: userProfile[0] , wallet })
     }
 
 
@@ -757,7 +758,7 @@ const applyUserReferrel = asyncHandler(async (req, res, next) => {
 const addAddress = asyncHandler(async (req, res, next) => {
 
     let user = req.session?.user
-    if (!user) res.redirect('/api/v1/');
+ 
     console.log('body', req.body)
     let body = req.body;
     body.user = req.session.user._id;

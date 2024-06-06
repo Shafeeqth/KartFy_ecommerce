@@ -677,7 +677,7 @@ const loadMyOrders = asyncHandler(async (req, res, next) => {
     let page = parseInt(req.query.page) - 1 || 0;
     let limit = parseInt(req.query.limit) || 7;
     page < 0 ? (page = 0) : page = page
-    if (!user) return res.redirect('/api/v1/')
+
     let total = await Order.countDocuments({user: user._id});
 
     // (page > Math.trunc(total / limit) - 1) ? (page = Math.trunc(total / limit) - 1) : page = page
@@ -692,8 +692,7 @@ const loadMyOrders = asyncHandler(async (req, res, next) => {
         .limit(limit)
 
 
-    res
-        .render('user/myOrders',
+    res.render('user/myOrders',
             {
                 order,
                 total,

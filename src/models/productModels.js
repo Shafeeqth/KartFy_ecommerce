@@ -60,7 +60,8 @@ const inventorySchema = mongoose.Schema({
         }
     }],
     
-},{
+},
+{
     timestamps: true
 });
 

@@ -405,9 +405,9 @@
 														<%let grandTotal=0;%>
 														
 															<%if(Array.isArray(cartData) &&
-																cartData.length> 0) {%>
+																cartData?.length> 0) {%>
 																	
-																<%cartData.forEach(cart=> {%>
+																<%cartData?.forEach(cart=> {%>
 																	<%total=0%>
 
 
@@ -418,36 +418,36 @@
 																				<div class="product">
 																					<figure class="product-media">
 																						<a
-																							href="/api/v1/product-detail?id=<%=cart.product._id%>">
-																							<img src="/Data//uploads/<%=cart.product.images[0]%>"
+																							href="/api/v1/product-detail?id=<%=cart?.product?._id%>">
+																							<img src="/Data//uploads/<%=cart?.product?.images[0]%>"
 																								alt="Product image">
 																						</a>
 																					</figure>
 
 																					<h3 class="product-title">
 																						<a
-																							href="/api/v1/product-detail?id=<%=cart.product._id%>">
-																							<%= cart.product.title%>
+																							href="/api/v1/product-detail?id=<%=cart?.product?._id%>">
+																							<%= cart?.product?.title%>
 																						</a>
 																					</h3><!-- End .product-title -->
 																				</div><!-- End .product -->
 																			</td>
 																			<td class="price-col">₹
-																				<%=cart.minimumPrice%>.00
+																				<%=cart?.minimumPrice%>.00
 																			</td>
 																			
 																			<td class="quantity-col">
 																				<div class="cart-product-quantity row">
 																					<input style="padding: 0; text-align: center;" disabled type="text"
 																						class="form-control "
-																						value="<%=cart.products.size%>">
+																						value="<%=cart?.products?.size%>">
 																					<input disabled type="text"
 																						class="form-control"
-																						value="<%=cart.products.quantity%>">
+																						value="<%=cart?.products?.quantity%>">
 																				</div>
 																				<!-- End .cart-product-quantity -->
 																			</td>
-																			<%  total += +cart.minimumPrice * +cart.products.quantity%>
+																			<%  total += +cart?.minimumPrice * +cart?.products?.quantity%>
 
 
 																			<td class="total-col">₹<%= total%>.00
@@ -639,7 +639,7 @@
 												<div class="input-group">
 													<input type="text" disabled
 														class=" border-danger form-control m-0 font-weight-bold text-center text-danger "
-														value="<%=cartData[0].coupon.code%>">
+														value="<%=cartData[0]?.coupon?.code%>">
 													<div class="input-group-append">
 														<button id="remove-button"
 															data-discount="<%=cartData[0]?.coupon?.discount%>"
@@ -703,8 +703,8 @@
 									</table><!-- End .table table-summary -->
 
 
-									<%if(Array.isArray(cartData) && cartData.length> 0 && address &&
-										address.length > 0) {%>
+									<%if(Array.isArray(cartData) && cartData?.length> 0 && address &&
+										address?.length > 0) {%>
 
 										<div class="accordion-summary" id="accordion-payment">
 											<div class="card my-3">
@@ -821,6 +821,14 @@
 											<span class="btn-hover-text">Confirm Order</span>
 										</button>
 										<%}%>
+										<%if(!address || !address.length > 0){%>
+											<div class="accordion-summary" id="accordion-payment">
+												<div class="card my-3">
+													<h4 class="text-danger">Please add address to Proceed</h4>
+												</div>
+											</div>
+
+											<%}%>
 
 								</div><!-- End .summary -->
 							</aside><!-- End .col-lg-3 -->

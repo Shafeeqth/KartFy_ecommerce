@@ -191,7 +191,7 @@
 																			<label> Username* </label>
 																			<input type="text" class="form-control"
 																				name="name"
-																				value="<%=userProfile[0]?.name%>"
+																				value="<%=userProfile?.name%>"
 																				id="nameField">
 
 
@@ -272,20 +272,20 @@
 															<h5 class="text-weight-bold fs-4 " >Mode</p>
 														</div>
 														<hr class="m-0">
-														 <% wallet.transactions.forEach((walletHistory)=>{ %>
+														 <% wallet?.transactions?.forEach((walletHistory)=>{ %>
 														   <div class="d-flex justify-content-between transction- m-3 " >
-															 <p ><%= walletHistory.date.toLocaleDateString('en-US',
+															 <p ><%= walletHistory?.date?.toLocaleDateString('en-US',
 															   { year: 'numeric', month: 'short', day:  'numeric', hour:
 															   'numeric', minute: 'numeric', second: 'numeric', hour12:
 															   true
 															   }) %></p>
-															   <%if(walletHistory.mode != 'Debit') {%>
+															   <%if(walletHistory?.mode != 'Debit') {%>
 																<p class="text-success">
 																	<%=  walletHistory?.description%> 
 																  </p>
 															  
 															 <p class="text-success">
-															   + ₹<%=  walletHistory.amount %> .00
+															   + ₹<%=  walletHistory?.amount %> .00
 															 </p>
 															
 															 <p class="text-success">
@@ -296,11 +296,11 @@
 																	<%=  walletHistory?.description%> 
 																  </p>
 																<p class="text-danger">
-																	-₹<%=  walletHistory.amount %> .00
+																	-₹<%=  walletHistory?.amount %> .00
 																  </p>
 																
 																  <p class="text-danger">
-																	<%= walletHistory.mode %>
+																	<%= walletHistory?.mode %>
 																  </p>
 
 															<%}%>
@@ -363,11 +363,11 @@
 																					<div class="row align-items-center"
 																						style="justify-content: space-evenly;">
 																						<a class="btn btn-primary"
-																							href="/api/v1/profile/edit-address?id=<%=addresses._id%>">Edit
+																							href="/api/v1/profile/edit-address?id=<%=addresses?._id%>">Edit
 																							<i
 																								class="icon-edit"></i></a>
 																						<button style="all: unset;"
-																							onclick="deleteAddress('<%=addresses._id%>')"><a
+																							onclick="deleteAddress('<%=addresses?._id%>')"><a
 																								class="btn btn-primary text-white pointer">
 																								Delete
 																								<i

@@ -16,7 +16,7 @@ const isUserAutharized = asyncHandler(async (req, res, next) => {
 
     }
     let id = req.session.user._id
-    let user = await User.findById({ _id: id, })
+    let user = await User.findById(id);
     if (user.isBlocked == true) {
         req.session.user = null
         res.redirect('/api/v1/')
