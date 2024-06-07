@@ -8,30 +8,23 @@ const Category = require('../models/categoryModel');
 const path = require('node:path');
 const sharp = require('sharp');
 
-
-
-
 const loadProducts = asyncHandler(async (req, res, next) => {
     let page = parseInt(req.query.page) -1 || 0;
     let limit = parseInt(req.query.limit) || 7;
     page < 0 ? (page = 0) : page = page
-
     let total = await Product.countDocuments({});
     let products = await Product.find({})
         .sort({ createdAt: -1 })
         .skip(limit * page)
         .limit(limit)
-
     res.render('admin/adminProducts', {
             products,
             page,
             total
         });
-
-
 })
-const loadProductDetails = asyncHandler(async (req, res, next) => {
 
+const loadProductDetails = asyncHandler(async (req, res, next) => {
     let { id } = req.query;
     let product = await Product.aggregate([
         {
@@ -54,47 +47,35 @@ const loadProductDetails = asyncHandler(async (req, res, next) => {
             $addFields: {
                 totalStocks : {
                     $sum: '$inventory.sizeVariant.stock'
-
-                }
-              
+                }             
             }
         }
-
-
     ])
     console.log(product)
 
     res.render('admin/adminProductDetails', { product })
-
 })
-const loadAddProduct = asyncHandler(async (req, res, next) => {
 
+const loadAddProduct = asyncHandler(async (req, res, next) => {
     let category = await Category.find({
         isListed: true
     }).select('title -_id subCategories')
 
     res.render('admin/addProduct', { category });
-
 })
 
 const loadEditProduct = asyncHandler(async (req, res, next) => {
     let id = req.query.id;
     res.locals.productId = id; 
-
     let category = await Category.find({
         isListed: true
     }).select('title -_id subCategories')
-
     let product = await Product.findOne({ _id: id });
     res.render("admin/editProduct", { product ,category});
-
-
-
 })
 
 const addProductStock = asyncHandler(async (req, res, next) => {
     try {
-
         let { id, size, quantity } = req.body;
 
         if (quantity < 1) {
@@ -109,13 +90,10 @@ const addProductStock = asyncHandler(async (req, res, next) => {
         let totalStock = inventory.sizeVariant?.reduce((acc, item) => item.stock + acc, 0)
         if (inventory) {
             const existSizeVariant = inventory.sizeVariant.find(variant => variant.size === size);
-         
             if (existSizeVariant) {
                 existSizeVariant.stock += parseInt(quantity);
-                await existSizeVariant.save();
-                
+                await existSizeVariant.save();               
                 inventory.totalStock = totalStock + parseInt(quantity)
-
             } else {
                 inventory.sizeVariant.push({
                     size: size,
@@ -154,9 +132,7 @@ const addProductStock = asyncHandler(async (req, res, next) => {
             error: error.message,
             message: 'Something went wrong'
         });
-
     }
-
 })
 
 const addProduct = asyncHandler(async (req, res, next) => {
@@ -170,7 +146,6 @@ const addProduct = asyncHandler(async (req, res, next) => {
         title, mrpPrice, description, price,
     });
     images.forEach((item, index) => {
-
         sharp(req.files[index].path).resize(600, 600).toFile(`${cropPath}/${item}`)
             .then((result) => {
                 console.log(result);
@@ -193,20 +168,15 @@ const addProduct = asyncHandler(async (req, res, next) => {
     })
     res.redirect('/api/v1/admin/products');
 
-
 })
 
 const editProduct = asyncHandler(async (req, res, next) => {
     let { title, mrpPrice, description, price, color, category, imageIndexes, id } = req.body;
-    
     category = Array.from(category).map(item => item.split(',')).map(item => {
         return  {[item[0]] : item[1]}
      })
-
     let images = req.files?.map(item => item.filename);
     let cropPath = path.join(__dirname, '/../public/Data/sharped');
-
-
     images?.forEach((item, index) => {
         sharp(req.files[index].path).resize(600, 600).toFile(`${cropPath}/${item}`)
             .then((result) => {
@@ -216,7 +186,6 @@ const editProduct = asyncHandler(async (req, res, next) => {
                 console.log(error);
             })
     })
-   
     Array.from(imageIndexes)?.forEach(async (item, index) => {
         await Product.updateOne({
             _id: id
@@ -226,13 +195,8 @@ const editProduct = asyncHandler(async (req, res, next) => {
                 [`images.${item}`]: images[index]
             }
         }
-    )
-        
-
+    )  
     })
-    
-    
-
     let product = await Product.findOneAndUpdate({
         _id: id
     }, {
@@ -249,9 +213,7 @@ const editProduct = asyncHandler(async (req, res, next) => {
     {
         new: true
     }
-
-);
-    
+);  
     return res.status(201)
         .json({
             success: true,
@@ -259,17 +221,12 @@ const editProduct = asyncHandler(async (req, res, next) => {
             data: product,
             message: 'Product edited Successfully'
         })
-
-
 })
-
 const listUnlistProduct = (req, res, next) => {
     const { id } = req.body
     return Product.findOne({ _id: id })
         .then((category) => {
             if (category.isListed) {
-
-
                 return Product.updateOne({ _id: id },
                     {
                         $set: {
@@ -279,9 +236,7 @@ const listUnlistProduct = (req, res, next) => {
                     .then(() => {
                         res.json({ ok: true })
                     })
-
             } else {
-
                 return Product.updateOne(
                     { _id: id },
                     {
@@ -295,15 +250,12 @@ const listUnlistProduct = (req, res, next) => {
                         console.log(error)
                     })
             }
-
-        })
-
+    })
 }
 
 const editProductSizeCount = asyncHandler (async (req, res, next) => {
     console.log(req.body)
     let {count, itemId, productId, size} = req.body;
-
     let inventory = await Inventory.findOneAndUpdate({
         product: productId,
         'sizeVariant._id': itemId

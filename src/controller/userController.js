@@ -14,22 +14,14 @@ const Referrel = require('../models/referrelModel');
 const Notification = require('../models/notificationModel');
 const bcrypt = require('bcrypt');
 
-
 const loadHome = asyncHandler(async (req, res, next) => {
     let user = req.session.user ? req.session.user : null;
     let banners = await Banner.find({ isListed: true })
     console.log(banners)
-
     res.status(200).render('user/homePage', { banners });
-
-
 })
 
-
 const loadShop = asyncHandler(async (req, res, next) => {
-
-
-    console.log(req.query)
     let user = req.session.user ? req.session.user : null;
     let page = parseInt(req.query.page) - 1 || 0;
     let limit = parseInt(req.query.limit) || 15;
@@ -43,7 +35,6 @@ const loadShop = asyncHandler(async (req, res, next) => {
     if (brand) categor.push({ 'products.category.Brands': { $in: brand } })
     let matchValue = {};
     let sort = req.query.sort?.trim() || ''
-
     let search = req.query.search ? String(req.query.search).trim() : ''
     search ? (search = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) : (search = '')
     if (gender || category || brand) {
@@ -56,10 +47,7 @@ const loadShop = asyncHandler(async (req, res, next) => {
     } else if (sort == 'low-to-High') sort = { 'minimumPrice': 1 }
     else if (sort == 'date') sort = { 'products.createdAt': -1 }
     else if (sort == 'rating' || sort == '') sort = { 'reviewAvg:': -1 }
-
-
     let categories = await Category.find({ isListed: true })
-
     let inventory = await Inventory.aggregate([
         {
             $lookup: {
@@ -258,15 +246,9 @@ const loadShop = asyncHandler(async (req, res, next) => {
         },
 
     ]);
-
-    let count = await Product.countDocuments()
-    
+    let count = await Product.countDocuments() 
     res.render('user/shopPage', { inventory, count, categories });
-
 })
-
-
-
 
 const loadCheckout = asyncHandler(async (req, res, next) => {
     // if(! req.session.allowedToCheckout) {
@@ -280,8 +262,6 @@ const loadCheckout = asyncHandler(async (req, res, next) => {
     //     return res.status(401)
     //     .redirect('/api/v1/')
     // }
-
-
     let user = req.session.user ? req.session.user : null;
     if (user) {
         let cartData = await Cart.aggregate([
@@ -436,15 +416,11 @@ const loadCheckout = asyncHandler(async (req, res, next) => {
         let wallet = await Wallet.findOne({ user: user._id }).select('balance');
         coupons = coupons ?? []
         res.render('user/checkoutPage', { cartData, address, coupons, wallet });
-
     }
-
 })
 
 const loadProductDetail = asyncHandler(async (req, res, next) => {
-
     let productId = req.query['id'];
-    console.log(productId)
     let user = req.session.user ? req.session.user : null;
     let product = await Inventory.aggregate([
         {
@@ -631,12 +607,9 @@ const loadProductDetail = asyncHandler(async (req, res, next) => {
         }
     ])
     res.status(200).render('user/productDetail', { product: product[0] });
-
 })
 
-
 const loadProfile = asyncHandler(async (req, res, next) => {
-
     let user = req.session.user ? req.session.user : null;
     if (user) {
         let wallet = await Wallet.findOne({ user: user._id }).populate('user')
@@ -664,28 +637,19 @@ const loadProfile = asyncHandler(async (req, res, next) => {
                     as: 'addresses'
                 }
             },
-
-
         ])
-       
-
+     
         res.render("user/userProfile", { userProfile: userProfile[0] , wallet })
     }
-
-
 
 })
 
 const loadAddAddress = asyncHandler(async (req, res, next) => {
     let user = req.session.user ?? null;
     res.render('user/addAddress');
-
 })
 
-
-
 const loadUserNotifications = asyncHandler(async (req, res, next) => {
-
     let user = req.session.user;
     if (!user) {
         return res.redirect('/api/v1')
@@ -708,7 +672,6 @@ const applyUserReferrel = asyncHandler(async (req, res, next) => {
             })
     }
     let user = req.session.user;
-
     await Wallet.findOneAndUpdate({
         user: referrel.user
     },
@@ -721,12 +684,10 @@ const applyUserReferrel = asyncHandler(async (req, res, next) => {
                     mode: 'Credit',
                     amount: 500,
                     description: 'Referrel Offer amount credited'
-
                 }
             }
         }
     )
-
     await Wallet.findOneAndUpdate({
         user: user._id
     },
@@ -744,7 +705,6 @@ const applyUserReferrel = asyncHandler(async (req, res, next) => {
             }
         }
     )
-
     return res.status(200)
         .json({
             success: true,
@@ -756,13 +716,9 @@ const applyUserReferrel = asyncHandler(async (req, res, next) => {
 
 
 const addAddress = asyncHandler(async (req, res, next) => {
-
     let user = req.session?.user
- 
-    console.log('body', req.body)
     let body = req.body;
     body.user = req.session.user._id;
-
     let { name, phone, alternatePhone, state, district, locality, pincode, street, type } = req.body
     // let { error, value } = userHelper.addressValidator.validate({ name, phone, alternatePhone, locality, district, pincode, street });
     // if (error) {
@@ -778,12 +734,9 @@ const addAddress = asyncHandler(async (req, res, next) => {
             message: 'Address added successfully.'
         })
 
-
 })
 
-
 const deleteAddress = asyncHandler(async (req, res, next) => {
-
     let user = req.session.user?._id
     let { id } = req.body
     if (user) {
@@ -794,20 +747,15 @@ const deleteAddress = asyncHandler(async (req, res, next) => {
             message: 'Address deleted successfully'
         })
 
-
     } else {
         res.redirect('/')
-
     }
 
 })
 
 
 const editAddress = asyncHandler(async (req, res, next) => {
-
-    let user = req.session.user
-    console.log(req.body)
-
+let user = req.session.user
     if (user) {
 
         let id = req.session.user.editAddressId;
@@ -826,9 +774,6 @@ const editAddress = asyncHandler(async (req, res, next) => {
         //     return res.redirect(`/profile/edit-address?id=${id}`)
         // }
         req.session.user.editAddressId = undefined
-
-
-
         let address = await Address.findOneAndUpdate({
             _id: new mongoose.Types.ObjectId(id)
         },
@@ -858,18 +803,13 @@ const editAddress = asyncHandler(async (req, res, next) => {
 })
 
 const changePassword = asyncHandler(async (req, res, next) => {
-
     let userId = req.session.user._id
     let { curPassword, nPassword, conPassword } = req.body;
-
     if (userId) {
-
         let user = await User.findById({
             _id: userId
         })
         let currentPasswordMatch = await bcrypt.compare(curPassword, user.password)
-        console.log(currentPasswordMatch)
-
         if (!currentPasswordMatch) {
             return res.json({
                 success: false,
@@ -877,7 +817,6 @@ const changePassword = asyncHandler(async (req, res, next) => {
                 error: 'invalid current password'
             });
         }
-
         let { error, value } = userHelper.resetPasswordValidation.validate({
             password: nPassword,
             confirmPassword: conPassword
@@ -889,7 +828,6 @@ const changePassword = asyncHandler(async (req, res, next) => {
                 error: error.message
             })
         }
-
         await model.User.updateOne({
             _id: userId
         }, {
@@ -908,14 +846,10 @@ const changePassword = asyncHandler(async (req, res, next) => {
     }
 })
 
-
 const changeUserDetails = asyncHandler(async (req, res, next) => {
-
     let id = req.session.user._id;
     let { name } = req.body;
-
     let { error, value } = userHelper.userAndemailValid.validate({ name });
-
     if (error) {
         return res.json({
             validateError: true,
@@ -949,7 +883,6 @@ const notificationMarkAsSeen = asyncHandler(async (req, res, next) => {
             new: true,
         }
     )
-
     return res.status(200)
         .json({
             success: true,
@@ -974,16 +907,6 @@ module.exports = {
     changePassword,
     changeUserDetails,
     notificationMarkAsSeen
-
-
-
-
-
-
-
-
-
-
 
 
 }

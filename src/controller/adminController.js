@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-
 const ApiError = require('../utilities/apiError');
 const ApiResponse = require('../utilities/apiResponse');
 const asyncHandler = require('../utilities/asyncHandler');
@@ -16,8 +15,6 @@ const { Product, Inventory } = require('../models/productModels')
 const Wallet = require('../models/walletModel');
 const excelJs = require('exceljs');
 const Notification = require('../models/notificationModel');
-
-
 
 const loadDashboard = asyncHandler(async (req, res, next) => {
     let now = new Date();
@@ -40,20 +37,14 @@ const loadDashboard = asyncHandler(async (req, res, next) => {
                     $sum: '$orderedItems.totalPrice'
                 }
             }
-
         }
-
     ]);
-
 
     let topTenCetagory = await findTopTen('Category')
     let topTenBrand = await findTopTen('Brands')
 
-
     async function findTopTen(filter) {
-
         let result = await Order.aggregate([
-
             {
                 $match: {
                     orderStatus: 'Delivered'
@@ -68,8 +59,6 @@ const loadDashboard = asyncHandler(async (req, res, next) => {
                     localField: 'orderedItems.product',
                     foreignField: '_id',
                     as: 'product'
-
-
                 }
             },
             {
@@ -101,7 +90,6 @@ const loadDashboard = asyncHandler(async (req, res, next) => {
                     sum: 1
                 }
             }
-
         ])
 
         return result.map(item => {
@@ -113,7 +101,6 @@ const loadDashboard = asyncHandler(async (req, res, next) => {
     }
 
     let topSellingProduct = await Order.aggregate([
-
         {
             $match: {
                 orderStatus: 'Delivered'
@@ -144,7 +131,6 @@ const loadDashboard = asyncHandler(async (req, res, next) => {
                 localField: '_id',
                 foreignField: '_id',
                 as: 'product',
-
             }
         },
         {
@@ -153,7 +139,6 @@ const loadDashboard = asyncHandler(async (req, res, next) => {
     ])
 
     let monthlyDataAggre = await Order.aggregate([
-
         {
             $match: {
                 orderStatus: 'Delivered'
@@ -302,14 +287,8 @@ const salesReportDownLoadExcel = asyncHandler(async (req, res, next) => {
 
         //     }
         // }
-
-
-
     ])
-    console.log(report)
-
-
-
+  
     const workBook = new excelJs.Workbook();
     const workSheet = workBook.addWorksheet('Report');
     const destinationPath = path.join(__dirname, '../../public/excelSheets');
@@ -321,20 +300,9 @@ const salesReportDownLoadExcel = asyncHandler(async (req, res, next) => {
         { header: "Payment Method", key: "payment_method", width: 10 },
         { header: "Date", key: "date", width: 10 },
 
-
     ]
     report = report.map(item => {
-
     })
-
-
-
-    // let counter = 1;
-    // report.forEach(item => {
-    //     item
-    // })
-
-
 
 })
 
@@ -362,13 +330,10 @@ const checkAuthentic = asyncHandler(async (req, res, next) => {
         if (password == req.body.password) {
             req.session.admin = req.body;
             res.redirect('/api/v1/admin')
-
         } else {
             req.flash('passwordError', 'Invalid password!. try again.');
             res.redirect('/api/v1/admin/login')
-
         }
-
 
     } else {
         req.flash('emailError', 'Invalid email!. try again.');
@@ -376,25 +341,13 @@ const checkAuthentic = asyncHandler(async (req, res, next) => {
     }
 })
 
-
-
-
 const loadCustomers = asyncHandler(async (req, res, next) => {
     let page = parseInt(req.query.page) - 1 || 0;
     let limit = parseInt(req.query.limit) || 7;
     page < 0 ? (page = 0) : page = page
-
     let total = await User.countDocuments({});
-
-
-    // (page > Math.trunc(total / limit) -1) ? ( page =  Math.trunc(total / limit) -1) : page = page
-
     const customers = await User.find({}).sort({ createdAt: -1 }).skip(page * limit).limit(limit)
-
-    res
-        .render('admin/userManagement', { customers, page, total })
-
-
+    res.render('admin/userManagement', { customers, page, total })
 
 })
 
@@ -402,11 +355,7 @@ const loadOrders = asyncHandler(async (req, res, next) => {
     let page = parseInt(req.query.page) - 1 || 0;
     let limit = parseInt(req.query.limit) || 7;
     page < 0 ? (page = 0) : page = page
-
     let total = await Order.countDocuments({});
-
-
-
     let order = await Order.find({})
         .populate('user')
         .populate('address')
@@ -414,18 +363,14 @@ const loadOrders = asyncHandler(async (req, res, next) => {
         .sort({ updatedAt: -1 })
         .skip(page * limit)
         .limit(limit)
-
-    res
-        .render('admin/order-details', {
+    res.render('admin/order-details', {
             order,
             page,
             total
         });
-
 })
 
 const loadSingleOrderDetails = asyncHandler(async (req, res, next) => {
-
     let orderId = req.query.id
     let order = await Order.findOne({
         _id: orderId
@@ -436,49 +381,31 @@ const loadSingleOrderDetails = asyncHandler(async (req, res, next) => {
     console.log(order)
     res.render('admin/singleOrderDetials', { order })
 
-
 })
-
-
-
-
 
 const loadCoupons = asyncHandler(async (req, res, next) => {
     let page = parseInt(req.query.page) - 1 || 0;
     let limit = parseInt(req.query.limit) || 7;
     page < 0 ? (page = 0) : page = page
-
     let total = await Coupon.countDocuments({});
-
-
     let coupon = await Coupon.find({}).skip(limit * page).limit(limit);
-
     res.render('admin/couponManagement', { coupon, total, page });
 })
-
-
 
 const loadReturns = asyncHandler(async (req, res, next) => {
     let page = parseInt(req.query.page) - 1 || 0;
     let limit = parseInt(req.query.limit) || 7;
     page < 0 ? (page = 0) : page = page
-
     let total = await Return.countDocuments({});
-
-
     let returns = await Return.find({})
         .populate('productId', 'images title')
         .populate('user', 'name  email')
         .populate('order')
         .skip(limit * page)
         .limit(limit)
-    console.log(returns)
 
     res.render('admin/returnRequest', { returns, total, page });
-})
-
-
-
+});
 
 const blockOrUnblockUser = asyncHandler(async (req, res, next) => {
     let { id } = req.body;
@@ -510,11 +437,7 @@ const blockOrUnblockUser = asyncHandler(async (req, res, next) => {
         .catch((error) => {
             console.log(error)
         })
-
 })
-
-
-
 
 const changeOrderStatus = asyncHandler(async (req, res, next) => {
     console.log(req.body)
@@ -537,11 +460,9 @@ const changeOrderStatus = asyncHandler(async (req, res, next) => {
                         mode: 'Credit',
                         amount: refundAmount,
                         description: 'Order canceled by admin amount credit ',
-
                     }
                 }
             })
-
         }
         const notification = await Notification.create({
             recipient: order.user,
@@ -552,7 +473,6 @@ const changeOrderStatus = asyncHandler(async (req, res, next) => {
             image: '/notificationImages/8918481_4029028.jpg',
         })
         flag = false;
-
     }
     order.orderedItems.forEach(async item => {
         await Inventory.updateOne({
@@ -590,29 +510,21 @@ const changeOrderStatus = asyncHandler(async (req, res, next) => {
             url: '/api/v1/my-orders/single-orderDetails?id=' + order._id,
             image: '/notificationImages/'+image,
         })
-
     }
-
-
     return res.json({
         success: true,
         result: order,
         error: null,
         message: 'Order status changed Successfully.'
     })
-
-
-
 })
 
 const createCoupon = asyncHandler(async (req, res, next) => {
-
     let { name: title, description, discount, minOrder: minCost, edate: expiryDate, limit } = req.body;
     let firstCode = title.split(' ')[0];
     let middleCode = generateRandomString(4);
     let lastCode = discount;
     let couponCode = firstCode + middleCode + lastCode;
-
     await Coupon.create({
         title,
         description,
@@ -643,14 +555,11 @@ const createCoupon = asyncHandler(async (req, res, next) => {
         }
         return result;
     }
-
-
 });
 
 const editCoupon = asyncHandler(async (req, res, next) => {
     console.log(req.body)
     const { name, id, description, discount, minOrder, edate, limit } = req.body;
-
     const coupon = await Coupon.findOneAndUpdate({
         _id: id,
     },
@@ -662,7 +571,6 @@ const editCoupon = asyncHandler(async (req, res, next) => {
                 expiryDate: edate,
                 limit,
                 minCost: minOrder
-
             }
         },
         {
@@ -670,14 +578,11 @@ const editCoupon = asyncHandler(async (req, res, next) => {
         }
     )
     res.redirect('/api/v1/admin/coupons')
-
 })
-
 
 const listAndUnlistCoupon = asyncHandler(async (req, res, next) => {
     let { id } = req.body
     let coupon = await Coupon.findOne({ _id: id })
-
     if (coupon.isListed == true) {
         coupon = await Coupon.findOneAndUpdate({
             _id: id,
@@ -714,32 +619,24 @@ const listAndUnlistCoupon = asyncHandler(async (req, res, next) => {
         })
 })
 
-
 const loadOffers = asyncHandler(async (req, res, next) => {
     let page = parseInt(req.query.page) - 1 || 0;
     let limit = parseInt(req.query.limit) || 7;
     page < 0 ? (page = 0) : page = page
-
     let total = await Offer.countDocuments({});
-
-
     let offers = await Offer.find({})
         .populate('productIds', 'title images')
         .skip(page * limit)
         .limit(limit)
-
     res.render('admin/offerManagement', { offers, page, total })
-
 })
 
 const loadBanners = asyncHandler(async (req, res, next) => {
     let page = parseInt(req.query.page) - 1 || 0;
     let limit = parseInt(req.query.limit) || 7;
     page < 0 ? (page = 0) : page = page
-
     let total = await Coupon.countDocuments({});
     let banners = await Banner.find({}).skip(limit * page).limit();
-
     console.log('categories', banners);
     res.render('admin/bannerManagement', { banners, page, total })
 
@@ -749,7 +646,6 @@ const createBanner = asyncHandler(async (req, res, next) => {
     let { name, description, url } = req.body;
     let cropPath = path.join(__dirname, '../../public/Data/banners/sharped');
     let crop = await sharp(req.file.path).resize(1600, 900).toFile(`${cropPath}/${req.file.originalname}`);
-
     let banner = await Banner.create({
         title: name,
         description,
@@ -764,12 +660,9 @@ const createBanner = asyncHandler(async (req, res, next) => {
 const editBanner = asyncHandler(async (req, res, next) => {
     let { name, description, url, id } = req.body;
 
-
     if (req.file) {
         let cropPath = path.join(__dirname, '../../public/Data/banners/sharped');
         let crop = await sharp(req.file.path).resize(1600, 900).toFile(`${cropPath}/${req.file.originalname}`);
-
-
         let newBanner = await Banner.findOneAndUpdate({
             _id: id
         },
@@ -806,7 +699,6 @@ const editBanner = asyncHandler(async (req, res, next) => {
 
 const listAndUnlistBanner = asyncHandler(async (req, res, next) => {
     const { bannerId } = req.body;
-
     let banner = await Banner.findOne({
         _id: bannerId
     })
@@ -816,7 +708,6 @@ const listAndUnlistBanner = asyncHandler(async (req, res, next) => {
         banner.isListed = true
     }
     banner = await banner.save();
-
     return res.status(200)
         .json({
             success: true,
@@ -824,15 +715,12 @@ const listAndUnlistBanner = asyncHandler(async (req, res, next) => {
             data: banner,
             message: 'Banner updated successfully'
         })
-
-
 })
 
 const getOfferData = asyncHandler(async (req, res, next) => {
     let { offerType } = req.body;
     if (offerType == 'product') {
         let product = await Product.find({ isListed: true });
-
         if (product) {
             return res.status(200)
                 .json({
@@ -844,7 +732,6 @@ const getOfferData = asyncHandler(async (req, res, next) => {
         }
     } else {
         let category = await Category.findOne({ title: 'Category' });
-
         let categoryData = category?.subCategories
         if (categoryData) {
             return res.status(200)
@@ -853,9 +740,8 @@ const getOfferData = asyncHandler(async (req, res, next) => {
                     error: false,
                     categoryData,
                     message: 'Products fetched successfully'
-                })
+            })
         }
-
     }
 })
 
@@ -876,7 +762,6 @@ const createOffer = asyncHandler(async (req, res, next) => {
             endDate: edate,
             discount,
             appliedCategory: selecteditems
-
         })
     }
     res.status(201)
@@ -886,7 +771,6 @@ const createOffer = asyncHandler(async (req, res, next) => {
 const listAndUnlistOffer = asyncHandler(async (req, res, next) => {
     let { id } = req.body
     let offer = await Offer.findOne({ _id: id })
-
     if (offer.isListed == true) {
         offer = await Offer.findOneAndUpdate({
             _id: id,
@@ -899,7 +783,6 @@ const listAndUnlistOffer = asyncHandler(async (req, res, next) => {
             {
                 new: true
             }
-
         )
     } else {
         offer = await Offer.findOneAndUpdate({
@@ -913,7 +796,6 @@ const listAndUnlistOffer = asyncHandler(async (req, res, next) => {
             {
                 new: true
             }
-
         )
     }
     return res.status(200)
@@ -926,9 +808,7 @@ const listAndUnlistOffer = asyncHandler(async (req, res, next) => {
 })
 
 const editOffer = asyncHandler(async (req, res, next) => {
-
     const { name, id, description, discount, edate } = req.body;
-
     const offer = await Offer.findOneAndUpdate({
         _id: id,
     },
@@ -938,8 +818,6 @@ const editOffer = asyncHandler(async (req, res, next) => {
                 description,
                 discount,
                 endDate: edate,
-
-
             }
         },
         {
@@ -947,10 +825,7 @@ const editOffer = asyncHandler(async (req, res, next) => {
         }
     )
     res.redirect('/api/v1/admin/offers')
-
 })
-
-
 
 
 const returnChangeStatus = asyncHandler(async (req, res, next) => {
@@ -966,7 +841,6 @@ const returnChangeStatus = asyncHandler(async (req, res, next) => {
     }
     const product = await Product.findById(returns.productId);
     let flag = true;
-
     let order = await Order.findOneAndUpdate({
         _id: returns.order,
         'orderedItems._id': returns.orderedItemId
@@ -975,7 +849,6 @@ const returnChangeStatus = asyncHandler(async (req, res, next) => {
             'orderedItems.$.returnStatus': status
         }
     })
-
     if (status == 'Accepted') {
         let wallet = await Wallet.findOneAndUpdate({
             user: new mongoose.Types.ObjectId(returns.user)
@@ -986,19 +859,15 @@ const returnChangeStatus = asyncHandler(async (req, res, next) => {
                 },
                 $push: {
                     transactions: {
-
-
                         amount: returns.productPrice,
                         mode: 'Credit',
                         description: 'Product return accepted'
                     }
                 }
-
             },
             {
                 new: true
             });
-
         await Inventory.findOneAndUpdate({
             product: returns.product,
             'sizeVariant.size': returns.size
@@ -1006,12 +875,9 @@ const returnChangeStatus = asyncHandler(async (req, res, next) => {
             {
                 $inc: {
                     'sizeVariant.$.stock': returns.quantity,
-
-
                 }
             });
           
-        
         const notification = await Notification.create({
             recipient: returns.user,
             type: 'success',
@@ -1021,10 +887,7 @@ const returnChangeStatus = asyncHandler(async (req, res, next) => {
             image: '/Data/uploads/' + product.images[0],
         })
         flag = false;
-
     }
-
-
  
     if (flag) {
         const notification = await Notification.create({
@@ -1035,24 +898,17 @@ const returnChangeStatus = asyncHandler(async (req, res, next) => {
             url: '/api/v1/my-orders/single-orderDetails?id=' + order._id,
             image: '/Data/uploads/' + product.images[0],
         })
-
     }
 
     returns.returnStatus = status;
     returns = await returns.save();
-
     return res.json({
         success: true,
         errer: false,
         message: 'Return status updated successfully'
     })
 
-
 })
-
-
-
-
 
 
 module.exports = {

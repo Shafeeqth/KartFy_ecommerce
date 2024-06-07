@@ -26,12 +26,10 @@ const loadLogin = asyncHandler(async (req, res, next) => {
     res.render('user/userLogin');
 })
 
-
 const loadOtp = asyncHandler(async (req, res, next) => {
     let email = req.session.user?.email || res.locals.user
     res.render('user/otp', { email });
 })
-
 
 const loadForgetPage = asyncHandler(async (req, res, next) => {
 
@@ -45,8 +43,6 @@ const loadResetPassword = asyncHandler(async (req, res, next) => {
     console.log(token)
     res.render('user/resetPassword');
 })
-
-
 
 const createUser = asyncHandler(async (req, res, next) => {
 
@@ -64,7 +60,6 @@ const createUser = asyncHandler(async (req, res, next) => {
                 message: 'Email already exist!'
             })
     }
-
     let { error, value } = userHelper.userValidation.validate(req.body);
     if (error) {
         console.log(error)
@@ -75,16 +70,11 @@ const createUser = asyncHandler(async (req, res, next) => {
                 error: true,
                 message: error.message
             })
-
     }
-
     const hash = await bcrypt.hash(req.body.password, 10);
     value.password = hash;
-
     const Otp = Math.floor(6000 + Math.random() * 4000);
-
     sendMail(value.email, 'CartFy OTP Verification', otpTemplate(Otp, value.name));
-    
     const otp = await OTP.updateOne({
         email : value.email,
         otp: Otp
@@ -101,30 +91,18 @@ const createUser = asyncHandler(async (req, res, next) => {
    );
     req.session.value = value;
     console.log('Otp has sent', Otp)
-
     return res.status(200)
         .json({
             success: true,
             error: false,
             message: 'user data recorded successfully'
         })
-
-
-
-
-
-
 })
 
-
 const varifyOtp = asyncHandler(async (req, res, next) => {
-
-
     let { otp } = req.body;
-
     let user = await OTP.findOne({ email: req.session?.value?.email, otp });
     if (!user) {
-
         return res.status(400)
             .json({
                 error: true,
@@ -159,19 +137,13 @@ const varifyOtp = asyncHandler(async (req, res, next) => {
             success: true,
             message: 'User account saved successfully'
         })
-
-
-
 })
 
 const forgotPassword = asyncHandler(async (req, res, next) => {
-
-
     let token = generateOtp.generate(8)
     console.log('token', token);
     let email = req.body.email;
     let user = await User.findOne({ email })
-
     if (user) {
 
         const tokens = await OTP.updateOne({
@@ -188,54 +160,41 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
                 upsert: true 
                }
        );
-
       
         sendMail(email, 'Reset Account Password', passwordUpdated(token, user.name));
         req.flash('sentEmail', `Please check your Email ${req.body.email}`);
         return res.redirect('/api/v1/forgot-password?checkEmail=' + encodeURIComponent('Please check your email'));
-
     }
     req.flash('forgotError', 'Email does not exist!.')
     res.status(303)
         .redirect('/api/v1/forgot-password');
-
-
-
-
 })
 
 const resetPassword = asyncHandler(async (req, res, next) => {
-
     let userTocken = req.session.token;
     console.log('token', userTocken)
     if (!userTocken) {
         req.flash('resetError', 'Something went wrong')
         return res.status(302)
             .redirect('/api/v1/reset-password')
-
-
     }
     let { password, confirmPassword } = req.body;
     console.log(password, confirmPassword)
     let { error, value } = userHelper.resetPasswordValidation.validate({
         password, confirmPassword
     })
-
     if (error) {
         req.flash('resetError', error.message)
         return res.status(302)
             .redirect('/api/v1/reset-password')
-
     }
     password = await bcrypt.hash(password, 10); // Hashing new password
-
     let tokens = await OTP.findOne({ token: userTocken });
     if(!tokens) {
         req.flash('resetError', 'Token got expired Try again!.')
         return res.status(302)
             .redirect('/api/v1/reset-password')
     }
-    
     let user = await User.findOneAndUpdate({ email: tokens.email },
         {
             $set: {
@@ -246,18 +205,9 @@ const resetPassword = asyncHandler(async (req, res, next) => {
     req.flash('passwordSuccess', 'Password updated successfully.');
     res.status(302).redirect('/api/v1/')
 
-
-
-
-
-
-
-
-
 })
 
 const resendOtp = asyncHandler(async (req, res, next) => {
-
     let email = req.session.value?.email;
     console.log(email);
     if (!email) {
@@ -283,16 +233,11 @@ const resendOtp = asyncHandler(async (req, res, next) => {
         message: 'OTP resent successfully',
     })
 
-
-
-
 })
 
 const userLogin = asyncHandler(async (req, res, next) => {
     const { email, password } = req.body;
-
     let user = await User.findOne({ email });
-
     if (!user) {
         return res.json({
             success: false,
@@ -300,7 +245,6 @@ const userLogin = asyncHandler(async (req, res, next) => {
             message: 'Invalid email!, try again.'
         })
     }
-
     if (user.isBlocked) {
         return res.json({
             success: false,
@@ -308,11 +252,9 @@ const userLogin = asyncHandler(async (req, res, next) => {
             errorType: 'blockError',
             message: 'User is blocked by Admin'
         })
-
     }
 
     let match = await bcrypt.compare(password, user.password);
-
     if (!match) {
         return res.json({
             success: false,
@@ -320,7 +262,6 @@ const userLogin = asyncHandler(async (req, res, next) => {
             errorType: 'passwordError',
             message: 'Incorrect password! please check your password'
         })
-
     }
     req.session.user = user;
     return res.json({
@@ -329,20 +270,12 @@ const userLogin = asyncHandler(async (req, res, next) => {
         message: 'User logged in successfully'
     })
 
-
-
-
-
-
 })
 
 const userLogout = async (req, res, next) => {
     req.session.user = null;
     req.flash('userLogout', 'User logged out successfully')
     next()
-
-
-
 }
 
 module.exports = {

@@ -485,8 +485,6 @@
 					}
 					butn.innerHTML = `<span class="spinner-border spinner-border-md mx-2" role="status" aria-hidden="true"></span> Checking...`
 
-
-
 					fetch('/api/v1/find-delivery-charge', {
 						method: "POST",
 						body: JSON.stringify({ pincode }),
