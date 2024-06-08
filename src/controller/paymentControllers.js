@@ -17,7 +17,6 @@ const createRazorpayOrder = async (req, res, myOrder) => {
             currency: 'INR',
             // reciept: ''+order.orderId
         }
-
         razorpayInstance.orders.create(options, 
         (error, order) => {
             if(error) {
@@ -27,7 +26,6 @@ const createRazorpayOrder = async (req, res, myOrder) => {
                     success: false,
                     error: true,
                     message: error.message
-    
                 })
             }
             return res.status(200)
@@ -45,12 +43,9 @@ const createRazorpayOrder = async (req, res, myOrder) => {
                     email: 'cartfyOnline@gmail.com'
                 })
         })
-        
     } catch (error) {
-        console.log(error)
-        
+        console.log(error)      
     }
-
 }
 
 paypal.configure({
@@ -60,9 +55,7 @@ paypal.configure({
 });
 
 const createPayPalPayment = async (req, res , next, myOrder) => {
-    try {
-     
-     
+    try {     
         let items = myOrder.orderedItems.map((item, index) => {
             return {
                 "name": 'ABC',
@@ -70,11 +63,9 @@ const createPayPalPayment = async (req, res , next, myOrder) => {
                 "price": ""+item.totalPrice ,
                 "currency": "USD",
                 "quantity": ""+item.quantity
-
             }
         })
         let totalAmount = myOrder.orderedItems.reduce( (acc, item ) => acc + (item.totalPrice * item.quantity),0);
-     
         const create_payment_json = {
             "intent": "sale",
             "payer": {
@@ -92,7 +83,6 @@ const createPayPalPayment = async (req, res , next, myOrder) => {
                 "amount": {
                     "currency": "USD",
                     "total": "" + totalAmount +".00",
-    
                 },
                 "description": "Hat for the best team ever"
             }]
@@ -116,9 +106,7 @@ const createPayPalPayment = async (req, res , next, myOrder) => {
         console.log(error)
         
     }
-
-}
-   
+}   
 
 const payPalSuccess = asyncHandler(async (req, res, next) => {
     const payerId = req.query.PayerId;
@@ -134,9 +122,7 @@ const payPalSuccess = asyncHandler(async (req, res, next) => {
         }]
     };
     const payment = await paypal.payment.execute(paymentId, execute_payment_json);
-
 })
-
 
 const payPalCancel = asyncHandler(async (req, res, next) => {
     res.send('Cancel')

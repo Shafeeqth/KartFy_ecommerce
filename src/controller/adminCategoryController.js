@@ -5,38 +5,26 @@ const ApiResponse = require('../utilities/apiResponse');
 const asyncHandler = require('../utilities/asyncHandler');
 const Category = require('../models/categoryModel');
 
-
-
 const loadCategories = asyncHandler(async (req, res, next) => {
     let page = parseInt(req.query.page) - 1 || 0;
     let limit = parseInt(req.query.limit) || 7;
     page < 0 ? (page = 0) : page = page
-
     let total = await Category.countDocuments({});
-
     const categories = await Category.find({})
         .sort({ createdAt: -1 })
         .skip(page * limit)
-        .limit(limit)
-    
-    
+        .limit(limit);
     res.render('admin/Catagery', {
             categories,
             page,
             total
         });
-
-
-
 })
-
 
 const loadAddCategory = asyncHandler(async (req, res, next) => {
     res.render('admin/addCategory', { title: 'Add Category' })
 
 })
-
-
 
 
 const loadEditCategory = asyncHandler(async (req, res, next) => {
@@ -46,47 +34,32 @@ const loadEditCategory = asyncHandler(async (req, res, next) => {
         success: false,
         message: 'something went wrong'
     })
-
-
     let category = await Category.findById({ _id: id })
     res.render('admin/editCategory', { category })
-
-
 })
-const loadAddSubCategory = asyncHandler(async (req, res, next) => {
 
+const loadAddSubCategory = asyncHandler(async (req, res, next) => {
     res.render('admin/addSubCategory', { title: 'Sub Category' })
 })
 
 const loadEditSubCategory = asyncHandler(async (req, res, next) => {
     let { id, subId } = req.query;
-
     let category = await Category.findOne({ _id: id });
     let subCategory = category.subCategories.find(item => item._id.toString() == subId)
-
     res.render('admin/editSubCategory', { title: 'Edit subCategory', subCategory, id })
 })
 
+
 const loadSubCategories = asyncHandler(async (req, res, next) => {
-    // let page = parseInt(req.query.page) -1 || 0;
-    // let limit = parseInt(req.query.limit) || 7;
-    // page < 0 ? (page = 0) : page = page
-
-    // let total = await Category.countDocuments({});
-
     let id = req.query.id;
     req.session.categoryId = id;
     let category = await Category.findOne({ _id: id });
-
-
     res.render('admin/subCategories', { category, title: 'Sub Cateries', })
 
 })
 
 const addCategory = asyncHandler(async (req, res, next) => {
-
     let { title, description } = req.body;
-
     let alreadyCategory = await Category.findOne({
         title: {
             $regex: title, $options: 'i'
@@ -96,12 +69,10 @@ const addCategory = asyncHandler(async (req, res, next) => {
     if (alreadyCategory) {
         return res
             .json({
-
                 success: false,
                 error: true,
                 message: 'Same category name is not allowed'
             });
-
 
     } else if (title) {
         const category = new Category({
@@ -110,8 +81,7 @@ const addCategory = asyncHandler(async (req, res, next) => {
         return category.save()
             .then((saved) => {
                 if (saved) {
-                    res
-                        .json({
+                    res.json({
                             success: true,
                             error: false,
                             message: 'Category added successfully'
@@ -124,8 +94,6 @@ const addCategory = asyncHandler(async (req, res, next) => {
     } else {
         console.log('data not recieved');
     }
-
-
 })
 
 const listUnlistCategory = (req, res, next) => {
@@ -133,8 +101,6 @@ const listUnlistCategory = (req, res, next) => {
     return Category.findOne({ _id: id })
         .then((category) => {
             if (category.isListed) {
-
-
                 return Category.updateOne({ _id: id },
                     {
                         $set: {
@@ -144,9 +110,7 @@ const listUnlistCategory = (req, res, next) => {
                     .then(() => {
                         res.json({ ok: true })
                     })
-
             } else {
-
                 return Category.updateOne(
                     { _id: id },
                     {
@@ -159,25 +123,15 @@ const listUnlistCategory = (req, res, next) => {
 
                     }).catch((error) => {
                         console.log(error)
-
                     });
-
             }
-
         })
-
-
 }
 
 const submitEditCategory = asyncHandler(async (req, res, next) => {
-
-
     let { title, description, id } = req.body;
-
     let category = await Category.findOne({
-
         $and:
-
             [{
                 title: {
                     $regex: `^${title}$`, $options: 'i'
@@ -188,38 +142,24 @@ const submitEditCategory = asyncHandler(async (req, res, next) => {
                     $ne: id
                 }
             }]
-
     });
-
-    console.log(category)
-
     if (category) res.json({
         error: true,
         fail: true,
         message: 'Same Category already exist!'
     })
-
-
     await Category.updateOne({
-
         _id: id
     }, {
         $set: { title, description }
     });
-
     return res.json({ saved: true })
-
 })
 
-
-
 const editSubCategory = asyncHandler(async (req, res, next) => {
-    console.log(req.body, 'body')
-
     let { title, description, catId, subId } = req.body;
     let category = await Category.findOne({
         _id: catId
-
     });
 
     if (!category) res.status(400)
@@ -233,7 +173,6 @@ const editSubCategory = asyncHandler(async (req, res, next) => {
         if (title.toLowerCase() === item.title.toString().toLowerCase() &&
             item._id != subId) {
             return true
-
         }
     })
     if (subCategoryExist) {
@@ -242,7 +181,6 @@ const editSubCategory = asyncHandler(async (req, res, next) => {
                 success: false,
                 error: true,
                 message: 'Same title name already exist'
-
             })
     }
 
@@ -252,8 +190,6 @@ const editSubCategory = asyncHandler(async (req, res, next) => {
         {
             'subCategories.$.title': title,
             'subCategories.$.description': description
-
-
         },
         {
             new: true
@@ -265,14 +201,10 @@ const editSubCategory = asyncHandler(async (req, res, next) => {
             error: null,
             data: result,
             message: 'SubCategory edited Succesfulyy'
-
         })
-
-
 })
 
 const addSubCategory = asyncHandler(async (req, res, next) => {
-
     let { title, description } = req.body;
     let id = req.session.categoryId;
     let matchCategory = await Category.findOne({
@@ -282,8 +214,6 @@ const addSubCategory = asyncHandler(async (req, res, next) => {
         }
     })
     let match = matchCategory.subCategories.find(category => new RegExp(`^${category.title}$`, 'i').test(title))
-
-
     if (match) {
         return res.status(400)
             .json({
@@ -293,7 +223,6 @@ const addSubCategory = asyncHandler(async (req, res, next) => {
                 result: null,
             })
     }
-
 
     let result = await Category.findOneAndUpdate({
         _id: id
@@ -313,8 +242,6 @@ const addSubCategory = asyncHandler(async (req, res, next) => {
         error: false,
         message: 'Sub category added Successfull'
     })
-
-
 })
 
 

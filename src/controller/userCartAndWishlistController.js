@@ -155,57 +155,37 @@ const loadCart = asyncHandler(async (req, res, next) => {
     res.render('user/cartPage', { cart });
 })
 
-
 const addToCart = asyncHandler(async (req, res, next) => {
-
-
     let { id, addToCartFromWishlist, size } = req.body.data
-    let user = req.session.user?._id;
-   
-    
+    let user = req.session.user?._id;   
     if (!user) {
         return res.json({
             success: false,
             error: true,
             message: "user Not Logged in",
             userNotFound: true
-
         })
     }
-
-    
     let inventory = await Inventory.findOne({ product: id }).populate('product')
-  
-    
-
     let product = inventory.sizeVariant.find(item => item.size == size);
-
     if (!product) {
         return res.json({
             success: false,
             error: true,
             message: 'Product Out of Stock'
-
         })
     }
     let userCart = await Cart.findOne({ user });
     if (userCart && userCart.isCouponApplied) {
         await userCart.removeCouponIfApplied();
     }
-
-   
     if (!product.stock > 0) {
         return res.json({
             success: false,
             error: true,
             message: 'Product Size Out of Stock'
         })
-
-
     }
-    
-    console.log('userCart)', userCart)
-
     if (addToCartFromWishlist === true) {
      
         if (!userCart) {
@@ -215,10 +195,8 @@ const addToCart = asyncHandler(async (req, res, next) => {
                     product: id,
                     size,
                     quantity: 1,
-                 
                 }],
             })
-
             return res.json({
                 success: true,
                 error: false,
@@ -226,7 +204,6 @@ const addToCart = asyncHandler(async (req, res, next) => {
                 addToCartFromWishlist: true,
                 message: 'Product added to cart successfully'
             })
-
         }
         let existInCart = userCart.products.find(item => {
             if (item.size === size && item.product._id == id) return true
@@ -234,27 +211,20 @@ const addToCart = asyncHandler(async (req, res, next) => {
         });
 
         if (existInCart) {
-
             return res.json({
                 success: false,
                 error: true,
                 message: 'Product already exist in cart!',
                 productAlreadyExist: true
             })
-
         }
-
         userCart.products.push({
             product: id,
             quantity: 1,
-            size,
-        
+            size,       
         })
-   
         await Wishlist.deleteOne({ product: id })
         userCart = await userCart.save()
-
-
         return res.status(200)
             .json({
                 success: true,
@@ -263,13 +233,9 @@ const addToCart = asyncHandler(async (req, res, next) => {
                 data: userCart,
                 message: 'Product moved to the cart successfully'
             })
-
-
-
     }
    
     if (!userCart) {
-
         let cartCreate = await Cart.create({
             user,
             products: [{
@@ -286,15 +252,11 @@ const addToCart = asyncHandler(async (req, res, next) => {
             addedToCart: true,
             message: 'Product added to cart successfully'
         })
-
-
     }
     let exist = userCart.products.find(item => {
         if (item.size == size && item.product._id == id) return true
         return false;
-
     })
-
 
     if (exist) {
         return res.json({
@@ -305,7 +267,6 @@ const addToCart = asyncHandler(async (req, res, next) => {
         })
     }
 
-
     userCart.products.push({
         product: id,
         quantity: 1,
@@ -314,7 +275,6 @@ const addToCart = asyncHandler(async (req, res, next) => {
     })
 
     userCart = await userCart.save()
-
     res.json({
         success: true,
         error: false,
@@ -322,23 +282,17 @@ const addToCart = asyncHandler(async (req, res, next) => {
         message: 'Product added to cart successfully',
         addedToCart: true
     })
-
 })
 
 const removeFromCart = asyncHandler(async (req, res, next) => {
-
     let user = req.session.user
     let { id, size, total } = req.body;
     console.log(req.body)
-  
     let userCart = await Cart.findOne({ user:user._id });
-   
     if (userCart && userCart.isCouponApplied) {
         await userCart.removeCouponIfApplied();
     }
     await userCart.save()
-
-
     let cart = await Cart.findOneAndUpdate({
         user: user._id
     },
@@ -357,22 +311,14 @@ const removeFromCart = asyncHandler(async (req, res, next) => {
             error: false,
             message: 'Product removed from Cart successully!'
         });
-
-
 })
 
 const updateCartCount = asyncHandler(async (req, res, next) => {
-
     let user = req.session.user._id
     let {  count, cartId, productId, size, price } = req.body;
-
-
-
     console.log('count', count, 'productId', productId, 'cartId', cartId, 'size', size)
     let productItem = await Inventory.findOne({ product: productId });
-  
     let product = productItem.sizeVariant.find(item => item.size == size);
-  
     if (!product) {
         return res.json({
             success: false,
@@ -380,7 +326,6 @@ const updateCartCount = asyncHandler(async (req, res, next) => {
             message: 'Product is out of stock'
         })
     }
-
 
     if (+count < 1) {
         return res.json({
@@ -403,36 +348,24 @@ const updateCartCount = asyncHandler(async (req, res, next) => {
             message: 'item count Exceeds product stock'
         })
     }
-
    
     let userCart = await Cart.findOne({ user });
     if (userCart && userCart.isCouponApplied) {
         await userCart.removeCouponIfApplied();
     }
-   
-
    let cartItem = userCart.products.find(item => item.size == size && item.product == productId);
-   console.log(cartItem);
-   
    userCart.cartTotal -= cartItem.totalPrice;
    cartItem.quantity = count;
    cartItem.totalPrice = price * count;
    await cartItem.save()
-
    userCart.cartTotal += count * price
    await userCart.save();
-  
-    return res.json({
+   return res.json({
         success: true,
         error: false,
         message: 'Prouduct count updated successfully'
     })
-
-
-
-
 });
-
 
 const loadWishlist = asyncHandler(async (req, res, next) => {
     let user = req.session.user ? req.session.user : null;
@@ -449,7 +382,6 @@ const loadWishlist = asyncHandler(async (req, res, next) => {
                 foreignField: '_id',
                 as: 'product'
             }
-
         },
         {
             $lookup: {
@@ -582,16 +514,9 @@ const loadWishlist = asyncHandler(async (req, res, next) => {
 })
 
 
-
-
-
 const addToWishlist = asyncHandler(async (req, res, next) => {
-
     let user = req.session.user?._id;
     let product = req.body?.id
-    console.log(product)
-
-
     if (!user) {
         return res.json({
             success: false,
@@ -601,8 +526,6 @@ const addToWishlist = asyncHandler(async (req, res, next) => {
         });
     }
     let exist = await Wishlist.findOne({ user, product })
-    console.log(exist);
-
     if (exist) {
         return res
             .status(200)
@@ -612,12 +535,8 @@ const addToWishlist = asyncHandler(async (req, res, next) => {
                 message: 'Product already Exist in Wishlist!',
                 productAlreadyExist: true
             })
-
-
     } else {
         let wishlist = await Wishlist.create({ product, user });
-
-
         return res
             .status(201)
             .json({
@@ -626,15 +545,10 @@ const addToWishlist = asyncHandler(async (req, res, next) => {
                 message: 'Product added to wishlist successfully!',
                 addedToWishlist: true
             })
-
     }
-
-
 })
 
-
 const removeFromWishlist = asyncHandler(async (req, res, next) => {
-
     let { id } = req.body
     console.log(id)
     return Wishlist.deleteOne({ _id: id })
@@ -647,10 +561,7 @@ const removeFromWishlist = asyncHandler(async (req, res, next) => {
         .catch((error) => {
             console.log(error);
         })
-
-
 })
-
 
 module.exports = {
     loadCart,
@@ -660,10 +571,5 @@ module.exports = {
     addToWishlist,
     addToCart,
     loadWishlist,
-
-
-
-
-
 
 }

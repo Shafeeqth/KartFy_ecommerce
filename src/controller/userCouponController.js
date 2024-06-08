@@ -6,7 +6,6 @@ const asyncHandler = require('../utilities/asyncHandler');
 const checkValidCoupon = asyncHandler(async (req, res, next) => {
     let user = req.session.user;
     if (!user) return false
-
     let cart = await Cart.findOne({ user: user._id }).populate('products.product','price -_id');
     let cartTotal = cart?.products.reduce((acc, item) => acc + item.product.price * item.quantity,0);
     if (!cart) return res.status(500)
@@ -20,16 +19,13 @@ const checkValidCoupon = asyncHandler(async (req, res, next) => {
     }
     let coupon = await Coupon.findOne({ _id: cart.coupon.couponId });
     let today = new Date()
-
     if (coupon.minCost > cartTotal) {
         return res.status(400)
             .json({
                 success: false,
                 error: true,
                 message: 'Cart balance is less than Coupon min Amount'
-
             })
-
     }
     if (coupon.expiryDate < today) {
         return res.status(400)
@@ -49,7 +45,6 @@ const checkValidCoupon = asyncHandler(async (req, res, next) => {
 
 })
 
-
 const addCoupon = asyncHandler(async (req, res, next) => {
     let code = req.body.code;
     let user = req.session.user;
@@ -58,10 +53,7 @@ const addCoupon = asyncHandler(async (req, res, next) => {
     })
     let cart = await Cart.findOne({ user: user._id }).populate('products.product','price -_id');
     let cartTotal = cart.products.reduce((acc, item) => acc + item.product.price * item.quantity,0);
-   
-    console.log('coupon', coupon)
     let now = new Date;
-
     if (!coupon) {
         return res.status(400)
             .json({
@@ -78,7 +70,6 @@ const addCoupon = asyncHandler(async (req, res, next) => {
                 error: true,
                 message: 'Order amount is less than coupn Min Order amount!'
             })
-
     }
     if (now.getTime() > expiryDate.getTime()) {
         return res.status(400)
@@ -87,7 +78,6 @@ const addCoupon = asyncHandler(async (req, res, next) => {
                 error: true,
                 message: 'Coupon is expired!'
             })
-
     }
     if (coupon.appliedUsers.includes(user._id)) {
         return res.status(400)
@@ -96,7 +86,6 @@ const addCoupon = asyncHandler(async (req, res, next) => {
                 error: true,
                 message: 'You have already rediemed this coupon!'
             })
-
     }
     if (!coupon.limit) {
         return res.status(400)
@@ -105,12 +94,9 @@ const addCoupon = asyncHandler(async (req, res, next) => {
                 error: true,
                 message: 'Coupon limit is over!'
             })
-
     }
     coupon.limit -= 1;
     await coupon.save()
-
-
     let discount = Math.floor((coupon.discount * cartTotal) / 100)
     cart.isCouponApplied = true;
     cart.coupon = {
@@ -126,33 +112,23 @@ const addCoupon = asyncHandler(async (req, res, next) => {
             data: cart,
             message: 'Coupon rediemed!'
         })
-
-
 });
-
 
 const removeCoupon = asyncHandler(async (req, res, next) => {
     let { discount } = req.body;
     let user = req.session.user._id
-    console.log(discount);
-
     let cart = await Cart.findOneAndUpdate({
          user
     },
         {
             $set: {
                 isCouponApplied: false,
-
             },
             $unset: {
                 coupon: ""
-
             },
-           
         }
-
-    )
-   
+    ) 
     return res.json({
         success: true,
         error: true,
@@ -160,13 +136,9 @@ const removeCoupon = asyncHandler(async (req, res, next) => {
     })
 })
 
-
-
 module.exports = {
     checkValidCoupon,
     removeCoupon,
     addCoupon,
-
-
    
 }
