@@ -264,6 +264,8 @@ const loadCheckout = asyncHandler(async (req, res, next) => {
     // }
     let user = req.session.user ? req.session.user : null;
     if (user) {
+
+        // to show the product price after deductiong the offer price from the product price.
         let cartData = await Cart.aggregate([
             {
                 $match: {
@@ -412,7 +414,8 @@ const loadCheckout = asyncHandler(async (req, res, next) => {
 
         let address = await Address.find({ user });
         address = address ?? []
-        let coupons = await Coupon.find({ isListed: true })
+        let now = new Date();
+        let coupons = await Coupon.find({ isListed: true, expiryDate: { $gte : now} })
         let wallet = await Wallet.findOne({ user: user._id }).select('balance');
         coupons = coupons ?? []
         res.render('user/checkoutPage', { cartData, address, coupons, wallet });
